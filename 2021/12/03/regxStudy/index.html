@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>正则表达式入门 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="正则表达式从入门到工作最近工作中用到了很多正则表达式，多少需要记录下使用心得。但一直犹豫要不要写这篇文章，因为网上的正则表达式太多，但想到，写笔记是为了以后的方便，还是决定做吧，而且除了要写基础的，更要写一些特色出来。 是什么简单来说，正则表达式就是用来对文件(字符串)进行匹配的语言(规则)，匹配到之后呢，就可以对文本进行增删改查，增删改查跟语言相关，因此不涉及这方面知识，当然示例代码用的是pyt">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正则表达式入门">
+<meta property="og:url" content="https://liji53.github.io/2021/12/03/regxStudy/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="正则表达式从入门到工作最近工作中用到了很多正则表达式，多少需要记录下使用心得。但一直犹豫要不要写这篇文章，因为网上的正则表达式太多，但想到，写笔记是为了以后的方便，还是决定做吧，而且除了要写基础的，更要写一些特色出来。 是什么简单来说，正则表达式就是用来对文件(字符串)进行匹配的语言(规则)，匹配到之后呢，就可以对文本进行增删改查，增删改查跟语言相关，因此不涉及这方面知识，当然示例代码用的是pyt">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-12-03T02:22:13.000Z">
+<meta property="article:modified_time" content="2021-12-03T02:22:13.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="/" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    未分类
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-regxStudy" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        正则表达式入门
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/12/03/regxStudy/" class="article-date">
+       <time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/12/03/regxStudy/" class="article-date">
+     <time datetime="2021-12-03T02:22:13.000Z" itemprop="dateModified">2021-12-03</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="正则表达式从入门到工作"><a href="#正则表达式从入门到工作" class="headerlink" title="正则表达式从入门到工作"></a>正则表达式从入门到工作</h1><p>最近工作中用到了很多正则表达式，多少需要记录下使用心得。但一直犹豫要不要写这篇文章，因为网上的正则表达式太多，但想到，写笔记是为了以后的方便，还是决定做吧，而且除了要写基础的，更要写一些特色出来。</p>
+<h2 id="是什么"><a href="#是什么" class="headerlink" title="是什么"></a>是什么</h2><p>简单来说，正则表达式就是用来对文件(字符串)进行匹配的语言(规则)，匹配到之后呢，就可以对文本进行增删改查，增删改查跟语言相关，因此不涉及这方面知识，当然示例代码用的是python</p>
+<h2 id="正则表达式的广泛应用"><a href="#正则表达式的广泛应用" class="headerlink" title="正则表达式的广泛应用"></a>正则表达式的广泛应用</h2><p>最开始接触正则是在shell命令下的grep、sed、awk，后来用的python、js等语言也都支持(包括C++在C11标准中也支持了正则).擅长用工具的人，还能发现像notepad、Everything等各种工具都支持正则,正则表达式就像基础功能一样，不管在编程语言中，还是工具中都有广泛的应用</p>
+<h2 id="学习资料，网站"><a href="#学习资料，网站" class="headerlink" title="学习资料，网站"></a>学习资料，网站</h2><p>正是如此的广泛的应用，因此网上学习资料是不缺的。</p>
+<p>在线测试用具：<a target="_blank" rel="noopener" href="https://tool.oschina.net/regex">https://tool.oschina.net/regex</a></p>
+<p>常用正则表达式(转)：<a target="_blank" rel="noopener" href="https://blog.csdn.net/sirobot/article/details/89478951">https://blog.csdn.net/sirobot/article/details/89478951</a></p>
+<p>正则表达式原理(转)：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/107836267">https://zhuanlan.zhihu.com/p/107836267</a></p>
+<h2 id="正则表达式入门"><a href="#正则表达式入门" class="headerlink" title="正则表达式入门"></a>正则表达式入门</h2><h3 id="基础语法"><a href="#基础语法" class="headerlink" title="基础语法"></a>基础语法</h3><h5 id="1-匹配普通文本"><a href="#1-匹配普通文本" class="headerlink" title="1. 匹配普通文本"></a>1. 匹配普通文本</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">re.search(<span class="string">r&#x27;hello world&#x27;</span>,<span class="string">&#x27;example hello world!&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(8, 19), match=&#x27;hello world&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<p>匹配任意一个字符.(除了换行符\n)</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">re.search(<span class="string">r&#x27;..llo&#x27;</span>,<span class="string">&#x27;example hello world!&#x27;</span>)</span><br><span class="line"><span class="comment">#&lt;re.Match object; span=(8, 13), match=&#x27;hello&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="2-匹配字符组"><a href="#2-匹配字符组" class="headerlink" title="2. 匹配字符组[]"></a>2. 匹配字符组[]</h5><p>虽然叫字符组，但其实匹配的还是一个字符，只不过这个字符是一个范围</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 匹配axample，bxample，cxample,[abc]表示a或b或c</span></span><br><span class="line">re.search(<span class="string">r&#x27;[abc]xample&#x27;</span>,<span class="string">&#x27;cxample hello world!&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 7), match=&#x27;cxample&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如果字符很多，可以使用-来表示一个范围的字符</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 匹配axample，bxample，cxample,[a-c]等价[abc]</span></span><br><span class="line">re.search(<span class="string">r&#x27;[a-c]xample&#x27;</span>,<span class="string">&#x27;cxample hello world!&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 7), match=&#x27;cxample&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<p>还可以用^来表示非的意思</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 匹配axample，bxample，cxample,[^d-z]等价[abc]</span></span><br><span class="line">re.search(<span class="string">r&#x27;[^d-z]xample&#x27;</span>,<span class="string">&#x27;cxample hello world!&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 7), match=&#x27;cxample&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="3-转义字符"><a href="#3-转义字符" class="headerlink" title="3. 转义字符 \"></a>3. 转义字符 \</h5><p>转义字符主要是为了匹配一些无法表达的特殊字符，如\t,\n等。转义字符跟字符集一样，仅匹配一个字符</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这里\t匹配制表符</span></span><br><span class="line">re.search(<span class="string">r&#x27;\texample&#x27;</span>,<span class="string">&#x27;    example hello world!&#x27;</span>)</span><br><span class="line"><span class="comment">#&lt;re.Match object; span=(0, 8), match=&#x27;\texample&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<p>转义字符也可以用来表示一类字符，如\w,\d,\s等  </p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 这里\w 等价[a-z0-9_]</span></span><br><span class="line">re.search(<span class="string">r&#x27;\w&#x27;</span>,<span class="string">&#x27;   example hello world!&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(1, 2), match=&#x27;e&#x27;&gt; </span></span><br></pre></td></tr></table></figure>
+
+<h3 id="数量词"><a href="#数量词" class="headerlink" title="数量词"></a>数量词</h3><p>前面的基础语法都只能匹配一个字符，如果需要匹配多次，下面的数量词就派上用场了,数量词需要在字符之后</p>
+<h5 id="1-基础数量词"><a href="#1-基础数量词" class="headerlink" title="1. 基础数量词"></a>1. 基础数量词</h5><p>匹配0次或者无限次*<br>匹配1次或者无限次+<br>匹配0次或者1次？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 匹配至少一个空白字符 后接 至少一个[a-z0-9_]字符 </span></span><br><span class="line">re.search(<span class="string">r&#x27;\s+\w+&#x27;</span>,<span class="string">&#x27;example hello_world!&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(7, 19), match=&#x27; hello_world&#x27;&gt;</span></span><br><span class="line"><span class="comment"># 匹配0个或一个空白字符 后接 至少一个[a-z0-9_]字符</span></span><br><span class="line">re.search(<span class="string">r&#x27;\s?\w+&#x27;</span>,<span class="string">&#x27;example hello_world!&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 7), match=&#x27;example&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="2-匹配诺干次"><a href="#2-匹配诺干次" class="headerlink" title="2. 匹配诺干次"></a>2. 匹配诺干次</h5><p>{m} 匹配前一个字符m次<br>{n,m} 匹配前一个字符n至m次</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 匹配数字 4到5次</span></span><br><span class="line">re.search(<span class="string">r&#x27;\d&#123;4,5&#125;&#x27;</span>,<span class="string">&#x27;1 22 333 4444&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(9, 13), match=&#x27;4444&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="字符边界-位置匹配"><a href="#字符边界-位置匹配" class="headerlink" title="字符边界(位置匹配)"></a>字符边界(位置匹配)</h3><p>字符边界简单来说就是匹配字符在哪个位置, 但除了^和$常用，平常用的比较少。对于边界字符的理解，可以把位置看成空字符，即””</p>
+<h5 id="1-简单常用位置符号"><a href="#1-简单常用位置符号" class="headerlink" title="1. 简单常用位置符号"></a>1. 简单常用位置符号</h5><p>^表示开头<br>$表示结尾</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 不匹配&#x27;11 21&#x27;</span></span><br><span class="line">re.search(<span class="string">r&#x27;^\d+ 22$&#x27;</span>,<span class="string">&#x27;11 22&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 5), match=&#x27;11 22&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="2-其他位置符号"><a href="#2-其他位置符号" class="headerlink" title="2. 其他位置符号"></a>2. 其他位置符号</h5><p>\b是单词边界，就是\w和\W之间的位置<br>\B是\b的反面，即非单词边界</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从结果可以看到，还包括\w和^、$之间的位置</span></span><br><span class="line">re.sub(<span class="string">r&#x27;\b&#x27;</span>,<span class="string">&quot;@&quot;</span>,<span class="string">&#x27;1.Hello world&#x27;</span>)</span><br><span class="line"><span class="comment"># &#x27;@1@.@Hello@ @world@&#x27;</span></span><br></pre></td></tr></table></figure>
+<h5 id="3-先行断言"><a href="#3-先行断言" class="headerlink" title="3. 先行断言"></a>3. 先行断言</h5><p>(?=exp) 其中exp是一个子表达式，即exp前面的位置。<br>(?!exp) 与上面相反</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 把位置理解成&quot;&quot;,这里就是在ll字符前面的空字符替换成@</span></span><br><span class="line">re.sub(<span class="string">r&#x27;(?=ll)&#x27;</span>,<span class="string">&quot;@&quot;</span>,<span class="string">&#x27;1.Hello worlld&#x27;</span>)</span><br><span class="line"><span class="comment"># &#x27;1.He@llo wor@lld&#x27;</span></span><br><span class="line">re.sub(<span class="string">r&#x27;(?!ll)&#x27;</span>,<span class="string">&quot;@&quot;</span>,<span class="string">&#x27;1.Hello worlld&#x27;</span>)</span><br><span class="line"><span class="comment"># &#x27;@1@.@H@el@l@o@ @w@o@rl@l@d@&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="分组和引用"><a href="#分组和引用" class="headerlink" title="分组和引用"></a>分组和引用</h3><p>前面讲了字符组[ab], 但这只能表示一个字符, 如果想要匹配ab或者cd就无能为力了；<br>又或者ab*, *只作用于一个字符，你想要把ab作为一个整体匹配多次，同样无能为力。<br>分组用于解决这些问题，分组也可以认为是子表达式</p>
+<h5 id="1-分组"><a href="#1-分组" class="headerlink" title="1. 分组"></a>1. 分组</h5><p>(exp) 其中exp是子表达<br>|式      表示左右任意匹配一个</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 匹配&#x27;.&#x27;前面是数字或者字母的</span></span><br><span class="line">re.search(<span class="string">r&#x27;(\d+|[a-zA-Z]+)\.&#x27;</span>,<span class="string">&#x27;1.hello&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 2), match=&#x27;1.&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+<h5 id="2-引用"><a href="#2-引用" class="headerlink" title="2. 引用"></a>2. 引用</h5><p>引用是为了对重复出现的文本进行匹配，要引用需要先分组<br>(exp)  会自动产生编号，从1开始;&lt;number&gt; 引用编号为number的分组匹配到的字符串<br>(?:exp) 不会捕获，即不会有编号<br>(?P<name>exp) 定义一个命名分组;(?P=name)引用别名为name的分组匹配到的字符串</name></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 常用于匹配html标签</span></span><br><span class="line">re.search(<span class="string">r&#x27;&lt;([a-z]+)&gt;.*&lt;/\1&gt;&#x27;</span>,<span class="string">&#x27;&lt;span&gt;xxx&lt;/span&gt;&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 16), match=&#x27;&lt;span&gt;xxx&lt;/span&gt;&#x27;&gt;</span></span><br><span class="line"><span class="comment"># (?:span) 不捕获，没有编号</span></span><br><span class="line">re.search(<span class="string">r&#x27;&lt;(?:span)&gt;&lt;(div)&gt;.*&lt;/\1&gt;&#x27;</span>,<span class="string">&#x27;&lt;span&gt;&lt;div&gt;xxx&lt;/div&gt;&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 20), match=&#x27;&lt;span&gt;&lt;div&gt;xxx&lt;/div&gt;&#x27;&gt;</span></span><br><span class="line"><span class="comment"># 使用别名</span></span><br><span class="line">re.search(<span class="string">r&#x27;&lt;(?P&lt;name1&gt;\w+)&gt;&lt;(?P&lt;name2&gt;h[1-5])&gt;.*&lt;/(?P=name2)&gt;&lt;/(?P=name1)&gt;&#x27;</span>,<span class="string">&#x27;&lt;html&gt;&lt;h1&gt;xxx&lt;/h1&gt;&lt;/html&gt;&#x27;</span>)</span><br><span class="line"><span class="comment"># &lt;re.Match object; span=(0, 25), match=&#x27;&lt;html&gt;&lt;h1&gt;xxx&lt;/h1&gt;&lt;/html&gt;&#x27;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="正则表达式不能干的事"><a href="#正则表达式不能干的事" class="headerlink" title="正则表达式不能干的事"></a>正则表达式不能干的事</h2><p>几乎所有讲正则表达式的博客，都是在说正则表达式无所不能，这里我结合实际，把实际中无法直接用正则匹配的情况说下，当然也可能是我水平不够，写不出来。</p>
+<h5 id="1-不能-abc"><a href="#1-不能-abc" class="headerlink" title="1. 不能(^abc)"></a>1. 不能(^abc)</h5><p>字符集可以[^abc]，表示非abc的字符；但没有表示非abc字符串的表达式，(^abc),^表示的是开头</p>
+<h5 id="2-不能就近匹配"><a href="#2-不能就近匹配" class="headerlink" title="2. 不能就近匹配"></a>2. 不能就近匹配</h5><p>比方“select a from select a into b”, 我希望匹配离into最近的select，但事与愿违</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>我写的内容虽然没有覆盖全正则表达式的所有语法，但作为入门足够了。正如前面写的，正则表达式在工具中也有广泛应用，在平常工作中可以多用正则表达式来查找文件，查找奇奇怪怪的内容，对工作效率提升up</p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/12/03/regxStudy/" data-id="ckwq84it900001yn4404fcwgf" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "正则表达式入门",
+        "image": "https://liji53.github.io",
+        "keywords": "",
+        "genre": "",
+        "datePublished": "2021-12-03",
+        "dateCreated": "2021-12-03",
+        "dateModified": "2021-12-03",
+        "url": "https://liji53.github.io/2021/12/03/regxStudy/",
+        "description": "正则表达式从入门到工作最近工作中用到了很多正则表达式，多少需要记录下使用心得。但一直犹豫要不要写这篇文章，因为网上的正则表达式太多，但想到，写笔记是为了以后的方便，还是决定做吧，而且除了要写基础的，更要写一些特色出来。
+是什么简单来说，正则表达式就是用来对文件(字符串)进行匹配的语言(规则)，匹配到之后呢，就可以对文本进行增删改查，增删改查跟语言相关，因此不涉及这方面知识，当然示例代码用的是pyt",
+        "wordCount": 520
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2021/10/08/fileConflict/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">没有登录认证下解决文件冲突方案</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/10/08/fileConflict/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/10/08/fileConflict/Images/filelock_design.png)" alt="没有登录认证下解决文件冲突方案" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/10/08/fileConflict/" class="title">没有登录认证下解决文件冲突方案</a></p>
+                            <p class="item-date"><time datetime="2021-10-08T21:37:29.000Z" itemprop="datePublished">2021-10-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/09/10/difflibParse/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/09/10/difflibParse/Images/difflib_org.png)" alt="探索difflib(初探匹配算法)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/09/10/difflibParse/" class="title">探索difflib(初探匹配算法)</a></p>
+                            <p class="item-date"><time datetime="2021-09-10T08:04:57.000Z" itemprop="datePublished">2021-09-10</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/09/09/pytestHtml/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/09/09/pytestHtml/Images/pytest_assert.png)" alt="pytest测试报告自定义比较内容" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/09/09/pytestHtml/" class="title">pytest测试报告自定义比较内容</a></p>
+                            <p class="item-date"><time datetime="2021-09-09T08:48:22.000Z" itemprop="datePublished">2021-09-09</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/09/02/oracleMigration/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/09/02/oracleMigration/" class="title">oracle数据迁移</a></p>
+                            <p class="item-date"><time datetime="2021-09-02T06:31:01.000Z" itemprop="datePublished">2021-09-02</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2021 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/12/03/regxStudy/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>
