@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>利用lex和yacc做代码检查(上) | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="利用lex和yacc做代码检查(上)这篇文章我们将使用lex和yacc来对公司代码进行扫描检查。背景：公司的业务代码是用伪代码和c++来实现的，再由开发工具翻译成c++语言，本次我们要代码检查的就是这些伪代码以及c++代码组成的业务代码，然后找出其中的类型不一致等问题。 预备知识以下的预备知识，对于理解lex和yacc的程序是必须的，因此如果不清楚，须先自学  编译原理, 要求理c&#x2F;c++解编译器">
+<meta property="og:type" content="article">
+<meta property="og:title" content="利用lex和yacc做代码检查(上)">
+<meta property="og:url" content="https://liji53.github.io/2022/01/13/lexAndYacc/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="利用lex和yacc做代码检查(上)这篇文章我们将使用lex和yacc来对公司代码进行扫描检查。背景：公司的业务代码是用伪代码和c++来实现的，再由开发工具翻译成c++语言，本次我们要代码检查的就是这些伪代码以及c++代码组成的业务代码，然后找出其中的类型不一致等问题。 预备知识以下的预备知识，对于理解lex和yacc的程序是必须的，因此如果不清楚，须先自学  编译原理, 要求理c&#x2F;c++解编译器">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/2022/01/13/lexAndYacc/Images/compiler_flow.png">
+<meta property="article:published_time" content="2022-01-13T09:15:34.000Z">
+<meta property="article:modified_time" content="2022-01-13T09:15:34.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/2022/01/13/lexAndYacc/Images/compiler_flow.png">
+    
+
+    
+        <link rel="alternate" href="/" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    未分类
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-lexAndYacc" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        利用lex和yacc做代码检查(上)
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2022/01/13/lexAndYacc/" class="article-date">
+       <time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2022/01/13/lexAndYacc/" class="article-date">
+     <time datetime="2022-01-13T09:15:34.000Z" itemprop="dateModified">2022-01-13</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="利用lex和yacc做代码检查-上"><a href="#利用lex和yacc做代码检查-上" class="headerlink" title="利用lex和yacc做代码检查(上)"></a>利用lex和yacc做代码检查(上)</h1><p>这篇文章我们将使用lex和yacc来对公司代码进行扫描检查。背景：公司的业务代码是用伪代码和c++来实现的，再由开发工具翻译成c++语言，本次我们要代码检查的就是这些伪代码以及c++代码组成的业务代码，然后找出其中的类型不一致等问题。<br><img src="/2022/01/13/lexAndYacc/Images/compiler_flow.png"></p>
+<h2 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h2><p>以下的预备知识，对于理解lex和yacc的程序是必须的，因此如果不清楚，须先自学</p>
+<ol>
+<li>编译原理, 要求理c/c++解编译器的整体流程、理解词法分析、语法分析<br>概述(转): <a target="_blank" rel="noopener" href="https://blog.csdn.net/cprimesplus/article/details/105724168">https://blog.csdn.net/cprimesplus/article/details/105724168</a></li>
+<li>正则表达式，主要在lex语法中用到，要求至少能看懂<br>入门：<a href="https://liji53.github.io/2021/12/03/regxStudy/">https://liji53.github.io/2021/12/03/regxStudy/</a></li>
+<li>lex和yacc的语法，2者语法结构类似，yacc比lex要复杂一些，先理解清楚lex，再去理解yacc会容易很多<br>lex入门(转)：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/wp5719/p/5528896.html">https://www.cnblogs.com/wp5719/p/5528896.html</a><br>lex和yacc小结(转)：<a target="_blank" rel="noopener" href="https://www.daimajiaoliu.com/daima/4717f8908900400">https://www.daimajiaoliu.com/daima/4717f8908900400</a></li>
+<li>c语言的语法文件，要求能看懂。 <strong>这两个文件是本次语法分析的基础文件，后续代码都在此基础上添加的</strong><br>c语言lex的语法文件：<a target="_blank" rel="noopener" href="http://www.quut.com/c/ANSI-C-grammar-l-1998.html">http://www.quut.com/c/ANSI-C-grammar-l-1998.html</a><br>c语言yacc的语法文件：<a target="_blank" rel="noopener" href="http://www.quut.com/c/ANSI-C-grammar-y-1998.html">http://www.quut.com/c/ANSI-C-grammar-y-1998.html</a></li>
+</ol>
+<h2 id="本次词法、语法分析的目标"><a href="#本次词法、语法分析的目标" class="headerlink" title="本次词法、语法分析的目标"></a>本次词法、语法分析的目标</h2><p>公司的业务代码长这个样子，这种[xxx]的写法就是伪代码，其本质是宏。c++部分的语法分析由于我只找到c的语法分析，而且用c的语法分析对接下来的语法解析足够了，因此直接使用最新的The ANSI C grammar(上文已经提到)，<br>这个文件后续作为待测试文件记test.cpp</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1）函数调用基本写法：[函数名][入参][出参]</span></span><br><span class="line">[function_name][parameter1=<span class="number">1</span>, parameter2=<span class="string">&quot;test&quot;</span>][output1=@id]</span><br><span class="line"><span class="comment">// 2）函数调用多行写法</span></span><br><span class="line">[function_name2][</span><br><span class="line">    parameter1=<span class="number">1</span>, </span><br><span class="line">    parameter2=<span class="string">&quot;test&quot;</span>][]</span><br><span class="line"><span class="comment">// 3）宏调用写法,&lt;A-Z&gt; 可无</span></span><br><span class="line">&lt;A&gt;[marco]</span><br><span class="line">[marco][variable][]</span><br><span class="line"><span class="comment">// c++语法</span></span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">10</span>; i++)&#123;</span><br><span class="line">    variable1 = variable2;</span><br><span class="line">&#125; </span><br></pre></td></tr></table></figure>
+<h2 id="先熟悉流程"><a href="#先熟悉流程" class="headerlink" title="先熟悉流程"></a>先熟悉流程</h2><p>这一步我们通过生成c语言的语法分析器，来熟悉lex和yacc的流程。<br>下载<a target="_blank" rel="noopener" href="http://www.quut.com/c/ANSI-C-grammar-l-1998.html">http://www.quut.com/c/ANSI-C-grammar-l-1998.html</a>, 命名c.l<br>下载<a target="_blank" rel="noopener" href="http://www.quut.com/c/ANSI-C-grammar-y-1998.html">http://www.quut.com/c/ANSI-C-grammar-y-1998.html</a>, 命名c.y</p>
+<h4 id="1-编译词法文件-会生成lex-yy-c"><a href="#1-编译词法文件-会生成lex-yy-c" class="headerlink" title="1. 编译词法文件, 会生成lex.yy.c"></a>1. 编译词法文件, 会生成lex.yy.c</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 编译词法文件</span></span><br><span class="line">lex c.l</span><br></pre></td></tr></table></figure>
+<h4 id="2-编译语法文件-会生成y-tab-c-y-tab-h"><a href="#2-编译语法文件-会生成y-tab-c-y-tab-h" class="headerlink" title="2. 编译语法文件, 会生成y.tab.c, y.tab.h"></a>2. 编译语法文件, 会生成y.tab.c, y.tab.h</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 直接编译会出现yacc: 1 <span class="built_in">shift</span>/reduce conflict. 错误，先编辑c.y文件</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 2.1 在c.y的序幕部分加以下内容</span></span><br><span class="line"><span class="meta">%</span><span class="bash">nonassoc LOWER_THAN_ELSE</span></span><br><span class="line"><span class="meta">%</span><span class="bash">nonassoc ELSE</span></span><br><span class="line"><span class="meta">#</span><span class="bash"> 2.2 在c.y的规则部分selection_statement修改成以下内容</span></span><br><span class="line">selection_statement</span><br><span class="line">  : IF &#x27;(&#x27; expression &#x27;)&#x27; statement %prec LOWER_THAN_ELSE</span><br><span class="line">  | IF &#x27;(&#x27; expression &#x27;)&#x27; statement ELSE statement</span><br><span class="line">  | SWITCH &#x27;(&#x27; expression &#x27;)&#x27; statement</span><br><span class="line">  ;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 2.3 在c.y的最后，增加main函数</span></span><br><span class="line">int main(void) &#123;</span><br><span class="line">    yyparse();</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#</span><span class="bash"> 2.4 编译语法文件，其中-d用来生成头文件</span></span><br><span class="line">yacc -d c.y</span><br></pre></td></tr></table></figure>
+<h4 id="3-生成语法分析器-生成a-out"><a href="#3-生成语法分析器-生成a-out" class="headerlink" title="3. 生成语法分析器, 生成a.out"></a>3. 生成语法分析器, 生成a.out</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc y.tab.c lex.yy.c</span><br></pre></td></tr></table></figure>
+<h4 id="4-测试词法分析器"><a href="#4-测试词法分析器" class="headerlink" title="4. 测试词法分析器"></a>4. 测试词法分析器</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 4.1 写一个简单的c文件,带上错误</span></span><br><span class="line">echo &quot;int main()&#123;a=b&#125;&quot; &gt; test.cpp  </span><br><span class="line"><span class="meta">#</span><span class="bash"> 4.2 测试下分析器能不能检查出错误</span></span><br><span class="line">./a.out &lt; test.cpp</span><br><span class="line"><span class="meta">#</span><span class="bash"> 4.3 程序输出结果如下，perfect</span></span><br><span class="line">int main()&#123;a=b&#125;</span><br><span class="line">              ^</span><br><span class="line">   syntax error</span><br></pre></td></tr></table></figure>
+<h2 id="词法分析lex"><a href="#词法分析lex" class="headerlink" title="词法分析lex"></a>词法分析lex</h2><p>在这里词法分析主要对上面示例中的1,2,3种写法进行解析，这里需要判断是否是伪代码，并返回伪代码的标记。由于c.l源文件内容较多，这里只贴修改部分代码</p>
+<h4 id="1-在定义部分，增加2个伪代码的状态标志"><a href="#1-在定义部分，增加2个伪代码的状态标志" class="headerlink" title="1. 在定义部分，增加2个伪代码的状态标志"></a>1. 在定义部分，增加2个伪代码的状态标志</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">%&#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span> </span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&quot;y.tab.h&quot;</span></span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">count</span><span class="params">(<span class="keyword">void</span>)</span></span>;</span><br><span class="line"><span class="keyword">int</span> marco_flag = <span class="number">0</span>;  <span class="comment">//伪代码状态，与MARCO_HEAD类似,表示除第一个[xxx]以外的状态</span></span><br><span class="line">%&#125;</span><br><span class="line"><span class="comment">/* 状态（或条件）定义- 用来标志伪代码头,即第一个[xxx]部分的状态 */</span></span><br><span class="line">%s MARCO_HEAD</span><br><span class="line">%%</span><br></pre></td></tr></table></figure>
+<h4 id="2-在规则部分，增加伪代码的规则解析"><a href="#2-在规则部分，增加伪代码的规则解析" class="headerlink" title="2. 在规则部分，增加伪代码的规则解析"></a>2. 在规则部分，增加伪代码的规则解析</h4><p>MARCO_SYMBOL_BEGIN、MARCO_NAME等需要在c.y中定义。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;&lt;&quot;</span>[A-Z]<span class="string">&quot;&gt;[&quot;</span>                    &#123;<span class="built_in">count</span>(); BEGIN MARCO_HEAD; <span class="keyword">return</span>(MARCO_SYMBOL_BEGIN); &#125;</span><br><span class="line">[ \t]*<span class="string">&quot;[&quot;</span>                       &#123;<span class="built_in">count</span>(); BEGIN MARCO_HEAD; <span class="keyword">return</span>(MARCO_SYMBOL_BEGIN); &#125;</span><br><span class="line">&lt;MARCO_HEAD&gt;&#123;L&#125;(&#123;L&#125;|&#123;D&#125;)*       &#123;<span class="built_in">count</span>(); <span class="keyword">return</span>(MARCO_NAME); &#125;</span><br><span class="line">&lt;MARCO_HEAD&gt;<span class="string">&quot;][&quot;</span>                &#123;<span class="built_in">count</span>(); BEGIN INITIAL; marco_flag = <span class="number">1</span>; <span class="keyword">return</span>(MARCO_SYMBOL_SPLIT); &#125; </span><br><span class="line">&lt;MARCO_HEAD&gt;<span class="string">&quot;]&quot;</span>                 &#123;<span class="comment">/*必须 写在&lt;MARCO_HEAD&gt;&quot;][&quot; 之后*/</span>   <span class="built_in">count</span>(); BEGIN INITIAL; <span class="keyword">return</span>(MARCO_SYMBOL_END); &#125;   </span><br><span class="line">&lt;MARCO_HEAD&gt;[ \t\v\n\f]	        &#123;<span class="built_in">count</span>(); &#125;</span><br><span class="line">&lt;MARCO_HEAD&gt;.                   &#123;<span class="comment">/* ECHO是一个宏，相当于 fprintf(yyout, &quot;%s&quot;, yytext)*/</span> ECHO; &#125;    </span><br><span class="line"><span class="string">&quot;]&quot;</span>                             &#123;</span><br><span class="line">                                    <span class="built_in">count</span>();</span><br><span class="line">                                    <span class="keyword">if</span>(marco_flag)&#123;</span><br><span class="line">                                        <span class="keyword">if</span>(<span class="built_in">input</span>() == <span class="string">&#x27;[&#x27;</span>)&#123;</span><br><span class="line">                                            <span class="keyword">return</span> (MARCO_SYMBOL_SPLIT);</span><br><span class="line">                                        &#125;</span><br><span class="line">                                        <span class="keyword">else</span>&#123;</span><br><span class="line">                                            marco_flag = <span class="number">0</span>;     </span><br><span class="line">                                            <span class="keyword">return</span> (MARCO_SYMBOL_END);</span><br><span class="line">                                        &#125;</span><br><span class="line">                                    &#125;</span><br><span class="line">                                    <span class="keyword">else</span>&#123; </span><br><span class="line">                                        <span class="built_in"><span class="keyword">return</span></span>(<span class="string">&#x27;]&#x27;</span>);</span><br><span class="line">                                    &#125; </span><br><span class="line">                                &#125;</span><br></pre></td></tr></table></figure>
+<p>这部分代码至少要放在下面代码之前，否则会因为规则的先后匹配错误</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="string">&quot;[&quot;</span>|<span class="string">&quot;&lt;:&quot;</span>)		&#123; <span class="built_in">count</span>(); <span class="keyword">return</span>(<span class="string">&#x27;[&#x27;</span>); &#125;</span><br><span class="line">(<span class="string">&quot;]&quot;</span>|<span class="string">&quot;:&gt;&quot;</span>)		&#123; <span class="built_in">count</span>(); <span class="keyword">return</span>(<span class="string">&#x27;]&#x27;</span>); &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="测试lex正确性"><a href="#测试lex正确性" class="headerlink" title="测试lex正确性"></a>测试lex正确性</h2><p>最后我们测试下词法分析器的正确性，待测试文件即上文提到的test.cpp</p>
+<h4 id="1-在c-y中定义部分添加宏定义"><a href="#1-在c-y中定义部分添加宏定义" class="headerlink" title="1. 在c.y中定义部分添加宏定义"></a>1. 在c.y中定义部分添加宏定义</h4><p>后面只用到了c.y生成的头文件</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%token MARCO_SYMBOL_BEGIN MARCO_SYMBOL_SPLIT MARCO_SYMBOL_END MARCO_NAME</span><br></pre></td></tr></table></figure>
+<h4 id="2-在c-l中添加main函数"><a href="#2-在c-l中添加main函数" class="headerlink" title="2. 在c.l中添加main函数"></a>2. 在c.l中添加main函数</h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">writeout</span><span class="params">(<span class="keyword">int</span> c)</span></span>&#123;</span><br><span class="line">  <span class="keyword">switch</span>(c)&#123;</span><br><span class="line">    <span class="keyword">case</span> MARCO_SYMBOL_BEGIN: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(MARCO_SYMBOL_BEGIN, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> MARCO_SYMBOL_SPLIT: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(MARCO_SYMBOL_SPLIT, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> MARCO_SYMBOL_END: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(MARCO_SYMBOL_END, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> MARCO_NAME: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(MARCO_NAME, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> IDENTIFIER: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(IDENTIFIER, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> CONSTANT: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(CONSTANT, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> STRING_LITERAL: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(STRING_LITERAL, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> SIZEOF: <span class="built_in">fprintf</span>(yyout, <span class="string">&quot;(SIZEOF, \&quot;%s\&quot;) &quot;</span>, yytext);<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>:<span class="keyword">break</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span> <span class="params">(<span class="keyword">int</span> argc, <span class="keyword">char</span> ** argv)</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> c;</span><br><span class="line">	<span class="keyword">if</span> (argc&gt;=<span class="number">2</span>)&#123;</span><br><span class="line">	  <span class="keyword">if</span> ((yyin = fopen(argv[<span class="number">1</span>], <span class="string">&quot;r&quot;</span>)) == <span class="literal">NULL</span>)&#123;</span><br><span class="line">	    <span class="built_in">printf</span>(<span class="string">&quot;Can&#x27;t open file %s\n&quot;</span>, argv[<span class="number">1</span>]);</span><br><span class="line">	    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	  &#125;</span><br><span class="line">	  <span class="keyword">while</span> (c = yylex())&#123;		</span><br><span class="line">        writeout(c);</span><br><span class="line">	  &#125;</span><br><span class="line">	  fclose(yyin);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="3-编译词法分析器"><a href="#3-编译词法分析器" class="headerlink" title="3. 编译词法分析器"></a>3. 编译词法分析器</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lex lex.l &amp;&amp; yacc -d yacc.y &amp;&amp; gcc lex.yy.c</span><br></pre></td></tr></table></figure>
+<h4 id="4-测试test-cpp"><a href="#4-测试test-cpp" class="headerlink" title="4. 测试test.cpp"></a>4. 测试test.cpp</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[liji@null test_compile]$ ./a.out test.cpp</span><br><span class="line"></span><br><span class="line">[(MARCO_SYMBOL_BEGIN, &quot;[&quot;) function_name(MARCO_NAME, &quot;function_name&quot;) ][(MARCO_SYMBOL_SPLIT, &quot;][&quot;) parameter1(IDENTIFIER, &quot;parameter1&quot;) =1(CONSTANT, &quot;1&quot;) , parameter2(IDENTIFIER, &quot;parameter2&quot;) =&quot;test&quot;(STRING_LITERAL, &quot;&quot;test&quot;&quot;) ](MARCO_SYMBOL_SPLIT, &quot;]&quot;) output1(IDENTIFIER, &quot;output1&quot;) =id(IDENTIFIER, &quot;id&quot;) ](MARCO_SYMBOL_END, &quot;]&quot;) </span><br><span class="line"></span><br><span class="line">[(MARCO_SYMBOL_BEGIN, &quot;[&quot;) function_name2(MARCO_NAME, &quot;function_name2&quot;) ][(MARCO_SYMBOL_SPLIT, &quot;][&quot;) </span><br><span class="line">    parameter1(IDENTIFIER, &quot;parameter1&quot;) =1(CONSTANT, &quot;1&quot;) , </span><br><span class="line">    parameter2(IDENTIFIER, &quot;parameter2&quot;) =&quot;test&quot;(STRING_LITERAL, &quot;&quot;test&quot;&quot;) ](MARCO_SYMBOL_SPLIT, &quot;]&quot;) ](MARCO_SYMBOL_END, &quot;]&quot;) </span><br><span class="line"></span><br><span class="line">&lt;A&gt;[(MARCO_SYMBOL_BEGIN, &quot;&lt;A&gt;[&quot;) marco(MARCO_NAME, &quot;marco&quot;) ](MARCO_SYMBOL_END, &quot;]&quot;) </span><br><span class="line">[(MARCO_SYMBOL_BEGIN, &quot;[&quot;) marco(MARCO_NAME, &quot;marco&quot;) ][(MARCO_SYMBOL_SPLIT, &quot;][&quot;) xxx(IDENTIFIER, &quot;xxx&quot;) ](MARCO_SYMBOL_SPLIT, &quot;]&quot;) ](MARCO_SYMBOL_END, &quot;]&quot;) </span><br><span class="line"></span><br><span class="line">for(int i(IDENTIFIER, &quot;i&quot;)  = 0(CONSTANT, &quot;0&quot;) ; i(IDENTIFIER, &quot;i&quot;)  &lt; 10(CONSTANT, &quot;10&quot;) ; i(IDENTIFIER, &quot;i&quot;) ++)&#123;</span><br><span class="line">    variable1(IDENTIFIER, &quot;variable1&quot;)  = variable2(IDENTIFIER, &quot;variable2&quot;) ;</span><br></pre></td></tr></table></figure>
+<p>从上文的第7行， ](MARCO_SYMBOL_SPLIT, “]”)这个内容其实是有问题的。 因为在规则部分，处理”]”的时候，用到了input()来判断下个字符是不是”[“， 因此yytext的值是”]”，其实应该是”][“ </p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2022/01/13/lexAndYacc/" data-id="ckylah92p00001dn4gk8233s5" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "利用lex和yacc做代码检查(上)",
+        "image": "https://liji53.github.io/2022/01/13/lexAndYacc/Images/compiler_flow.png",
+        "keywords": "",
+        "genre": "",
+        "datePublished": "2022-01-13",
+        "dateCreated": "2022-01-13",
+        "dateModified": "2022-01-13",
+        "url": "https://liji53.github.io/2022/01/13/lexAndYacc/",
+        "description": "利用lex和yacc做代码检查(上)这篇文章我们将使用lex和yacc来对公司代码进行扫描检查。背景：公司的业务代码是用伪代码和c++来实现的，再由开发工具翻译成c++语言，本次我们要代码检查的就是这些伪代码以及c++代码组成的业务代码，然后找出其中的类型不一致等问题。
+预备知识以下的预备知识，对于理解lex和yacc的程序是必须的，因此如果不清楚，须先自学
+
+编译原理, 要求理c/c++解编译器",
+        "wordCount": 1677
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="/" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2021/12/03/regxStudy/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">正则表达式入门</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/10/08/fileConflict/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/10/08/fileConflict/Images/filelock_design.png)" alt="没有登录认证下解决文件冲突方案" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/10/08/fileConflict/" class="title">没有登录认证下解决文件冲突方案</a></p>
+                            <p class="item-date"><time datetime="2021-10-08T21:37:29.000Z" itemprop="datePublished">2021-10-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/09/10/difflibParse/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/09/10/difflibParse/Images/difflib_org.png)" alt="探索difflib(初探匹配算法)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/09/10/difflibParse/" class="title">探索difflib(初探匹配算法)</a></p>
+                            <p class="item-date"><time datetime="2021-09-10T08:04:57.000Z" itemprop="datePublished">2021-09-10</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/09/09/pytestHtml/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/09/09/pytestHtml/Images/pytest_assert.png)" alt="pytest测试报告自定义比较内容" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/09/09/pytestHtml/" class="title">pytest测试报告自定义比较内容</a></p>
+                            <p class="item-date"><time datetime="2021-09-09T08:48:22.000Z" itemprop="datePublished">2021-09-09</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2022/01/13/lexAndYacc/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>
