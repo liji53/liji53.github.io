@@ -15,18 +15,18 @@
     <meta name="description" content="锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。那锁与原子操作有什么联系，区别呢？ 锁的机制与开销现在锁的机制在linux2.5.7之后开始使用futex(fast Userspace mutexes),即内核态和用户态的混合机制。这个机制的主要优势就是在加锁的时候根据mmap共享内存里的futex变量，判断该变量是否有竞争，如果没">
 <meta property="og:type" content="article">
 <meta property="og:title" content="atomic">
-<meta property="og:url" content="https://liji53.github.io/2022/03/04/atomic/index.html">
+<meta property="og:url" content="https://liji53.github.io/2022/02/04/atomic/index.html">
 <meta property="og:site_name" content="么么博客">
 <meta property="og:description" content="锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。那锁与原子操作有什么联系，区别呢？ 锁的机制与开销现在锁的机制在linux2.5.7之后开始使用futex(fast Userspace mutexes),即内核态和用户态的混合机制。这个机制的主要优势就是在加锁的时候根据mmap共享内存里的futex变量，判断该变量是否有竞争，如果没">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2022-03-04T03:24:16.000Z">
-<meta property="article:modified_time" content="2022-03-04T03:24:16.000Z">
+<meta property="article:published_time" content="2022-02-04T03:24:16.000Z">
+<meta property="article:modified_time" content="2022-02-04T03:24:16.000Z">
 <meta property="article:author" content="Liji">
 <meta name="twitter:card" content="summary">
     
 
     
-        <link rel="alternate" href="/" title="么么博客" type="application/atom+xml" />
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
     
 
     
@@ -87,7 +87,7 @@
                                     <a class="main-nav-list-link" href="/">主页</a>
                                 </li>
                             
-                                    
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li></ul>
                                 
                                 <li class="main-nav-list-item" >
                                     <a class="main-nav-list-link" href="/about/index.html">关于</a>
@@ -149,7 +149,7 @@
                         <div class="main-body-header">
     <h1 class="header">
     
-    未分类
+    <a class="page-title-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a>
     </h1>
 </div>
 
@@ -172,16 +172,16 @@
                 
   <div class="article-date">
     <i class="fa fa-calendar"></i>
-    <a href="/2022/03/04/atomic/" class="article-date">
-       <time datetime="2022-03-04T03:24:16.000Z" itemprop="datePublished">2022-03-04</time>
+    <a href="/2022/02/04/atomic/" class="article-date">
+       <time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time>
     </a>
   </div>
 
 
 <div class="article-date">
   <i class="fa fa-calendar-plus-o"></i>
-  <a href="/2022/03/04/atomic/" class="article-date">
-     <time datetime="2022-03-04T03:24:16.000Z" itemprop="dateModified">2022-03-04</time>
+  <a href="/2022/02/04/atomic/" class="article-date">
+     <time datetime="2022-02-04T03:24:16.000Z" itemprop="dateModified">2022-02-04</time>
   </a>
 </div>
 
@@ -275,7 +275,7 @@
 
 
 
-    <a data-url="https://liji53.github.io/2022/03/04/atomic/" data-id="cl0dms68f00012in45fo3bp6v" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+    <a data-url="https://liji53.github.io/2022/02/04/atomic/" data-id="cl0dms68f00012in45fo3bp6v" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
 <script>
     (function ($) {
         $('body').on('click', function() {
@@ -348,11 +348,11 @@
         "headline": "atomic",
         "image": "https://liji53.github.io",
         "keywords": "",
-        "genre": "",
-        "datePublished": "2022-03-04",
-        "dateCreated": "2022-03-04",
-        "dateModified": "2022-03-04",
-        "url": "https://liji53.github.io/2022/03/04/atomic/",
+        "genre": "C++基础",
+        "datePublished": "2022-02-04",
+        "dateCreated": "2022-02-04",
+        "dateModified": "2022-02-04",
+        "url": "https://liji53.github.io/2022/02/04/atomic/",
         "description": "锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。那锁与原子操作有什么联系，区别呢？
 锁的机制与开销现在锁的机制在linux2.5.7之后开始使用futex(fast Userspace mutexes),即内核态和用户态的混合机制。这个机制的主要优势就是在加锁的时候根据mmap共享内存里的futex变量，判断该变量是否有竞争，如果没",
         "wordCount": 1493
@@ -384,7 +384,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="twitter" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-twitter"></i>
                     </a>
                 </li>
@@ -392,7 +392,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="facebook" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-facebook"></i>
                     </a>
                 </li>
@@ -400,7 +400,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="stack-overflow" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-stack-overflow"></i>
                     </a>
                 </li>
@@ -416,7 +416,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="weibo" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-weibo"></i>
                     </a>
                 </li>
@@ -424,7 +424,7 @@
             
                 
                 <li>
-                    <a class="social-tooltip" title="rss" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-rss"></i>
                     </a>
                 </li>
@@ -436,10 +436,20 @@
         
 <nav id="article-nav">
     
+        <a href="/2022/02/23/LLVM/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            LLVM(1)
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
     
-        <a href="/2022/02/23/LLVM/" id="article-nav-older" class="article-nav-link-wrap">
+    
+        <a href="/2022/01/13/lexAndYacc/" id="article-nav-older" class="article-nav-link-wrap">
         <strong class="article-nav-caption">上一篇</strong>
-        <p class="article-nav-title">LLVM(1)</p>
+        <p class="article-nav-title">利用lex和yacc做代码检查(上)</p>
         <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
         </a>
     
@@ -461,26 +471,6 @@
                     <li>
                         
                         <div class="item-thumbnail">
-                            <a href="/2022/03/04/atomic/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2022/03/04/atomic/" class="title">atomic</a></p>
-                            <p class="item-date"><time datetime="2022-03-04T03:24:16.000Z" itemprop="datePublished">2022-03-04</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-thumbnail">
                             <a href="/2022/02/23/LLVM/" class="thumbnail">
     
     
@@ -495,6 +485,26 @@
                             <p class="item-category"></p>
                             <p class="item-title"><a href="/2022/02/23/LLVM/" class="title">LLVM(1)</a></p>
                             <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
                         </div>
                     </li>
                 
@@ -521,6 +531,26 @@
                     <li>
                         
                         <div class="item-thumbnail">
+                            <a href="/2022/01/08/smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
                             <a href="/2021/12/03/regxStudy/" class="thumbnail">
     
     
@@ -538,39 +568,26 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2021/10/08/fileConflict/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2021/10/08/fileConflict/Images/filelock_design.png)" alt="没有登录认证下解决文件冲突方案" class="thumbnail-image"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2021/10/08/fileConflict/" class="title">没有登录认证下解决文件冲突方案</a></p>
-                            <p class="item-date"><time datetime="2021-10-08T21:37:29.000Z" itemprop="datePublished">2021-10-08</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
 
             
                 
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li></ul>
+        </div>
+    </div>
+
 
             
                 
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
@@ -635,7 +652,7 @@
     var disqus_shortname = 'hexo-theme-hueman';
     
     
-    var disqus_url = 'https://liji53.github.io/2022/03/04/atomic/';
+    var disqus_url = 'https://liji53.github.io/2022/02/04/atomic/';
     
     (function() {
     var dsq = document.createElement('script');

@@ -6,14 +6,14 @@
     
 
     
-    <title>归档: 2021/6 | 么么博客</title>
+    <title>分类: C++基础 | 么么博客</title>
     
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="description" content="程序猿个人随记">
 <meta property="og:type" content="website">
 <meta property="og:title" content="么么博客">
-<meta property="og:url" content="https://liji53.github.io/archives/2021/06/index.html">
+<meta property="og:url" content="https://liji53.github.io/categories/C-%E5%9F%BA%E7%A1%80/index.html">
 <meta property="og:site_name" content="么么博客">
 <meta property="og:description" content="程序猿个人随记">
 <meta property="og:locale" content="zh_CN">
@@ -145,7 +145,7 @@
                         <div class="main-body-header">
     <h1 class="header">
     
-    <i class="icon fa fa-archive"></i>归档: 2021/6
+    <i class="icon fa fa-folder-open"></i>分类: <em class="page-title-link">C++基础</em>
     </h1>
 </div>
 
@@ -158,7 +158,7 @@
         
         <section class="archives-wrap">
             <div class="archive-year-wrap">
-                <a href="/archives/2021" class="archive-year"><i class="icon fa fa-calendar-o"></i>2021</a>
+                <a href="/archives/2022" class="archive-year"><i class="icon fa fa-calendar-o"></i>2022</a>
             </div>
             <div class="archives">
     
@@ -169,7 +169,7 @@
         <article class="article article-summary">
     <div class="article-summary-inner">
         
-        <a href="/2021/06/10/dockerBuild/" class="thumbnail">
+        <a href="/2022/02/04/atomic/" class="thumbnail">
     
     
         <span class="thumbnail-image thumbnail-none"></span>
@@ -179,7 +179,7 @@
 <span class="comment-counter">
     <i class="fa fa-comments-o"></i>
     
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/06/10/dockerBuild/">0</span>
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/02/04/atomic/">0</span>
     
 </span>
 
@@ -190,21 +190,68 @@
         
         <div class="article-meta">
             <div class="category">
-            
+            <a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a>
             </div>
-            <div class="date"><time datetime="2021-06-10T02:38:06.000Z" itemprop="datePublished">2021-06-10</time></div>
+            <div class="date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></div>
         </div>
         
     
         <h1 class="article-title" itemprop="name">
-        <a href="/2021/06/10/dockerBuild/">定制docker镜像</a>
+        <a href="/2022/02/04/atomic/">atomic</a>
         </h1>
     
 
         <p class="article-excerpt">
-            定制docker镜像如果你写出来的应用，领导要求要考虑部署简单、可维护，这时候你应该想到docker，以我工作中的环境为例，部署需要用到httpd、mongodb、svn、python3等。但去hub docker上找相应的镜像，往往只能找到基础镜像，因此需要我们定制自己的镜像 。
-准备工作1. 下载docker首先需要下载docker，我的环境是centos 7.6
-由于是公司服务器环境，使用c
+            锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。那锁与原子操作有什么联系，区别呢？
+锁的机制与开销现在锁的机制在linux2.5.7之后开始使用futex(fast Userspace mutexes),即内核态和用户态的混合机制。这个机制的主要优势就是在加锁的时候根据mmap共享内存里的futex变量，判断该变量是否有竞争，如果没
+        </p>
+    </div>
+</article>
+    
+
+    
+    
+    
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
+        <a href="/2022/01/08/smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/01/08/smart-ptr/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a>
+            </div>
+            <div class="date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2022/01/08/smart-ptr/">smart_ptr</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            智能指针的实现shared_ptr 的实现我们都知道靠引用计数，但引用计数的生命周期是怎么样的，智能指针是否线程安全，weak_ptr是否需要计数？现在我们通过阅读源码，来一探究竟。
+shared_ptr的实现代码来自vs的memory.h,用的是c++14标准
+构造函数(c++11动态数组，需要显式提供delete functor)在vs中神奇的发现c++17才支持的动态数组，c++14就支持了
         </p>
     </div>
 </article>
@@ -214,6 +261,7 @@
 
 
     </div></section>
+
 
 
 

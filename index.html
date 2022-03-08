@@ -22,7 +22,7 @@
     
 
     
-        <link rel="alternate" href="/" title="么么博客" type="application/atom+xml" />
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
     
 
     
@@ -83,7 +83,7 @@
                                     <a class="main-nav-list-link" href="/">主页</a>
                                 </li>
                             
-                                    
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li></ul>
                                 
                                 <li class="main-nav-list-item" >
                                     <a class="main-nav-list-link" href="/about/index.html">关于</a>
@@ -169,53 +169,6 @@
         <article class="article article-summary">
     <div class="article-summary-inner">
         
-        <a href="/2022/03/04/atomic/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/03/04/atomic/">0</span>
-    
-</span>
-
-
-    
-</a>
-
-        
-        <div class="article-meta">
-            <div class="category">
-            
-            </div>
-            <div class="date"><time datetime="2022-03-04T03:24:16.000Z" itemprop="datePublished">2022-03-04</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2022/03/04/atomic/">atomic</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。那锁与原子操作有什么联系，区别呢？
-锁的机制与开销现在锁的机制在linux2.5.7之后开始使用futex(fast Userspace mutexes),即内核态和用户态的混合机制。这个机制的主要优势就是在加锁的时候根据mmap共享内存里的futex变量，判断该变量是否有竞争，如果没
-        </p>
-    </div>
-</article>
-    
-
-    
-    
-    
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
         <a href="/2022/02/23/LLVM/" class="thumbnail">
     
     
@@ -251,6 +204,53 @@
         <p class="article-excerpt">
             Clang Static Analyzer 安装和运行最近在利用业余时间学习和研究代码检查，经过比对了几种代码检查工具之后，决定把Clang Static Analyzer作为学习的对象，原因是开源+扩展性。本文我将重点围绕llvm环境搭建，以及实现第一个static analyzer checker
 文档资料学习CSA绕不开LLVM、Clang，好在LLVM的文档非常全面，以下全是官方文档链接：
+        </p>
+    </div>
+</article>
+    
+
+    
+    
+    
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
+        <a href="/2022/02/04/atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/02/04/atomic/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a>
+            </div>
+            <div class="date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2022/02/04/atomic/">atomic</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。那锁与原子操作有什么联系，区别呢？
+锁的机制与开销现在锁的机制在linux2.5.7之后开始使用futex(fast Userspace mutexes),即内核态和用户态的混合机制。这个机制的主要优势就是在加锁的时候根据mmap共享内存里的futex变量，判断该变量是否有竞争，如果没
         </p>
     </div>
 </article>
@@ -307,6 +307,56 @@
         </p>
     </div>
 </article>
+    
+
+    
+    
+    
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
+        <a href="/2022/01/08/smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/01/08/smart-ptr/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a>
+            </div>
+            <div class="date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2022/01/08/smart-ptr/">smart_ptr</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            智能指针的实现shared_ptr 的实现我们都知道靠引用计数，但引用计数的生命周期是怎么样的，智能指针是否线程安全，weak_ptr是否需要计数？现在我们通过阅读源码，来一探究竟。
+shared_ptr的实现代码来自vs的memory.h,用的是c++14标准
+构造函数(c++11动态数组，需要显式提供delete functor)在vs中神奇的发现c++17才支持的动态数组，c++14就支持了
+        </p>
+    </div>
+</article>
+    
+        </div>
     
 
     
@@ -396,7 +446,7 @@
         
         <div class="article-meta">
             <div class="category">
-            
+            <a class="article-category-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a>
             </div>
             <div class="date"><time datetime="2021-10-08T21:37:29.000Z" itemprop="datePublished">2021-10-08</time></div>
         </div>
@@ -449,7 +499,7 @@
         
         <div class="article-meta">
             <div class="category">
-            
+            <a class="article-category-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a>
             </div>
             <div class="date"><time datetime="2021-09-10T08:04:57.000Z" itemprop="datePublished">2021-09-10</time></div>
         </div>
@@ -499,7 +549,7 @@
         
         <div class="article-meta">
             <div class="category">
-            
+            <a class="article-category-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a>
             </div>
             <div class="date"><time datetime="2021-09-09T08:48:22.000Z" itemprop="datePublished">2021-09-09</time></div>
         </div>
@@ -555,7 +605,7 @@ https://www.cnblogs.com/yoyoketang/p/97
         
         <div class="article-meta">
             <div class="category">
-            
+            <a class="article-category-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a>
             </div>
             <div class="date"><time datetime="2021-09-02T06:31:01.000Z" itemprop="datePublished">2021-09-02</time></div>
         </div>
@@ -625,58 +675,6 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
         </div>
     
 
-    
-    
-    
-    
-        <div class="article-row">
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
-        <a href="/2021/07/05/deployWeb/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2021/07/05/deployWeb/Images/static_web.png)" alt="花最小的学习成本部署web服务" class="thumbnail-image"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/07/05/deployWeb/">0</span>
-    
-</span>
-
-
-    
-</a>
-
-        
-        <div class="article-meta">
-            <div class="category">
-            
-            </div>
-            <div class="date"><time datetime="2021-07-05T11:51:02.000Z" itemprop="datePublished">2021-07-05</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2021/07/05/deployWeb/">花最小的学习成本部署web服务</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            用httpd给程序搭个web界面当你写完程序，需要做推广时，必不可少的需要有个界面。基于这么一个简单背景，花了5天的时间，给自己的程序搞了个web界面，由于之前没有web的实战经验，又不能花大量精力在学习web上，因此有了这篇学习记录
-预备知识主要储备知识还是在前端这块：
-
-了解html、css、js，html和js可以在实际过程中边学边用
-了解http协议，主要是出问题的时候，可以抓包快速确定是
-        </p>
-    </div>
-</article>
-    
-
 
     </div></section>
 
@@ -697,7 +695,7 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
             
                 
                 <li>
-                    <a class="social-tooltip" title="twitter" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-twitter"></i>
                     </a>
                 </li>
@@ -705,7 +703,7 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
             
                 
                 <li>
-                    <a class="social-tooltip" title="facebook" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-facebook"></i>
                     </a>
                 </li>
@@ -713,7 +711,7 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
             
                 
                 <li>
-                    <a class="social-tooltip" title="stack-overflow" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-stack-overflow"></i>
                     </a>
                 </li>
@@ -729,7 +727,7 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
             
                 
                 <li>
-                    <a class="social-tooltip" title="weibo" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-weibo"></i>
                     </a>
                 </li>
@@ -737,7 +735,7 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
             
                 
                 <li>
-                    <a class="social-tooltip" title="rss" href="/" target="_blank" rel="noopener">
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
                         <i class="icon fa fa-rss"></i>
                     </a>
                 </li>
@@ -761,26 +759,6 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
                     <li>
                         
                         <div class="item-thumbnail">
-                            <a href="/2022/03/04/atomic/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2022/03/04/atomic/" class="title">atomic</a></p>
-                            <p class="item-date"><time datetime="2022-03-04T03:24:16.000Z" itemprop="datePublished">2022-03-04</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-thumbnail">
                             <a href="/2022/02/23/LLVM/" class="thumbnail">
     
     
@@ -795,6 +773,26 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
                             <p class="item-category"></p>
                             <p class="item-title"><a href="/2022/02/23/LLVM/" class="title">LLVM(1)</a></p>
                             <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
                         </div>
                     </li>
                 
@@ -821,6 +819,26 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
                     <li>
                         
                         <div class="item-thumbnail">
+                            <a href="/2022/01/08/smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
                             <a href="/2021/12/03/regxStudy/" class="thumbnail">
     
     
@@ -838,39 +856,26 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2021/10/08/fileConflict/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2021/10/08/fileConflict/Images/filelock_design.png)" alt="没有登录认证下解决文件冲突方案" class="thumbnail-image"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2021/10/08/fileConflict/" class="title">没有登录认证下解决文件冲突方案</a></p>
-                            <p class="item-date"><time datetime="2021-10-08T21:37:29.000Z" itemprop="datePublished">2021-10-08</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
 
             
                 
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li></ul>
+        </div>
+    </div>
+
 
             
                 
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">三月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
