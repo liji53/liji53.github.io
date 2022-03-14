@@ -459,8 +459,8 @@ shared_ptr的实现代码来自vs的memory.h,用的是c++14标准
 
         <p class="article-excerpt">
             分配器杂谈分配器在stl的容器中用于空间的分配与释放，以及对象的初始化与析构，下面我们简单了解下stl 6大组件中的allocator
-分配器的任务与接口1.基本接口上面讲到了分配器的任务，而对应的接口就是
-12345678template &lt;class T&gt;T* allocator&lt;T&gt;::allocate(size_type n);template &lt;class 
+分配器的思想与接口分配器将内存的分配与对象的构造行为分离出来，一是为了提高效率对于已分配好的内存可以反复利用，避免内存碎片，但更重要的是为了泛型编程的可复用性，降低内存分配与构造行为的耦合性。
+1.基本接口12345678template &lt;class T&
         </p>
     </div>
 </article>
