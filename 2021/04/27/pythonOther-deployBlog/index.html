@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>史上最详细-用docker部署博客 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="用docker，hexo，github部署博客hexo+github的部署教程，网上详细教程一堆。如果你觉得安装node.js、npm以及再用npm安装各种模块(安装后还会有大量的安装残余)不爽，那欢迎参考本次教程。我们将使用docker来封装运行hexo，hexo镜像非自己制作，我们网上下载 预备知识通过本次教程，虽然可以完成搭建，但还是建议多储备点知识，这样在遇到环境差异时，能快速排查问题。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="史上最详细-用docker部署博客">
+<meta property="og:url" content="https://liji53.github.io/2021/04/27/pythonOther-deployBlog/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="用docker，hexo，github部署博客hexo+github的部署教程，网上详细教程一堆。如果你觉得安装node.js、npm以及再用npm安装各种模块(安装后还会有大量的安装残余)不爽，那欢迎参考本次教程。我们将使用docker来封装运行hexo，hexo镜像非自己制作，我们网上下载 预备知识通过本次教程，虽然可以完成搭建，但还是建议多储备点知识，这样在遇到环境差异时，能快速排查问题。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/2021/04/27/pythonOther-deployBlog/Images/docker_hyper.png">
+<meta property="article:published_time" content="2021-04-27T11:00:44.000Z">
+<meta property="article:modified_time" content="2021-04-27T11:00:44.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/2021/04/27/pythonOther-deployBlog/Images/docker_hyper.png">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    未分类
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-pythonOther-deployBlog" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        史上最详细-用docker部署博客
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/04/27/pythonOther-deployBlog/" class="article-date">
+       <time datetime="2021-04-27T11:00:44.000Z" itemprop="datePublished">2021-04-27</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/04/27/pythonOther-deployBlog/" class="article-date">
+     <time datetime="2021-04-27T11:00:44.000Z" itemprop="dateModified">2021-04-27</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="用docker，hexo，github部署博客"><a href="#用docker，hexo，github部署博客" class="headerlink" title="用docker，hexo，github部署博客"></a>用docker，hexo，github部署博客</h1><p>hexo+github的部署教程，网上详细教程一堆。如果你觉得安装node.js、npm以及再用npm安装各种模块(安装后还会有大量的安装残余)不爽，那欢迎参考本次教程。我们将使用docker来封装运行hexo，hexo镜像非自己制作，我们网上下载</p>
+<h3 id="预备知识"><a href="#预备知识" class="headerlink" title="预备知识"></a>预备知识</h3><p>通过本次教程，虽然可以完成搭建，但还是建议多储备点知识，这样在遇到环境差异时，能快速排查问题。</p>
+<ol>
+<li>了解docker，会用常用命令；参考：<a target="_blank" rel="noopener" href="https://www.runoob.com/docker/docker-tutorial.html">https://www.runoob.com/docker/docker-tutorial.html</a></li>
+<li>了解hexo，会用常用命令；参考：<a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/">https://hexo.io/zh-cn/docs/</a></li>
+<li>了解git、github、markdown</li>
+</ol>
+<h3 id="docker安装"><a href="#docker安装" class="headerlink" title="docker安装"></a>docker安装</h3><p>这里只讲win10安装docker，其他环境，请参考其他博客，网上资料很多，不怕搞不定</p>
+<ol>
+<li><p>启用Hyper，Hyper是win10自带的虚拟化技术，docker会在Hyper虚拟出来的环境上运行</p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/docker_hyper.png"></p>
+</li>
+<li><p>安装docker，下载地址：<a target="_blank" rel="noopener" href="https://docs.docker.com/docker-for-windows/install/">https://docs.docker.com/docker-for-windows/install/</a></p>
+<p>一路next即可</p>
+<p>安装完成之后，cmd下执行docker version，如下所示，说明安装成功</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\hspcadmin&gt;docker version</span><br><span class="line">Client: Docker Engine - Community</span><br><span class="line"> Cloud integration: 1.0.12</span><br><span class="line"> Version:           20.10.5</span><br><span class="line"> API version:       1.41</span><br><span class="line"> Go version:        go1.13.15</span><br><span class="line"> Git commit:        55c4c88</span><br><span class="line"> Built:             Tue Mar  2 20:14:53 2021</span><br><span class="line"> OS/Arch:           windows/amd64</span><br><span class="line"> Context:           default</span><br><span class="line"> Experimental:      true</span><br></pre></td></tr></table></figure></li>
+<li><p>修改镜像仓库的配置，最好自己申请一个阿里云的镜像，速度最快</p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/docker_imageModif.png"></p>
+</li>
+</ol>
+<h3 id="docker启动hexo"><a href="#docker启动hexo" class="headerlink" title="docker启动hexo"></a>docker启动hexo</h3><p>hexo的镜像，从Docker官方的公共仓库找，网址：<a target="_blank" rel="noopener" href="https://hub.docker.com/search?q=hexo">https://hub.docker.com/search?q=hexo</a></p>
+<p>我选的是spurin/hexo (100K+下载量，说明用的人挺多的)</p>
+<ol>
+<li><p>下载spurin/hexo镜像(我已经提前下载，所以打印提示已经是最新版本)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\hspcadmin&gt;docker pull spurin/hexo</span><br><span class="line">Using default tag: latest</span><br><span class="line">latest: Pulling from spurin/hexo</span><br><span class="line">Digest: sha256:4f8a4d8133d5b29d60b86782237673511b3c3b2081b767064d2b922b53bc2ef5</span><br><span class="line">Status: Image is up to date for spurin/hexo:latest</span><br><span class="line">docker.io/spurin/hexo:latest</span><br></pre></td></tr></table></figure></li>
+<li><p>创建容器，命令如图所示</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\hspcadmin&gt;docker create --name=liji53.github.com -e HEXO_SERVER_PORT=4001 -e GIT_USER=&quot;liji53&quot; -e GIT_EMAIL=&quot;liji_1211@163.com&quot; -v E:/blog:/app -p 4001:4001 spurin/hexo</span><br><span class="line">666891af8d09cdc0443cfe157c3fcf10ab3f9739e72673cdf201a030c66d4c75</span><br></pre></td></tr></table></figure>
+
+<p>详细参数说明：</p>
+<p>–name   给容器指定名称，方便多个博客的管理(非必须)</p>
+<p>-e HEXO_SERVER_PORT   指定hexo server的端口(注意这个是容器内部的hexo server端口)</p>
+<p><strong>-e GIT_USER    github账户的账户名称(必须与github上的账号保持一致，还没有的赶紧注册)</strong></p>
+<p><strong>-e GIT_EMAIL    github的注册email</strong></p>
+<p><strong>-v  路径映射，把hexo的app文件夹映射到本地</strong></p>
+<p>-p   将容器内部使用的网络端口随机映射到我们使用的主机上</p>
+</li>
+<li><p>启动容器，需要一段时间。会自动初始化hexo、下载依赖的插件、创建SSH密钥等。(启动的打印很多，我这里仅展示部分)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\hspcadmin&gt;docker start liji53.github.com &amp;&amp; docker logs --follow liji53.github.com</span><br><span class="line">liji53.github.com</span><br><span class="line">***** App directory exists and has content, continuing *****</span><br><span class="line">***** App directory contains a requirements.txt file, installing npm requirements *****</span><br><span class="line">***** App .ssh directory exists and has content, continuing *****</span><br><span class="line">***** Running git config, user = liji53, email = liji_1211@163.com *****</span><br><span class="line">***** Copying .ssh from App directory and setting permissions *****</span><br><span class="line">***** Contents of public ssh key (for deploy) - *****</span><br><span class="line">***** Starting server on port 4001 *****</span><br><span class="line">INFO  Validating config</span><br><span class="line">INFO  Start processing</span><br><span class="line">INFO  Hexo is running at http://localhost:4001 . Press Ctrl+C to stop.</span><br></pre></td></tr></table></figure></li>
+<li><p> 检查–本地预览效果，出现以下图片说明部署成功了 ，网址：<a target="_blank" rel="noopener" href="http://localhost:4001/">http://localhost:4001/</a></p>
+</li>
+</ol>
+<p>   <img src="/2021/04/27/pythonOther-deployBlog/Images/hexo_localhost.png"></p>
+<h3 id="替换hexo主题"><a href="#替换hexo主题" class="headerlink" title="替换hexo主题"></a>替换hexo主题</h3><p>hexo的主题，我们用的是hueman，地址：<a target="_blank" rel="noopener" href="https://github.com/ppoffice/hexo-theme-hueman">https://github.com/ppoffice/hexo-theme-hueman</a></p>
+<ol>
+<li><p>进入容器（也可以不进入容器，后续步骤可直接在windows的映射路径上操作）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">C:\Users\hspcadmin&gt;docker exec -it  liji53.github.com bash</span><br><span class="line">root@666891af8d09:/app#</span><br></pre></td></tr></table></figure></li>
+<li><p>下载主题</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@666891af8d09:/app/themes# git clone https://github.com/ppoffice/hexo-theme-hueman.git themes/hueman</span><br><span class="line">Cloning into &#x27;themes/hueman&#x27;...</span><br><span class="line">remote: Enumerating objects: 2272, done.</span><br><span class="line">remote: Counting objects: 100% (11/11), done.</span><br><span class="line">remote: Compressing objects: 100% (11/11), done.</span><br><span class="line">remote: Total 2272 (delta 1), reused 2 (delta 0), pack-reused 2261</span><br><span class="line">Receiving objects: 100% (2272/2272), 5.77 MiB | 37.00 KiB/s, done.</span><br><span class="line">Resolving deltas: 100% (1216/1216), done.</span><br><span class="line">Checking out files: 100% (241/241), done.</span><br></pre></td></tr></table></figure>
+
+<p>如果出现下面这个问题(fatal: unable to access ‘<a target="_blank" rel="noopener" href="https://github.com/ppoffice/hexo-theme-hueman.git/&#39;">https://github.com/ppoffice/hexo-theme-hueman.git/&#39;</a>: gnutls_handshake() failed: The TLS connection was non-properly terminated.)</p>
+<p>则该改成</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git://github.com/ppoffice/hexo-theme-hueman.git themes/hueman</span><br></pre></td></tr></table></figure></li>
+<li><p>修改hueman的默认配置名称</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@666891af8d09:/app# mv themes/hueman/_config.yml.example  themes/hueman/_config.yml  </span><br></pre></td></tr></table></figure></li>
+<li><p>修改hexo的全局配置，使用hueman的主题，在windows上修改，本例的文件路径是E:\blog\_config.yml（在容器中修改，没有vim，需要下载，下载命令 apt update &amp;&amp; apt -y install vim）</p>
+<p>打开_config.yml，找到theme这一行，改成hueman，其他_config.yml的用法参考官网</p>
+<p><a target="_blank" rel="noopener" href="https://hexo.io/zh-cn/docs/configuration">https://hexo.io/zh-cn/docs/configuration</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> Extensions</span></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># Plugins: https://hexo.io/plugins/</span></span></span><br><span class="line"><span class="meta">#</span><span class="bash"><span class="comment"># Themes: https://hexo.io/themes/</span></span></span><br><span class="line">theme: hueman</span><br></pre></td></tr></table></figure></li>
+<li><p>检查–本地预览效果，出现以下图片说明部署成功了，网址：<a target="_blank" rel="noopener" href="http://localhost:4001/">http://localhost:4001/</a></p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/theme_example.png"></p>
+<p>如果效果不对，试试重启容器，命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker restart liji53.github.com &amp;&amp; docker logs --follow liji53.github.com</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="搭建github博客"><a href="#搭建github博客" class="headerlink" title="搭建github博客"></a>搭建github博客</h3><p>首先，要注册一个github的账号，注册的邮箱必须要验证，这步就不贴图了</p>
+<ol>
+<li><p>创建仓库</p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/github_create.png"></p>
+</li>
+<li><p>仓库的名字必须是username.github.io，其中username是你的用户名</p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/github_name.png"></p>
+</li>
+</ol>
+<h3 id="配置SSH-Key"><a href="#配置SSH-Key" class="headerlink" title="配置SSH Key"></a>配置SSH Key</h3><p>当你本地写完博客，提交代码时，必须有github权限才可以，直接使用用户名和密码每次都要输入，很不方便。因此我们使用ssh key来解决这个问题</p>
+<ol>
+<li><p>前面搭建docker+hexo的过程中，已经提到hexo容器帮我们生成了ssh密钥，不需要调用ssh-keygen</p>
+<p>密钥的路径在本地映射路径下，参考：</p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/ssh_pub.png"></p>
+</li>
+<li><p>记事本打开<code>.ssh\id_rsa.pub</code>文件，复制里面的内容，打开你的github主页，进入个人设置-&gt;SSH and GPG keys -&gt; New SSH key, 将刚复制的内容粘贴到key哪里，title随便填</p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/ssh_setting.png"></p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/ssh_new.png"></p>
+</li>
+</ol>
+<h3 id="用hexo写博客并上传"><a href="#用hexo写博客并上传" class="headerlink" title="用hexo写博客并上传"></a>用hexo写博客并上传</h3><p>到这一步，环境已经搭建完成了，只剩考虑该写啥了。。。接下来我们简单验证下</p>
+<ol>
+<li><p>在容器环境下，用命令生成文件；在到windows环境下，打开test.md随便写几句</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">root@666891af8d09:/app# hexo new test</span><br><span class="line">INFO  Validating config</span><br><span class="line">INFO  Created: /app/source/_posts/test.md</span><br></pre></td></tr></table></figure></li>
+<li><p>进入容器，用hexo生成博客静态网页(会生成public目录，里面就是生成的网页)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@666891af8d09:/app# hexo g</span><br><span class="line">INFO  Validating config</span><br><span class="line">INFO  Start processing</span><br><span class="line">Deprecated as of 10.7.0. highlight(lang, code, ...args) has been deprecated.</span><br><span class="line">Deprecated as of 10.7.0. Please use highlight(code, options) instead.</span><br><span class="line">https://github.com/highlightjs/highlight.js/issues/2277</span><br><span class="line">INFO  Files loaded in 2.6 s</span><br><span class="line">INFO  Generated: content.json</span><br><span class="line">INFO  Generated: archives/index.html</span><br><span class="line">INFO  Generated: archives/2021/index.html</span><br><span class="line">INFO  Generated: index.html</span><br></pre></td></tr></table></figure></li>
+<li><p>上传博客(用hexo d命令只会上传public目录，其他不会上传)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">root@666891af8d09:/app# hexo d</span><br><span class="line">INFO  Validating config</span><br><span class="line">INFO  Start processing</span><br><span class="line">Deprecated as of 10.7.0. highlight(lang, code, ...args) has been deprecated.</span><br><span class="line">Deprecated as of 10.7.0. Please use highlight(code, options) instead.</span><br><span class="line">https://github.com/highlightjs/highlight.js/issues/2277</span><br><span class="line">INFO  Files loaded in 2.48 s</span><br><span class="line">INFO  Generated: content.json</span><br><span class="line">INFO  Generated: archives/index.html</span><br></pre></td></tr></table></figure></li>
+<li><p>检查–网站预览效果</p>
+<p><img src="/2021/04/27/pythonOther-deployBlog/Images/blog_web.png"></p>
+</li>
+</ol>
+<h3 id="常见问题及参考"><a href="#常见问题及参考" class="headerlink" title="常见问题及参考"></a>常见问题及参考</h3><ol>
+<li><p>github访问慢、访问失败</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/15893854">https://zhuanlan.zhihu.com/p/15893854</a></p>
+</li>
+<li><p>博客图片路径加载失败</p>
+<p>参考：<a target="_blank" rel="noopener" href="https://blog.csdn.net/xjm850552586/article/details/84101345">https://blog.csdn.net/xjm850552586/article/details/84101345</a></p>
+</li>
+<li><p>其他参考</p>
+<p><a target="_blank" rel="noopener" href="https://spurin.com/2020/01/04/Creating-a-Blog-Website-with-Docker-Hexo-Github-Free-Hosting-and-HTTPS/">https://spurin.com/2020/01/04/Creating-a-Blog-Website-with-Docker-Hexo-Github-Free-Hosting-and-HTTPS/</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/liuxianan/p/build-blog-website-by-hexo-github.html">https://www.cnblogs.com/liuxianan/p/build-blog-website-by-hexo-github.html</a></p>
+</li>
+</ol>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/04/27/pythonOther-deployBlog/" data-id="cl14k2zbp00051pn43dct1s3f" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "史上最详细-用docker部署博客",
+        "image": "https://liji53.github.io/2021/04/27/pythonOther-deployBlog/Images/docker_hyper.png",
+        "keywords": "",
+        "genre": "",
+        "datePublished": "2021-04-27",
+        "dateCreated": "2021-04-27",
+        "dateModified": "2021-04-27",
+        "url": "https://liji53.github.io/2021/04/27/pythonOther-deployBlog/",
+        "description": "用docker，hexo，github部署博客hexo+github的部署教程，网上详细教程一堆。如果你觉得安装node.js、npm以及再用npm安装各种模块(安装后还会有大量的安装残余)不爽，那欢迎参考本次教程。我们将使用docker来封装运行hexo，hexo镜像非自己制作，我们网上下载
+预备知识通过本次教程，虽然可以完成搭建，但还是建议多储备点知识，这样在遇到环境差异时，能快速排查问题。
+",
+        "wordCount": 704
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/05/20/staticLd/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            静态链接
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/23/C-Project-LLVM/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/02/23/C-Project-LLVM/Images/LLVM_vs.png)" alt="LLVM(1)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/02/23/C-Project-LLVM/" class="title">LLVM(1)</a></p>
+                            <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/C-Basic-atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/C-Basic-atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/C-Project-lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/C-Project-lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/C-Project-lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/08/C-Basic-smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/C-Basic-smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/pythonOther-regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/pythonOther-regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/04/27/pythonOther-deployBlog/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>

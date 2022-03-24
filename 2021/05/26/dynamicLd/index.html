@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>动态链接 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="动态链接静态链接存在2个主要问题：1.内存、磁盘空间浪费严重，每个进程都有自己的独立内存空间，需要对每个共享库都分配内存空间2.更新、发布需要重新编译，假如软件中其中一个库是第三方提供的，一旦更新这个库需要将整个程序重新编译链接。 动态库为了解决上面的两个问题，它的核心思想就是将链接过程推迟到运行时，并且将指令共享给多个进程。 动态库的文件格式首先回看下上文静态链接中给出的一张elf格式图： 1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动态链接">
+<meta property="og:url" content="https://liji53.github.io/2021/05/26/dynamicLd/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="动态链接静态链接存在2个主要问题：1.内存、磁盘空间浪费严重，每个进程都有自己的独立内存空间，需要对每个共享库都分配内存空间2.更新、发布需要重新编译，假如软件中其中一个库是第三方提供的，一旦更新这个库需要将整个程序重新编译链接。 动态库为了解决上面的两个问题，它的核心思想就是将链接过程推迟到运行时，并且将指令共享给多个进程。 动态库的文件格式首先回看下上文静态链接中给出的一张elf格式图： 1.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/Images%5CELF_view.png">
+<meta property="article:published_time" content="2021-05-26T20:04:45.000Z">
+<meta property="article:modified_time" content="2021-05-26T20:04:45.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/Images%5CELF_view.png">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-dynamicLd" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        动态链接
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/05/26/dynamicLd/" class="article-date">
+       <time datetime="2021-05-26T20:04:45.000Z" itemprop="datePublished">2021-05-26</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/05/26/dynamicLd/" class="article-date">
+     <time datetime="2021-05-26T20:04:45.000Z" itemprop="dateModified">2021-05-26</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="动态链接"><a href="#动态链接" class="headerlink" title="动态链接"></a>动态链接</h1><p>静态链接存在2个主要问题：<br>1.内存、磁盘空间浪费严重，每个进程都有自己的独立内存空间，需要对每个共享库都分配内存空间<br>2.更新、发布需要重新编译，假如软件中其中一个库是第三方提供的，一旦更新这个库需要将整个程序重新编译链接。</p>
+<p>动态库为了解决上面的两个问题，它的核心思想就是将链接过程推迟到运行时，并且将指令共享给多个进程。</p>
+<h3 id="动态库的文件格式"><a href="#动态库的文件格式" class="headerlink" title="动态库的文件格式"></a>动态库的文件格式</h3><p>首先回看下上文静态链接中给出的一张elf格式图：<br><img src="/Images%5CELF_view.png"></p>
+<h5 id="1-program-header-table"><a href="#1-program-header-table" class="headerlink" title="1.program header table"></a>1.program header table</h5><p>只有可执行文件和动态库才有这个table，链接时会把相同属性的section合并在一起，合并后就是segment，这么做的好处是减少内存页的碎片。<br>通过readelf -l [目标文件] 即可查看program header table，如下图：<br><img src="/Images%5Cprogram_header_table.png"><br>上面图中绿色的是需要映射到内存中</p>
+<h5 id="2-interp-section-和-INTERP-segment"><a href="#2-interp-section-和-INTERP-segment" class="headerlink" title="2.interp section 和 INTERP segment"></a>2.interp section 和 INTERP segment</h5><p>首先看下.interp section 是什么？ – 动态链接器的路径</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[liji@null dynamic]$ readelf -S a</span><br><span class="line">......</span><br><span class="line">[ 1] .interp           PROGBITS         0000000000400238  00000238</span><br><span class="line">     000000000000001c  0000000000000000   A       0     0     1</span><br><span class="line">......</span><br><span class="line">[liji@null dynamic]$ readelf -x .interp a</span><br><span class="line">Hex dump of section &#x27;.interp&#x27;:</span><br><span class="line">  0x00400238 2f6c6962 36342f6c 642d6c69 6e75782d /lib64/ld-linux-</span><br><span class="line">  0x00400248 7838362d 36342e73 6f2e3200          x86-64.so.2.</span><br></pre></td></tr></table></figure>
+<p>动态链接器用于程序运行时的重定位，与静态链接器(ld)不是一个东西。<br>动态链接器的位置并不是环境变量决定的，而是由ELF文件决定的，在加载时会寻找.interp指向的路径。<br>理解了.interp section之后，INTERP segment 其实就是 .interp section。</p>
+<h5 id="3-dynamic-section"><a href="#3-dynamic-section" class="headerlink" title="3.dynamic section"></a>3.dynamic section</h5><p>通过readelf -d [可执行文件] 即可查看.dynamic段，如下图：<br><img src="/Images%5Cdynamic.png"><br>dynamic段描述了动态链接时相关的内容，通过ldd命令还可以获取到更全的依赖动态库信息</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[liji@null dynamic]$ ldd a</span><br><span class="line">	linux-vdso.so.1 =&gt;  (0x00007ffc3751e000)</span><br><span class="line">	libmy.so =&gt; not found</span><br><span class="line">	libc.so.6 =&gt; /lib64/libc.so.6 (0x00007fb64b20d000)</span><br><span class="line">	/lib64/ld-linux-x86-64.so.2 (0x00007fb64b5db000)</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-dynsym-动态符号表-amp-dynstr-amp-rela-xxx"><a href="#4-dynsym-动态符号表-amp-dynstr-amp-rela-xxx" class="headerlink" title="4.dynsym 动态符号表 &amp; .dynstr &amp; .rela.xxx"></a>4.dynsym 动态符号表 &amp; .dynstr &amp; .rela.xxx</h5><p>动态符号表只保存了动态链接相关的符号，而静态符号表则保存了所有的符号<br>与静态符号表一样，动态符号表也需要dynstr(动态符号字符串表辅助)，即符号表只保存符号的索引，实际的内容保存在字符串表。<br>.rela.plt和.rela.dyn重定位表分别用于函数引用的修正和数据引用的修正，如下图：<br><img src="/Images%5Crela.png"><br>重定位的实现与静态重定位类似，都是从全局符号表中去查找，找到之后，直接修改.got表的地址(关于got后面再讲)</p>
+<h5 id="6-动态库相关的段"><a href="#6-动态库相关的段" class="headerlink" title="6.动态库相关的段"></a>6.动态库相关的段</h5><p>下面我们梳理下跟动态库相关的section：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>属性</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>.dynamic</td>
+<td></td>
+<td>动态库的整体信息</td>
+</tr>
+<tr>
+<td>.dynstr</td>
+<td>alloc</td>
+<td>用于辅助动态符号表，保存符号的字符串</td>
+</tr>
+<tr>
+<td>.dynsym</td>
+<td>alloc</td>
+<td>动态符号表</td>
+</tr>
+<tr>
+<td>.got</td>
+<td>alloc+write</td>
+<td>全局偏移表(后面讲)</td>
+</tr>
+<tr>
+<td>.got.plt</td>
+<td>alloc+write</td>
+<td>全局偏移表，用于plt</td>
+</tr>
+<tr>
+<td>.interp</td>
+<td></td>
+<td>记录动态编译器的位置</td>
+</tr>
+<tr>
+<td>.plt</td>
+<td>alloc</td>
+<td>procedure linkage table(后面讲)</td>
+</tr>
+<tr>
+<td>.rela.plt</td>
+<td></td>
+<td>对函数引用的修正，修正.got.plt</td>
+</tr>
+<tr>
+<td>.rela.dyn</td>
+<td></td>
+<td>对数据引用的修正，主要修正.got</td>
+</tr>
+</tbody></table>
+<h3 id="动态链接的过程"><a href="#动态链接的过程" class="headerlink" title="动态链接的过程"></a>动态链接的过程</h3><p>文章开头我们提到了静态链接的问题，那么动态链接是如何解决多进程内存共享的呢？ – PIC</p>
+<h5 id="1-PIC技术-地址无关代码"><a href="#1-PIC技术-地址无关代码" class="headerlink" title="1.PIC技术-地址无关代码"></a>1.PIC技术-地址无关代码</h5><p>在生成so的时候，需要加上-fPIC，这就是为了生成地址无关代码。<br>它的核心思想是把指令分成需要被修改的，和不需要被修改的，进程间共享的是不需要修改的指令，而需要修改的指令(其实是需要重定位的地址)则放到数据段，并且每个进程都有一个副本。<br>接下来的问题就是如何进行地址访问，原理看下图：<br><img src="/Images%5CPIC_principle.png"><br>当需要访问外部模块的变量、函数时，通过数据段里的全局偏移表(got)进行间接访问。<br>got section以及动态重定位表的内容如下：<br><img src="/Images%5Cgot_section.png"><br>我们稍后讲.got.plt</p>
+<h5 id="2-PLT技术-延迟绑定"><a href="#2-PLT技术-延迟绑定" class="headerlink" title="2.PLT技术-延迟绑定"></a>2.PLT技术-延迟绑定</h5><p>动态库也存在缺点，主要是对性能的影响:</p>
+<ol>
+<li>PIC技术，每次对函数、数据的访问先经过got表，再间接寻址</li>
+<li>当程序启动时需要动态链接器进行链接，这过程需要装载用到的动态库，然后进行符号查找，并进行重定位。<br>而PLT技术用于优化第二项，加快启动的速度 ：它的核心思想是当函数第一次被调用的时候才绑定<br>它有专门的section用于实现它的技术，我们看它的汇编实现：<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Disassembly of <span class="meta">section</span> .plt:</span><br><span class="line"><span class="number">0000000000000550</span> &lt;.plt&gt;:</span><br><span class="line"> <span class="number">550</span>:	ff <span class="number">35</span> b2 0a <span class="number">20</span> <span class="number">00</span>    	<span class="keyword">push</span>   <span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rip</span>+<span class="number">0x200ab2</span>] # .got<span class="number">.</span>plt 的第二项，即moduleid，参数<span class="number">2</span></span><br><span class="line"> <span class="number">556</span>:	ff <span class="number">25</span> b4 0a <span class="number">20</span> <span class="number">00</span>    	<span class="keyword">jmp</span>    <span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rip</span>+<span class="number">0x200ab4</span>] # .got<span class="number">.</span>plt 的第三项，即_dl_runtime_resolve()</span><br><span class="line"> 55c:	0f 1f <span class="number">40</span> <span class="number">00</span>          	<span class="keyword">nop</span>    <span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rax</span>+<span class="number">0x0</span>]</span><br><span class="line"># printf的入口,第一次调用时printf地址还没确定，需要_dl_runtime_resolve()进行绑定</span><br><span class="line"><span class="number">0000000000000560</span> &lt;printf@plt&gt;:</span><br><span class="line"> <span class="number">560</span>:	ff <span class="number">25</span> b2 0a <span class="number">20</span> <span class="number">00</span>    	<span class="keyword">jmp</span>    <span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rip</span>+<span class="number">0x200ab2</span>] # &lt;printf@GLIBC_2<span class="number">.2</span><span class="number">.5</span>&gt;</span><br><span class="line"> <span class="number">566</span>:	<span class="number">68</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span> <span class="number">00</span>       	<span class="keyword">push</span>   <span class="number">0x0</span>                      # 需要决议的函数下标，即.rela<span class="number">.</span>plt的下标	，参数<span class="number">1</span></span><br><span class="line"> 56b:	e9 e0 ff ff ff       	<span class="keyword">jmp</span>    <span class="number">550</span> &lt;.plt&gt;</span><br></pre></td></tr></table></figure>
+printf函数的入口第二项指令是push 0x0，如注释所写，我们看下.rel.plt下标为0的内容:<br><img src="/Images%5Crel_plt.png"><br>_dl_runtime_resolve()用于重定位printf，完成之后会把printf的地址放入got.plt表中，下次再调用printf就不需要再重定位了<br>再来看下它的计算过程：<br>0000000000000560 + 6(指令大小) + rip(当前地址) + 0x200ab2 = 0x201018 + rip(当前地址)<br>0000000000000550 + 6(指令大小) + rip(当前地址) + 0x200ab2 = 0x201008 + rip(当前地址)<br>0000000000000556 + 6(指令大小) + rip(当前地址) + 0x200ab4 = 0x201010 + rip(当前地址)<br>而.got.plt的地址为：<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[22] .got              PROGBITS         0000000000200fd8  00000fd8</span><br><span class="line">     0000000000000028  0000000000000008  WA       0     0     8</span><br><span class="line">[23] .got.plt          PROGBITS         0000000000201000  00001000</span><br><span class="line">     0000000000000020  0000000000000008  WA       0     0     8</span><br></pre></td></tr></table></figure>
+正好是.got.plt的2，3，4项，而第一项保存了.dynamic段的地址<br>最后我们讲讲.got 和 .got.plt 的区别：<br>.got 用来保存全局变量的地址以及不需要用plt技术的函数，如__gmon_start__<br>.got.plt 用来保存函数引用的地址</li>
+</ol>
+<h5 id="流程图"><a href="#流程图" class="headerlink" title="流程图"></a>流程图</h5><h3 id="内核装载elf的过程"><a href="#内核装载elf的过程" class="headerlink" title="内核装载elf的过程"></a>内核装载elf的过程</h3><h5 id="1-静态链接程序的装载"><a href="#1-静态链接程序的装载" class="headerlink" title="1.静态链接程序的装载"></a>1.静态链接程序的装载</h5><p><img src="/Images%5Cstatic_run.png"></p>
+<h5 id="2-动态链接程序的装载"><a href="#2-动态链接程序的装载" class="headerlink" title="2.动态链接程序的装载"></a>2.动态链接程序的装载</h5><p><img src="/Images%5Cdynamic_run.png"><br>动态链接器的运行过程：<br><img src="/Images%5Cdynamic_id_flow.png"></p>
+<h3 id="命令-amp-资料"><a href="#命令-amp-资料" class="headerlink" title="命令&amp;资料"></a>命令&amp;资料</h3><ol>
+<li>readelf -l [可执行文件]  查看program header table</li>
+<li>readelf -d [可执行文件]  查看.dynamic section<h5 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h5>书籍：《程序员的自我修养》</li>
+</ol>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/05/26/dynamicLd/" data-id="cl14k2zbw000c1pn4fcfp0my7" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "动态链接",
+        "image": "https://liji53.github.io/Images%5CELF_view.png",
+        "keywords": "",
+        "genre": "编译、汇编、链接",
+        "datePublished": "2021-05-26",
+        "dateCreated": "2021-05-26",
+        "dateModified": "2021-05-26",
+        "url": "https://liji53.github.io/2021/05/26/dynamicLd/",
+        "description": "动态链接静态链接存在2个主要问题：1.内存、磁盘空间浪费严重，每个进程都有自己的独立内存空间，需要对每个共享库都分配内存空间2.更新、发布需要重新编译，假如软件中其中一个库是第三方提供的，一旦更新这个库需要将整个程序重新编译链接。
+动态库为了解决上面的两个问题，它的核心思想就是将链接过程推迟到运行时，并且将指令共享给多个进程。
+动态库的文件格式首先回看下上文静态链接中给出的一张elf格式图：
+1.",
+        "wordCount": 630
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/06/10/pythonOther-dockerBuild/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            定制docker镜像
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2021/05/20/staticLd/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">静态链接</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/23/C-Project-LLVM/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/02/23/C-Project-LLVM/Images/LLVM_vs.png)" alt="LLVM(1)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/02/23/C-Project-LLVM/" class="title">LLVM(1)</a></p>
+                            <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/C-Basic-atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/C-Basic-atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/C-Project-lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/C-Project-lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/C-Project-lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/08/C-Basic-smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/C-Basic-smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/pythonOther-regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/pythonOther-regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/05/26/dynamicLd/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>

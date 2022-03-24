@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>数据监控(influxDb+grafana) | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="数据监控方案背景&amp;预备知识​        经过一个月多月的程序运行，数据沉淀在mongodb中，接下来就要考虑统计报表了，数据统计能最直接的体现你的工作价值！ ​        从网上找了一些数据监控的解决方案，得益于docker的简单部署，让我们在验证方案可行性上省去了大量时间。整体方案：1.使用docker部署InfluxDb和Grafana；2.用influxDb远程连接Mongo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据监控(influxDb+grafana)">
+<meta property="og:url" content="https://liji53.github.io/2021/07/30/pythonOther-deployMonitor/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="数据监控方案背景&amp;预备知识​        经过一个月多月的程序运行，数据沉淀在mongodb中，接下来就要考虑统计报表了，数据统计能最直接的体现你的工作价值！ ​        从网上找了一些数据监控的解决方案，得益于docker的简单部署，让我们在验证方案可行性上省去了大量时间。整体方案：1.使用docker部署InfluxDb和Grafana；2.用influxDb远程连接Mongo">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/2021/07/30/pythonOther-deployMonitor/Images/deploy_grafana.png">
+<meta property="article:published_time" content="2021-07-30T03:02:02.000Z">
+<meta property="article:modified_time" content="2021-07-30T03:02:02.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/2021/07/30/pythonOther-deployMonitor/Images/deploy_grafana.png">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    未分类
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-pythonOther-deployMonitor" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        数据监控(influxDb+grafana)
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/07/30/pythonOther-deployMonitor/" class="article-date">
+       <time datetime="2021-07-30T03:02:02.000Z" itemprop="datePublished">2021-07-30</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/07/30/pythonOther-deployMonitor/" class="article-date">
+     <time datetime="2021-07-30T03:02:02.000Z" itemprop="dateModified">2021-07-30</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="数据监控方案"><a href="#数据监控方案" class="headerlink" title="数据监控方案"></a>数据监控方案</h1><h3 id="背景-amp-预备知识"><a href="#背景-amp-预备知识" class="headerlink" title="背景&amp;预备知识"></a>背景&amp;预备知识</h3><p>​        经过一个月多月的程序运行，数据沉淀在mongodb中，接下来就要考虑统计报表了，数据统计能最直接的体现你的工作价值！</p>
+<p>​        从网上找了一些数据监控的解决方案，得益于docker的简单部署，让我们在验证方案可行性上省去了大量时间。整体方案：1.使用docker部署InfluxDb和Grafana；2.用influxDb远程连接Mongodb，并用脚本生成influxdb数据；3.最后通过Grafana的web展示出来。</p>
+<p>​        预备知识：</p>
+<ol>
+<li>了解InfluxDb，会使用python或其他语言读写influxdb数据库</li>
+<li>了解Grafana，会简单使用对应的web即可</li>
+<li>了解mongodb，由于数据源在mongodb，因此需要会从mongodb中读数据</li>
+</ol>
+<h3 id="环境部署"><a href="#环境部署" class="headerlink" title="环境部署"></a>环境部署</h3><h5 id="1-下载安装包"><a href="#1-下载安装包" class="headerlink" title="1. 下载安装包"></a>1. 下载安装包</h5><p>下载地址：</p>
+<p><a target="_blank" rel="noopener" href="https://dl.grafana.com/oss/release/grafana-8.0.6-1.x86_64.rpm">https://dl.grafana.com/oss/release/grafana-8.0.6-1.x86_64.rpm</a></p>
+<p><a target="_blank" rel="noopener" href="https://dl.influxdata.com/influxdb/releases/influxdb-1.7.10.x86_64.rpm">https://dl.influxdata.com/influxdb/releases/influxdb-1.7.10.x86_64.rpm</a></p>
+<h5 id="2-生成docker镜像"><a href="#2-生成docker镜像" class="headerlink" title="2. 生成docker镜像"></a>2. 生成docker镜像</h5><p>这里我把2个软件合成了一个镜像。</p>
+<p>启动脚本文件run-tool.sh:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">service grafana-server start</span><br><span class="line">influxd -config /etc/influxdb/influxdb.conf</span><br></pre></td></tr></table></figure>
+
+<p>dockerfile文件：</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">FROM</span> centos:<span class="number">7</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> influxdb-1.7.10.x86_64.rpm /home/</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> grafana-8.0.6-1.x86_64.rpm /home/</span></span><br><span class="line"><span class="keyword">COPY</span><span class="bash"> run-tool.sh /</span></span><br><span class="line"><span class="keyword">RUN</span><span class="bash"> <span class="built_in">cd</span> /etc/yum.repos.d/ \</span></span><br><span class="line"><span class="bash">    &amp;&amp; curl -O http://mirrors.aliyun.com/repo/Centos-7.repo  \</span></span><br><span class="line"><span class="bash">    &amp;&amp; rm CentOS-Base.repo; mv Centos-7.repo CentOS-Base.repo \</span></span><br><span class="line"><span class="bash">    &amp;&amp; yum clean all; yum makecache; yum -y update \</span></span><br><span class="line"><span class="bash">    &amp;&amp; yum install -y /sbin/service; yum install -y fontconfig \</span></span><br><span class="line"><span class="bash">    &amp;&amp; yum install -y urw-fonts \</span></span><br><span class="line"><span class="bash">    &amp;&amp; <span class="built_in">cd</span> /home/ \</span></span><br><span class="line"><span class="bash">    &amp;&amp; rpm -ivh influxdb-1.7.10.x86_64.rpm \</span></span><br><span class="line"><span class="bash">    &amp;&amp; rpm -ivh grafana-8.0.6-1.x86_64.rpm \</span></span><br><span class="line"><span class="bash">    &amp;&amp; chmod +x /run-tool.sh</span></span><br><span class="line"><span class="keyword">CMD</span><span class="bash"> /run-tool.sh</span></span><br></pre></td></tr></table></figure>
+
+<p>生成镜像命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker build -t tool:monitor .</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-启动容器"><a href="#3-启动容器" class="headerlink" title="3. 启动容器"></a>3. 启动容器</h5><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run --name monitor --privileged -it -p 192.168.0.1:8086:8086 -p 192.168.0.1:3000:3000 -v /home/liji/docker/tmp:/mnt tool:monitor</span><br></pre></td></tr></table></figure>
+
+<p>验证是否部署成功，登录grafana的web界面查看，存在以下登录界面说明部署成功：</p>
+<p><img src="/2021/07/30/pythonOther-deployMonitor/Images/deploy_grafana.png"></p>
+<h3 id="数据生成"><a href="#数据生成" class="headerlink" title="数据生成"></a>数据生成</h3><p>数据生成这个环节是粘合剂，把业务生成的数据通过某种规则转成直观的统计数据，是最核心的步骤。本环节我是通过python对mongodb里的数据进行统计，仅贴部分代码：</p>
+<h5 id="1-连接mongodb、连接influxdb"><a href="#1-连接mongodb、连接influxdb" class="headerlink" title="1. 连接mongodb、连接influxdb"></a>1. 连接mongodb、连接influxdb</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> datetime</span><br><span class="line"><span class="keyword">import</span> pymongo</span><br><span class="line"><span class="keyword">from</span> influxdb <span class="keyword">import</span> InfluxDBClient</span><br><span class="line"><span class="comment"># 连接mongodb</span></span><br><span class="line">url = <span class="string">&quot;mongodb://&quot;</span> + g_mongo_ip + <span class="string">&#x27;:&#x27;</span> + g_mongo_port</span><br><span class="line">mongo_client = pymongo.MongoClient(url)</span><br><span class="line"><span class="comment"># 连接influxdb</span></span><br><span class="line">influx_client = InfluxDBClient(g_influx_ip, g_influx_port, database=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">influx_client.create_database(g_influx_database)  <span class="comment"># 没有则创建</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="2-统计mongodb的数据-DIY"><a href="#2-统计mongodb的数据-DIY" class="headerlink" title="2. 统计mongodb的数据(DIY)"></a>2. 统计mongodb的数据(DIY)</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mongo_db = mongo_client[mongo_db_name]</span><br><span class="line">mongo_db[mongo_col_name].find(&#123;<span class="string">&quot;xxx&quot;</span>: &#123;<span class="string">&quot;$exists&quot;</span>: <span class="literal">True</span>&#125;&#125;).count()</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-写入influxdb-DIY"><a href="#3-写入influxdb-DIY" class="headerlink" title="3. 写入influxdb(DIY)"></a>3. 写入influxdb(DIY)</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">points = [&#123;</span><br><span class="line">        <span class="string">&quot;measurement&quot;</span>: mongo_db_name,</span><br><span class="line">        <span class="string">&quot;time&quot;</span>: datetime.datetime.utcnow().isoformat(<span class="string">&quot;T&quot;</span>),</span><br><span class="line">        <span class="string">&quot;fields&quot;</span>: &#123;</span><br><span class="line">            <span class="string">&quot;current_problem_count&quot;</span>:<span class="number">100</span>,</span><br><span class="line">            <span class="string">&quot;resolve_problem_count&quot;</span>:<span class="number">20</span>      </span><br><span class="line">        &#125;</span><br><span class="line">    &#125;]</span><br><span class="line">influx_client.write_points(points)</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-验证数据是否写入"><a href="#4-验证数据是否写入" class="headerlink" title="4. 验证数据是否写入"></a>4. 验证数据是否写入</h5><p>在安装了influxdb的环境中运行influx，具体命令可以百度</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@123106ce0db7 /]# influx</span><br><span class="line">Connected to http://localhost:8086 version 1.7.10</span><br><span class="line">InfluxDB shell version: 1.7.10</span><br><span class="line"><span class="meta">&gt;</span><span class="bash"> show databases</span> </span><br><span class="line">name: databases</span><br><span class="line">name</span><br><span class="line">----</span><br><span class="line">_internal</span><br><span class="line">test</span><br></pre></td></tr></table></figure>
+
+<h3 id="界面展示"><a href="#界面展示" class="headerlink" title="界面展示"></a>界面展示</h3><p>这个环节是对grafana的界面操作，我也是刚入门，基本操作如下：</p>
+<h5 id="1-配置数据源"><a href="#1-配置数据源" class="headerlink" title="1. 配置数据源"></a>1. 配置数据源</h5><p><img src="/2021/07/30/pythonOther-deployMonitor/Images/grafana_datasource.png"></p>
+<p>选择influxdb以及选择连接地址端口</p>
+<p><img src="/2021/07/30/pythonOther-deployMonitor/Images/grafana_datasetting.png"></p>
+<p>选择要连接的数据库，不用怕错误，点击“save &amp; test”的时候，会自动帮你测试连接情况</p>
+<p><img src="/2021/07/30/pythonOther-deployMonitor/Images/grafana_datasetting2.png"></p>
+<h5 id="2-配置展示面板"><a href="#2-配置展示面板" class="headerlink" title="2. 配置展示面板"></a>2. 配置展示面板</h5><p><img src="/2021/07/30/pythonOther-deployMonitor/Images/grafana_panel.png"></p>
+<p>选择要展示的数据</p>
+<p><img src="/2021/07/30/pythonOther-deployMonitor/Images/grafana_addData.png"></p>
+<h5 id="3-结果呈现"><a href="#3-结果呈现" class="headerlink" title="3. 结果呈现"></a>3. 结果呈现</h5><p>这个效果是我的效果，暂时已经符合我的预期了哈</p>
+<p><img src="/2021/07/30/pythonOther-deployMonitor/Images/grafana_statics.png"></p>
+<p>网上盗的图，参考</p>
+<p><img src="/2021/07/30/pythonOther-deployMonitor/Images/grafana_other.png"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>整个数据监控部署实现差不多花了2天半时间，在这个过程中让我第一次接触influxdb时间序列数据库，也第一次体验了数据监控的方案。作为开发，使用了你以前没用过的技术，确实很爽，但也要及时总结、温故而知新。</p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/07/30/pythonOther-deployMonitor/" data-id="cl14k2zc1000j1pn4bjpu5xdy" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "数据监控(influxDb+grafana)",
+        "image": "https://liji53.github.io/2021/07/30/pythonOther-deployMonitor/Images/deploy_grafana.png",
+        "keywords": "",
+        "genre": "",
+        "datePublished": "2021-07-30",
+        "dateCreated": "2021-07-30",
+        "dateModified": "2021-07-30",
+        "url": "https://liji53.github.io/2021/07/30/pythonOther-deployMonitor/",
+        "description": "数据监控方案背景&amp;预备知识​        经过一个月多月的程序运行，数据沉淀在mongodb中，接下来就要考虑统计报表了，数据统计能最直接的体现你的工作价值！
+​        从网上找了一些数据监控的解决方案，得益于docker的简单部署，让我们在验证方案可行性上省去了大量时间。整体方案：1.使用docker部署InfluxDb和Grafana；2.用influxDb远程连接Mongo",
+        "wordCount": 522
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/09/02/pythonOther-oracleMigration/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            oracle数据迁移
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2021/07/05/pythonOther-deployWeb/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">花最小的学习成本部署web服务</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/23/C-Project-LLVM/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/02/23/C-Project-LLVM/Images/LLVM_vs.png)" alt="LLVM(1)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/02/23/C-Project-LLVM/" class="title">LLVM(1)</a></p>
+                            <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/C-Basic-atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/C-Basic-atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/C-Project-lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/C-Project-lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/C-Project-lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/08/C-Basic-smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/C-Basic-smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/pythonOther-regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/pythonOther-regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/07/30/pythonOther-deployMonitor/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>

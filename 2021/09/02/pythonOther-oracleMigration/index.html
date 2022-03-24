@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>oracle数据迁移 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="数据迁移总结(oracle)此类博客太多的坑，都不完整，要不执行着就报错执行不下去了。总的来说，能不用oracle就不要用，学习成本太高。 方法一:客户端exp&#x2F;imp(不推荐)1. 环境准备，下载工具下载地址： https:&#x2F;&#x2F;www.oracle.com&#x2F;cn&#x2F;database&#x2F;technologies&#x2F;instant-client&#x2F;winx64-64-downloads.html 下载以下2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="oracle数据迁移">
+<meta property="og:url" content="https://liji53.github.io/2021/09/02/pythonOther-oracleMigration/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="数据迁移总结(oracle)此类博客太多的坑，都不完整，要不执行着就报错执行不下去了。总的来说，能不用oracle就不要用，学习成本太高。 方法一:客户端exp&#x2F;imp(不推荐)1. 环境准备，下载工具下载地址： https:&#x2F;&#x2F;www.oracle.com&#x2F;cn&#x2F;database&#x2F;technologies&#x2F;instant-client&#x2F;winx64-64-downloads.html 下载以下2">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-09-02T06:31:01.000Z">
+<meta property="article:modified_time" content="2021-09-02T06:31:01.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-pythonOther-oracleMigration" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        oracle数据迁移
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/09/02/pythonOther-oracleMigration/" class="article-date">
+       <time datetime="2021-09-02T06:31:01.000Z" itemprop="datePublished">2021-09-02</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/09/02/pythonOther-oracleMigration/" class="article-date">
+     <time datetime="2021-09-02T06:31:01.000Z" itemprop="dateModified">2021-09-02</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="数据迁移总结-oracle"><a href="#数据迁移总结-oracle" class="headerlink" title="数据迁移总结(oracle)"></a>数据迁移总结(oracle)</h1><p>此类博客太多的坑，都不完整，要不执行着就报错执行不下去了。总的来说，能不用oracle就不要用，学习成本太高。</p>
+<h3 id="方法一-客户端exp-imp-不推荐"><a href="#方法一-客户端exp-imp-不推荐" class="headerlink" title="方法一:客户端exp/imp(不推荐)"></a>方法一:客户端exp/imp(不推荐)</h3><h5 id="1-环境准备，下载工具"><a href="#1-环境准备，下载工具" class="headerlink" title="1. 环境准备，下载工具"></a>1. 环境准备，下载工具</h5><p>下载地址：</p>
+<p><a target="_blank" rel="noopener" href="https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloads.html">https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloads.html</a></p>
+<p>下载以下2个文件：</p>
+<p>  instantclient-basic-windows.x64-12.2.0.1.0.zip</p>
+<p>  instantclient-tools-windows.x64-12.2.0.1.0.zip</p>
+<p>注意：exp和imp工具在tools里，<strong>版本12.2.0.1.0</strong> 上才有，</p>
+<h5 id="2-环境安装，配置TNS文件"><a href="#2-环境安装，配置TNS文件" class="headerlink" title="2. 环境安装，配置TNS文件"></a>2. 环境安装，配置TNS文件</h5><p>解压之后，在exp、imp工具的同级目录下新增Network/Admin/tnsnames.ora文件（环境变量看自己的需求）</p>
+<p>tnsnames.ora文件内容参考：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">ora11g_test = </span><br><span class="line">    (DESCRIPTION =</span><br><span class="line">        (ADDRESS_LIST =</span><br><span class="line">            (ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.1)(PORT = 1521))</span><br><span class="line">        )</span><br><span class="line">        (CONNECT_DATA =</span><br><span class="line">            (SERVICE_NAME = helowinXDB)</span><br><span class="line">        )</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-使用方法"><a href="#3-使用方法" class="headerlink" title="3.使用方法"></a>3.使用方法</h5><p>使用之前，需要<strong>建立好表空间、用户</strong>，这里不详细讲</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">exp.exe usr/password@ora11g_test file=usr_export.dmp owner=usr</span><br><span class="line">imp.exe usr/password@target_oracle file=usr_export.dmp full=y</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-存在问题"><a href="#4-存在问题" class="headerlink" title="4. 存在问题"></a>4. 存在问题</h5><p>说实在的，报的问题实在太多，很多解决不了，下面是随便罗列的几个，因此放弃这个方法.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">EXP-00113: Feature New Composite Partitioning Method is unsupported. </span><br><span class="line">EXP-00107: Feature (BINARY XML) of column XML_CONTENT in table</span><br><span class="line">ORA-00904: &quot;DUMMYFLAG&quot;: invalid identifier</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法二：expdp和impdp（不推荐）"><a href="#方法二：expdp和impdp（不推荐）" class="headerlink" title="方法二：expdp和impdp（不推荐）"></a>方法二：expdp和impdp（不推荐）</h3><p>经历方法一的失败，网上看到有数据泵的方式，因此再次尝试</p>
+<h5 id="1-环境-amp-资料"><a href="#1-环境-amp-资料" class="headerlink" title="1. 环境&amp;资料"></a>1. 环境&amp;资料</h5><p>使用数据泵需要10g以上的oracle server版本，同时需要在服务端运行，相关的教程建议看</p>
+<p><a target="_blank" rel="noopener" href="https://hevodata.com/learn/export-data-from-oracle-using-expdp/#i1">https://hevodata.com/learn/export-data-from-oracle-using-expdp/#i1</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/cd/E11882_01/server.112/e22490/dp_export.htm#SUTIL200">https://docs.oracle.com/cd/E11882_01/server.112/e22490/dp_export.htm#SUTIL200</a></p>
+<p><a target="_blank" rel="noopener" href="https://oracle-base.com/articles/10g/oracle-data-pump-10g#TableExpImp">https://oracle-base.com/articles/10g/oracle-data-pump-10g#TableExpImp</a></p>
+<h5 id="2-使用方法"><a href="#2-使用方法" class="headerlink" title="2. 使用方法"></a>2. 使用方法</h5><p>连接本地数据库</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sqlplus &#x2F; as sysdba</span><br></pre></td></tr></table></figure>
+
+<p>创建连接远程数据库(本地的话不需用)(网上很多教程没有提到这一步，如果不创建，生成的dmp文件在远程的oracle服务器上)</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SQL</span><span class="operator">&gt;</span><span class="keyword">create</span> public database link orcl11g <span class="keyword">connect</span> <span class="keyword">to</span> <span class="keyword">system</span> identified <span class="keyword">by</span> oracle <span class="keyword">using</span> <span class="string">&#x27;(DESCRIPTION =(ADDRESS_LIST =(ADDRESS = (PROTOCOL = TCP)(HOST = 192.168.0.2)(PORT = 1521)))(CONNECT_DATA =(SERVICE_NAME = test)))&#x27;</span>;</span><br></pre></td></tr></table></figure>
+
+<p>创建dmp文件本地存储路径，并赋予权限</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SQL</span><span class="operator">&gt;</span><span class="keyword">create</span> directory data_dir <span class="keyword">as</span> <span class="string">&#x27;/home/oracle/back/data&#x27;</span>;</span><br><span class="line"><span class="keyword">SQL</span><span class="operator">&gt;</span><span class="keyword">Grant</span> read,write <span class="keyword">on</span> directory data_dir <span class="keyword">to</span> test;</span><br></pre></td></tr></table></figure>
+
+<p>shell下，导出数据(有多种导出模式：导整个数据库、按表空间导、按用户导、按表名导、按查询条件导)</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p /home/oracle/back/data</span><br><span class="line">expdp system/system dumpfile=export.dmp directory=data_dir network_link=orcl11g schemas=test</span><br></pre></td></tr></table></figure>
+
+<p>导入数据（注意：<strong>需要先建表空间、用户</strong>，即使按整个数据库模式）</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">impdp test/*** dumpfile=export.dmp directory=data_dir schemas=test</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-问题"><a href="#3-问题" class="headerlink" title="3. 问题"></a>3. 问题</h5><p>用了方法二，问题同样很多，有些报错解决不了。因此这个方法也放弃</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ORA-14460</span><br><span class="line">ORA-26059</span><br><span class="line">.......</span><br></pre></td></tr></table></figure>
+
+<h3 id="方法三-写脚本"><a href="#方法三-写脚本" class="headerlink" title="方法三: 写脚本"></a>方法三: 写脚本</h3><p>也试过用plsql的导出用户对象、导出表的方式，但也是动不动就出问题，而且无法实现自动化，想要灵活的定制只能自己写脚本同步数据。下面是相关代码，</p>
+<p>工具：python</p>
+<h5 id="1-整体代码结构"><a href="#1-整体代码结构" class="headerlink" title="1. 整体代码结构"></a>1. 整体代码结构</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> cx_Oracle</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line">g_table_space_name_list = [[<span class="string">&#x27;TEST1_DATA&#x27;</span>, <span class="string">&#x27;test1dat.dbf&#x27;</span>, <span class="number">1024</span>],</span><br><span class="line">                          [<span class="string">&#x27;TEST2_DATA&#x27;</span>, <span class="string">&#x27;test2dat.dbf&#x27;</span>, <span class="number">1024</span>]]</span><br><span class="line">                         </span><br><span class="line">grant_privilege = [<span class="string">&quot;CONNECT&quot;</span>,<span class="string">&quot;RESOURCE&quot;</span>,<span class="string">&quot;DBA&quot;</span>,<span class="string">&quot;UNLIMITED TABLESPACE&quot;</span>,</span><br><span class="line">                   <span class="string">&quot;select any table&quot;</span>,<span class="string">&quot;create any table&quot;</span>, <span class="string">&quot;drop any table&quot;</span>]</span><br><span class="line"></span><br><span class="line">g_user_name_list = [[<span class="string">&quot;LJ_TEST&quot;</span>, <span class="string">&quot;TEST1_DATA&quot;</span>, grant_privilege],</span><br><span class="line">                  [<span class="string">&quot;LJ_TEST2&quot;</span>, <span class="string">&quot;LJ_TEST2&quot;</span>, grant_privilege]]</span><br><span class="line"></span><br><span class="line">exist_table_space_str = <span class="string">&quot;select count(*) from dual where exists(&quot;</span> \</span><br><span class="line">                    <span class="string">&quot;select * from v$tablespace a where a.name = upper(&#x27;%s&#x27;))&quot;</span></span><br><span class="line">create_table_space_str = <span class="string">&quot;CREATE TABLESPACE %s DATAFILE &quot;</span> \</span><br><span class="line">                         <span class="string">&quot;&#x27;/home/oracle/app/oracle/oradata/helowin/%s&#x27; &quot;</span> \</span><br><span class="line">                <span class="string">&quot;SIZE %dM EXTENT MANAGEMENT LOCAL SEGMENT SPACE MANAGEMENT AUTO&quot;</span></span><br><span class="line">exist_user_name_str = <span class="string">&quot;select count(*) from dual where exists(&quot;</span> \</span><br><span class="line">                    <span class="string">&quot;select * from all_users a where a.username = upper(&#x27;%s&#x27;))&quot;</span></span><br><span class="line">create_user_name_str = <span class="string">&quot;CREATE USER %s IDENTIFIED BY test &quot;</span> \</span><br><span class="line">                       <span class="string">&quot;DEFAULT TABLESPACE %s TEMPORARY TABLESPACE TEMP&quot;</span></span><br><span class="line">query_table_data_str = <span class="string">&quot;select * from %s.%s&quot;</span></span><br><span class="line">insert_table_data_str = <span class="string">&quot;insert into %s.%s (%s) values (%s)&quot;</span></span><br><span class="line">delete_table_data_str = <span class="string">&quot;truncate table %s.%s&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    client = OracleClient()</span><br><span class="line">    client.create_table_space()</span><br><span class="line">    client.create_user_name()</span><br><span class="line">    client.create_table()</span><br><span class="line">    client.sync_data()</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-连接数据库"><a href="#2-连接数据库" class="headerlink" title="2.连接数据库"></a>2.连接数据库</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">OracleClient</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self</span>):</span></span><br><span class="line">        os.environ[<span class="string">&#x27;NLS_LANG&#x27;</span>] = <span class="string">&#x27;SIMPLIFIED CHINESE_CHINA.utf8&#x27;</span></span><br><span class="line">        <span class="comment"># 待同步的数据库</span></span><br><span class="line">        dsn = cx_Oracle.makedsn(<span class="string">&quot;192.168.0.1&quot;</span>, <span class="string">&#x27;1521&#x27;</span>, service_name=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">        self.m_client = cx_Oracle.connect(<span class="string">&#x27;system&#x27;</span>, <span class="string">&#x27;oracle&#x27;</span>, dsn)</span><br><span class="line">        self.m_cursor = self.m_client.cursor()</span><br><span class="line">        <span class="comment"># 数据源</span></span><br><span class="line">        src_dsn = cx_Oracle.makedsn(<span class="string">&quot;192.168.0.2&quot;</span>, <span class="string">&#x27;1521&#x27;</span>, service_name=<span class="string">&#x27;test&#x27;</span>)</span><br><span class="line">        self.m_src_client = cx_Oracle.connect(<span class="string">&#x27;system&#x27;</span>, <span class="string">&#x27;oracle&#x27;</span>, src_dsn)</span><br><span class="line">        self.m_src_cursor = self.m_src_client.cursor()</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__del__</span>(<span class="params">self</span>):</span></span><br><span class="line">        self.m_cursor.close()</span><br><span class="line">        self.m_client.close()</span><br><span class="line">        self.m_src_cursor.close()</span><br><span class="line">        self.m_src_client.close()</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-建立表空间"><a href="#3-建立表空间" class="headerlink" title="3. 建立表空间"></a>3. 建立表空间</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_table_space</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="keyword">for</span> table_space_name <span class="keyword">in</span> g_table_space_name_list:</span><br><span class="line">        self.m_cursor.execute(exist_table_space_str % table_space_name[<span class="number">0</span>])</span><br><span class="line">        data = self.m_cursor.fetchall()</span><br><span class="line">        <span class="comment"># todo: if table space created, should drop and recreate.</span></span><br><span class="line">        <span class="keyword">if</span> data[<span class="number">0</span>][<span class="number">0</span>] != <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        self.m_cursor.execute(create_table_space_str %</span><br><span class="line">                (table_space_name[<span class="number">0</span>], table_space_name[<span class="number">1</span>], table_space_name[<span class="number">2</span>]))</span><br><span class="line">        self.m_client.commit()</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-建用户"><a href="#4-建用户" class="headerlink" title="4. 建用户"></a>4. 建用户</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_user_name</span>(<span class="params">self</span>):</span></span><br><span class="line">    <span class="keyword">for</span> user_name <span class="keyword">in</span> g_user_name_list:</span><br><span class="line">        self.m_cursor.execute(exist_user_name_str % user_name[<span class="number">0</span>])</span><br><span class="line">        data = self.m_cursor.fetchall()</span><br><span class="line">        <span class="comment"># todo: if user created, should drop and recreate.</span></span><br><span class="line">        <span class="keyword">if</span> data[<span class="number">0</span>][<span class="number">0</span>] != <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        self.m_cursor.execute(create_user_name_str %</span><br><span class="line">                              (user_name[<span class="number">0</span>], user_name[<span class="number">1</span>]))</span><br><span class="line">        <span class="keyword">for</span> privilege <span class="keyword">in</span> user_name[<span class="number">2</span>]:</span><br><span class="line">            self.m_cursor.execute(<span class="string">&quot;GRANT %s TO %s&quot;</span> % (privilege, user_name[<span class="number">0</span>]))</span><br><span class="line">        self.m_client.commit()</span><br></pre></td></tr></table></figure>
+
+<h5 id="5-建表"><a href="#5-建表" class="headerlink" title="5. 建表"></a>5. 建表</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">_get_table_name_list</span>(<span class="params">self</span>):</span></span><br><span class="line">      src_table_name_list = &#123;&#125;</span><br><span class="line">      dst_table_name_list = &#123;&#125;</span><br><span class="line">      <span class="keyword">for</span> user_name <span class="keyword">in</span> g_user_name_list:</span><br><span class="line">          self.m_src_cursor.execute(query_table_name_str % user_name[<span class="number">0</span>])</span><br><span class="line">          src_data = self.m_src_cursor.fetchall()</span><br><span class="line">          src_table_name_list[user_name[<span class="number">0</span>]] = [x[<span class="number">0</span>] <span class="keyword">for</span> x <span class="keyword">in</span> src_data]</span><br><span class="line">          self.m_cursor.execute(query_table_name_str % user_name[<span class="number">0</span>])</span><br><span class="line">          data = self.m_cursor.fetchall()</span><br><span class="line">          dst_table_name_list[user_name[<span class="number">0</span>]] = [x[<span class="number">0</span>] <span class="keyword">for</span> x <span class="keyword">in</span> data]</span><br><span class="line">      <span class="keyword">return</span> src_table_name_list, dst_table_name_list</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">_create_table</span>(<span class="params">self, user_name, table_name</span>):</span></span><br><span class="line">      query_table_name_str = <span class="string">&quot;select TABLE_NAME from all_tables where OWNER = &#x27;%s&#x27;&quot;</span></span><br><span class="line">query_create_table_str=<span class="string">&quot;select dbms_metadata.get_ddl(&#x27;TABLE&#x27;,&#x27;%s&#x27;,&#x27;%s&#x27;) from dual&quot;</span></span><br><span class="line">      self.m_src_cursor.execute(query_create_table_str % (table_name, user_name))</span><br><span class="line">      create_table_obj = self.m_src_cursor.fetchall()</span><br><span class="line">      create_table_str = create_table_obj[<span class="number">0</span>][<span class="number">0</span>].read()</span><br><span class="line">      self.m_cursor.execute(create_table_str)</span><br><span class="line">      self.m_client.commit()</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="keyword">def</span> <span class="title">create_table</span>(<span class="params">self</span>):</span></span><br><span class="line">      src_table_name_list, dst_table_name_list = self._get_table_name_list()</span><br><span class="line">      <span class="keyword">for</span> user_name <span class="keyword">in</span> src_table_name_list:</span><br><span class="line">          <span class="keyword">for</span> table_name <span class="keyword">in</span> src_table_name_list[user_name]:</span><br><span class="line">              <span class="comment"># todo, if table created, should recreated</span></span><br><span class="line">              <span class="keyword">if</span> table_name <span class="keyword">in</span> dst_table_name_list[user_name]:</span><br><span class="line">                  <span class="keyword">continue</span></span><br><span class="line">              self._create_table(user_name, table_name)</span><br></pre></td></tr></table></figure>
+
+<h5 id="6-同步数据"><a href="#6-同步数据" class="headerlink" title="6. 同步数据"></a>6. 同步数据</h5><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_sync_data</span>(<span class="params">self, user_name, table_name</span>):</span></span><br><span class="line">    self.m_src_cursor.execute(query_table_data_str % (user_name, table_name))</span><br><span class="line">    titles = <span class="string">&#x27;,&#x27;</span>.join([i[<span class="number">0</span>] <span class="keyword">for</span> i <span class="keyword">in</span> self.m_src_cursor.description])</span><br><span class="line">    data_placeholder = <span class="string">&#x27;,&#x27;</span>.join([<span class="string">&#x27;:&#x27;</span>+<span class="built_in">str</span>(i+<span class="number">1</span>) <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="built_in">len</span>(self.m_src_cursor.description))])</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        all_table_data = self.m_src_cursor.fetchall()</span><br><span class="line">    <span class="keyword">except</span> cx_Oracle.DatabaseError <span class="keyword">as</span> msg:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\033[1;31;40mError[%s.%s]:%s \033[0m&quot;</span> % (user_name, table_name, msg))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># if contains old data,should drop</span></span><br><span class="line">    self.m_cursor.execute(delete_table_data_str % (user_name, table_name))</span><br><span class="line">    self.m_client.commit()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        self.m_cursor.executemany(insert_table_data_str % (</span><br><span class="line">            user_name, table_name, titles, data_placeholder), all_table_data)</span><br><span class="line">    <span class="keyword">except</span> cx_Oracle.DatabaseError <span class="keyword">as</span> msg:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;\033[1;31;40mError[%s.%s]:%s \033[0m&quot;</span> % (user_name, table_name, msg))</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    self.m_client.commit()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sync_data</span>(<span class="params">self</span>):</span></span><br><span class="line">    src_table_name_list, dst_table_name_list = self._get_table_name_list()</span><br><span class="line">    <span class="keyword">for</span> user_name <span class="keyword">in</span> src_table_name_list:</span><br><span class="line">        <span class="keyword">for</span> table_name <span class="keyword">in</span> src_table_name_list[user_name]:</span><br><span class="line">            <span class="keyword">if</span> table_name <span class="keyword">not</span> <span class="keyword">in</span> dst_table_name_list[user_name]:</span><br><span class="line">                self._create_table(user_name, table_name)</span><br><span class="line">            self._sync_data(user_name, table_name)</span><br></pre></td></tr></table></figure>
+
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/09/02/pythonOther-oracleMigration/" data-id="cl14k2zbz000g1pn4e5z4hy8o" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "oracle数据迁移",
+        "image": "https://liji53.github.io",
+        "keywords": "",
+        "genre": "python杂项",
+        "datePublished": "2021-09-02",
+        "dateCreated": "2021-09-02",
+        "dateModified": "2021-09-02",
+        "url": "https://liji53.github.io/2021/09/02/pythonOther-oracleMigration/",
+        "description": "数据迁移总结(oracle)此类博客太多的坑，都不完整，要不执行着就报错执行不下去了。总的来说，能不用oracle就不要用，学习成本太高。
+方法一:客户端exp/imp(不推荐)1. 环境准备，下载工具下载地址：
+https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloads.html
+下载以下2",
+        "wordCount": 2015
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/09/09/pythonOther-pytestHtml/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            pytest测试报告自定义比较内容
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2021/07/30/pythonOther-deployMonitor/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">数据监控(influxDb+grafana)</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/23/C-Project-LLVM/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/02/23/C-Project-LLVM/Images/LLVM_vs.png)" alt="LLVM(1)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/02/23/C-Project-LLVM/" class="title">LLVM(1)</a></p>
+                            <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/C-Basic-atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/C-Basic-atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/C-Project-lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/C-Project-lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/C-Project-lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/08/C-Basic-smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/C-Basic-smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/pythonOther-regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/pythonOther-regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">2</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/09/02/pythonOther-oracleMigration/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>
