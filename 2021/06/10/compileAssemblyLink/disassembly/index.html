@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>c/c++反汇编 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="c&#x2F;c++反汇编有人说编程的最高境界是人机合一，为了达到这个境界，我们开始学习反汇编，做到写一段代码，脑中就自动反射出相应的汇编代码本文我们分析c&#x2F;c++常用的语句，看它的汇编代码是怎样的，下面例子都是linux上编译的（对新手来说，直接用vs看反汇编，缺少了思考的过程） 基本语句反汇编编译器不同、优化选项不同会导致生成的汇编代码不一致，接下来的汇编代码是gcc在没有优化的情况下编译出来的。 1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="c&#x2F;c++反汇编">
+<meta property="og:url" content="https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="c&#x2F;c++反汇编有人说编程的最高境界是人机合一，为了达到这个境界，我们开始学习反汇编，做到写一段代码，脑中就自动反射出相应的汇编代码本文我们分析c&#x2F;c++常用的语句，看它的汇编代码是怎样的，下面例子都是linux上编译的（对新手来说，直接用vs看反汇编，缺少了思考的过程） 基本语句反汇编编译器不同、优化选项不同会导致生成的汇编代码不一致，接下来的汇编代码是gcc在没有优化的情况下编译出来的。 1.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/Images/regs_restore.jpg">
+<meta property="article:published_time" content="2021-06-10T19:51:03.000Z">
+<meta property="article:modified_time" content="2021-06-10T19:51:03.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/Images/regs_restore.jpg">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-compileAssemblyLink/disassembly" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        c/c++反汇编
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/06/10/compileAssemblyLink/disassembly/" class="article-date">
+       <time datetime="2021-06-10T19:51:03.000Z" itemprop="datePublished">2021-06-10</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/06/10/compileAssemblyLink/disassembly/" class="article-date">
+     <time datetime="2021-06-10T19:51:03.000Z" itemprop="dateModified">2021-06-10</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="c-c-反汇编"><a href="#c-c-反汇编" class="headerlink" title="c/c++反汇编"></a>c/c++反汇编</h1><p>有人说编程的最高境界是人机合一，为了达到这个境界，我们开始学习反汇编，做到写一段代码，脑中就自动反射出相应的汇编代码<br>本文我们分析c/c++常用的语句，看它的汇编代码是怎样的，下面例子都是linux上编译的（对新手来说，直接用vs看反汇编，缺少了思考的过程）</p>
+<h3 id="基本语句反汇编"><a href="#基本语句反汇编" class="headerlink" title="基本语句反汇编"></a>基本语句反汇编</h3><p>编译器不同、优化选项不同会导致生成的汇编代码不一致，接下来的汇编代码是gcc在没有优化的情况下编译出来的。</p>
+<h5 id="1-全局变量与局部变量"><a href="#1-全局变量与局部变量" class="headerlink" title="1.全局变量与局部变量"></a>1.全局变量与局部变量</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 没有指令，编译器会把这个全局变量放到.data段</span></span><br><span class="line"><span class="comment">/*Hex dump of section &#x27;.data&#x27;:</span></span><br><span class="line"><span class="comment">  0x00601020 00000000 11000000                   ........</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">int</span> g = <span class="number">0x11</span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">// 计算过程：0x4004d1 + 0xa(指令长度) + 0x200b49 = 0x601024（g的地址）</span></span><br><span class="line">    <span class="comment">/* 指令：  </span></span><br><span class="line"><span class="comment">    4004d1:	c7 05 49 0b 20 00 88 	mov    DWORD PTR [rip+0x200b49],0x88  # 601024 &lt;g&gt;</span></span><br><span class="line"><span class="comment">    4004d8:	00 00 00 </span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    g = <span class="number">0x88</span>;</span><br><span class="line">    <span class="comment">// mov    DWORD PTR [rbp-0x4],0x1</span></span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>全局变量放在数据段中，在链接时修改引用它的指令的地址，可参考<a href="https://liji53.github.io/2021/05/20/compileAssemblyLink/staticLd/">《静态链接》</a><br>局部变量放在栈中。</p>
+<h5 id="2-引用与指针"><a href="#2-引用与指针" class="headerlink" title="2.引用与指针"></a>2.引用与指针</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mov    DWORD PTR [rbp-0x14],0x1</span></span><br><span class="line"><span class="keyword">int</span> a = <span class="number">1</span>;</span><br><span class="line"><span class="comment">// lea    rax,[rbp-0x14]</span></span><br><span class="line"><span class="comment">// mov    QWORD PTR [rbp-0x8],rax</span></span><br><span class="line"><span class="keyword">int</span>* p = &amp;a;</span><br><span class="line"><span class="comment">// lea    rax,[rbp-0x14]</span></span><br><span class="line"><span class="comment">// mov    QWORD PTR [rbp-0x10],rax</span></span><br><span class="line"><span class="keyword">int</span>&amp; r = a;</span><br></pre></td></tr></table></figure>
+<p>从底层实现来看，引用和指针完全没有区别，引用也占用栈空间。</p>
+<h5 id="3-const变量"><a href="#3-const变量" class="headerlink" title="3.const变量"></a>3.const变量</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mov    DWORD PTR [rbp-0x10],0x88</span></span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> c = <span class="number">0x88</span>;</span><br><span class="line"><span class="comment">// lea    rax,[rbp-0x10]</span></span><br><span class="line"><span class="comment">// mov    QWORD PTR [rbp-0x8],rax</span></span><br><span class="line"><span class="keyword">int</span>* a= (<span class="keyword">int</span>*)&amp;c;</span><br><span class="line"><span class="comment">// mov    rax,QWORD PTR [rbp-0x8]</span></span><br><span class="line"><span class="comment">// mov    DWORD PTR [rax],0x22</span></span><br><span class="line">*a = <span class="number">0x22</span>;</span><br><span class="line"><span class="comment">// mov    DWORD PTR [rbp-0xc],0x88</span></span><br><span class="line"><span class="keyword">int</span> b = c;</span><br></pre></td></tr></table></figure>
+<p>被const修饰之后的变量其实与普通变量没有任何区别，只不过编译器在遇到const修饰的变量时会直接优化成常量值。</p>
+<h5 id="4-if和switch"><a href="#4-if和switch" class="headerlink" title="4.if和switch"></a>4.if和switch</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cmp    DWORD PTR [rbp-0x4],0x0</span></span><br><span class="line"><span class="comment">// jne    4004e7 &lt;main+0x1a&gt;     ; else的地址</span></span><br><span class="line"><span class="keyword">if</span>(a == <span class="number">0</span>)&#123;...;&#125;</span><br><span class="line"><span class="comment">// cmp    DWORD PTR [rbp-0x4],0x1</span></span><br><span class="line"><span class="comment">// jne    4004f6 &lt;main+0x29&gt;     ; else的地址</span></span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span>(a == <span class="number">1</span>)&#123;...;&#125;</span><br><span class="line"><span class="keyword">else</span>&#123;...;&#125;</span><br></pre></td></tr></table></figure>
+<p>有多少个if分支，就有多少个cmp指令</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*cmp    DWORD PTR [rbp-0x4],0x5</span></span><br><span class="line"><span class="comment">  ja     400518 &lt;main+0x4b&gt;</span></span><br><span class="line"><span class="comment">  mov    eax,DWORD PTR [rbp-0x4]</span></span><br><span class="line"><span class="comment">  mov    rax,QWORD PTR [rax*8+0x4005b0]</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="built_in"><span class="keyword">switch</span></span>(i)&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">1</span>: ...;<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">2</span>: ...;<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">3</span>: ...;<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">4</span>: ...;<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">case</span> <span class="number">5</span>: ...;<span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">default</span>: <span class="keyword">break</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>switch 不管case分支多少(测试要5个分支及以上)，采用数组索引的方式，直接跳转，相比if语句不仅占用空间小，而且耗时上是O(1)的算法。<br>如果case 不连续怎么办，自己动手反汇编看下代码吧</p>
+<h5 id="5-数组与结构体"><a href="#5-数组与结构体" class="headerlink" title="5.数组与结构体"></a>5.数组与结构体</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// mov    QWORD PTR [rbp-0x20],0x0</span></span><br><span class="line"><span class="comment">// mov    QWORD PTR [rbp-0x18],0x0</span></span><br><span class="line"><span class="comment">// mov    DWORD PTR [rbp-0x10],0x0</span></span><br><span class="line"><span class="keyword">int</span> a[<span class="number">5</span>] = &#123;<span class="number">0</span>&#125;;</span><br><span class="line"><span class="comment">// mov    DWORD PTR [rbp-0x30],0x1</span></span><br><span class="line"><span class="comment">// mov    DWORD PTR [rbp-0x2c],0x2</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">cStruct</span>&#123;</span><span class="keyword">int</span> a; <span class="keyword">int</span> b;&#125;cStruct;</span><br><span class="line">cStruct c = &#123;<span class="number">1</span>,<span class="number">2</span>&#125;; </span><br></pre></td></tr></table></figure>
+<p>数组和结构体的内存布局一样，无非就是编译器给我们提供了一个自动求取偏移量的方法。</p>
+<h3 id="函数的反汇编"><a href="#函数的反汇编" class="headerlink" title="函数的反汇编"></a>函数的反汇编</h3><p>每个函数的开头和结尾大部分都有这么一段code（它的含义就不介绍了),应该做到看到类似代码本能的就想到这是一个函数：</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">  <span class="keyword">push</span>   <span class="built_in">rbp</span></span><br><span class="line">  <span class="keyword">mov</span>    <span class="built_in">rbp</span>,<span class="built_in">rsp</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">pop</span>    <span class="built_in">rbp</span></span><br><span class="line">  <span class="keyword">ret</span>    </span><br><span class="line"># 或者</span><br><span class="line">  <span class="keyword">push</span>   <span class="built_in">rbp</span></span><br><span class="line">  <span class="keyword">mov</span>    <span class="built_in">rbp</span>,<span class="built_in">rsp</span></span><br><span class="line">  <span class="keyword">sub</span>    <span class="built_in">rsp</span>,<span class="number">0x10</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">leave</span></span><br><span class="line">  <span class="keyword">ret</span>    </span><br></pre></td></tr></table></figure>
+
+<h5 id="1-函数调用"><a href="#1-函数调用" class="headerlink" title="1.函数调用"></a>1.函数调用</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 调用方</span></span><br><span class="line"><span class="comment">// mov    esi,0x4</span></span><br><span class="line"><span class="comment">// mov    edi,0x2</span></span><br><span class="line"><span class="comment">// call   4004cd &lt;add&gt;</span></span><br><span class="line"><span class="comment">// mov    DWORD PTR [rbp-0x4],eax</span></span><br><span class="line"><span class="keyword">int</span> s = <span class="built_in">add</span>(<span class="number">2</span>, <span class="number">4</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 被调用函数</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">  push   rbp</span></span><br><span class="line"><span class="comment">  mov    rbp,rsp</span></span><br><span class="line"><span class="comment">  mov    DWORD PTR [rbp-0x4],edi</span></span><br><span class="line"><span class="comment">  mov    DWORD PTR [rbp-0x8],esi</span></span><br><span class="line"><span class="comment">  mov    eax,DWORD PTR [rbp-0x8]</span></span><br><span class="line"><span class="comment">  mov    edx,DWORD PTR [rbp-0x4]</span></span><br><span class="line"><span class="comment">  add    eax,edx</span></span><br><span class="line"><span class="comment">  pop    rbp</span></span><br><span class="line"><span class="comment">  ret    </span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">add</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span></span>&#123;<span class="keyword">return</span> a+b;&#125;</span><br></pre></td></tr></table></figure>
+<p>没有亲自动手反汇编之前，你可能以为通过栈传递参数的。<br>但x86-64通过寄存器传递参数(参数个数小于等于6，超过6个的通过栈传递)。<br>你可能想到这不是fastcall嘛，但其实x86-64中只有一种调用约定：调用方清理堆栈。<br>一般记住：e[r]di 是第一个参数，e[r]si 是第二个参数，剩下就百度把。</p>
+<h5 id="2-系统调用"><a href="#2-系统调用" class="headerlink" title="2.系统调用"></a>2.系统调用</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">  4005d0:	41 b9 00 00 00 00    	mov    r9d,0x0</span></span><br><span class="line"><span class="comment">  4005d6:	41 b8 ff ff ff ff    	mov    r8d,0xffffffff</span></span><br><span class="line"><span class="comment">  4005dc:	b9 22 00 00 00       	mov    ecx,0x22</span></span><br><span class="line"><span class="comment">  4005e1:	ba 03 00 00 00       	mov    edx,0x3</span></span><br><span class="line"><span class="comment">  4005e6:	be 00 00 02 00       	mov    esi,0x20000</span></span><br><span class="line"><span class="comment">  4005eb:	bf 00 00 00 00       	mov    edi,0x0</span></span><br><span class="line"><span class="comment">  4005f0:	e8 9b fe ff ff       	call   400490 &lt;mmap@plt&gt;</span></span><br><span class="line"><span class="comment">  4005f5:	48 89 45 f8          	mov    QWORD PTR [rbp-0x8],rax</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">char</span>* p=(<span class="keyword">char</span>*)<span class="built_in">mmap</span>(<span class="number">0</span>, <span class="number">128</span>*<span class="number">1024</span>, PROT_READ|PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, <span class="number">-1</span>, <span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+<p>&lt;mmap@plt&gt;是什么，可以看我之前写的<a href="https://liji53.github.io/2021/05/26/compileAssemblyLink/dynamicLd/">《动态链接》</a><br>nmmap的用户层入口在glibc中，通过符号表，找到mmap的地址,并反汇编：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">[liji@null disassembly]$ readelf -s /usr/lib64/libc.so.6 | grep &quot;mmap&quot;</span><br><span class="line">   321: 00000000000f8d10   183 FUNC    WEAK   DEFAULT   13 mmap64@@GLIBC_2.2.5</span><br><span class="line">   661: 00000000000f8d10   183 FUNC    WEAK   DEFAULT   13 mmap@@GLIBC_2.2.5</span><br><span class="line">   874: 00000000000751b0   320 FUNC    LOCAL  DEFAULT   13 _IO_wfile_underflow_mmap</span><br><span class="line">   ...</span><br><span class="line">[liji@null disassembly]$ objdump -d --start-address=0xf8d10 --stop-address=0xf8e00  /usr/lib64/libc.so.6 -M intel</span><br><span class="line">00000000000f8d10 &lt;mmap&gt;:</span><br><span class="line">   ...</span><br><span class="line"><span class="meta">   #</span><span class="bash"> 系统调用号，在unistd.h中定义</span></span><br><span class="line">   f8d43:	b8 09 00 00 00       	mov    eax,0x9  </span><br><span class="line"><span class="meta">   #</span><span class="bash"> 系统调用中断，在i386中是 int 80</span></span><br><span class="line">   f8d48:	0f 05                	syscall </span><br><span class="line">   f8d4a:	48 3d 00 f0 ff ff    	cmp    rax,0xfffffffffffff000</span><br><span class="line">   f8d50:	77 52                	ja     f8da4 &lt;mmap+0x94&gt;</span><br><span class="line">   ...</span><br><span class="line"><span class="meta">   #</span><span class="bash"> 设置errno，在多线程中errno是线程局部变量</span></span><br><span class="line">   f8da4:	48 8b 15 a5 e0 2c 00 	mov    rdx,QWORD PTR [rip+0x2ce0a5]        # 3c6e50 &lt;.got+0x100&gt;</span><br><span class="line">   f8dab:	f7 d8                	neg    eax</span><br><span class="line">   f8dad:	64 89 02             	mov    DWORD PTR fs:[rdx],eax</span><br><span class="line">   ...</span><br></pre></td></tr></table></figure>
+<p>系统调用号放在eax中，其他参数放在其他通用寄存器中(可以百度)，返回值通过rax。<br>它的流程图：<br><img src="/2021/06/10/compileAssemblyLink/disassembly/Images/regs_restore.jpg"></p>
+<h5 id="3-类成员函数"><a href="#3-类成员函数" class="headerlink" title="3.类成员函数"></a>3.类成员函数</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span> a;</span><br><span class="line">    <span class="comment">// mov    QWORD PTR [rbp-0x8],rdi   ; this指针</span></span><br><span class="line">    <span class="comment">// mov    rax,QWORD PTR [rbp-0x8]   ; rax = this</span></span><br><span class="line">    <span class="comment">// mov    DWORD PTR [rax],0x1       ; *this = 1</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">()</span></span>&#123;a=<span class="number">1</span>;&#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">// mov    DWORD PTR [rbp-0x10],0x0</span></span><br><span class="line">    A a = <span class="built_in">A</span>();</span><br><span class="line">    <span class="comment">// lea    rax,[rbp-0x10]            ; rax = &amp;a</span></span><br><span class="line">    <span class="comment">// mov    rdi,rax                   ; 传参</span></span><br><span class="line">    <span class="comment">// call   400520 &lt;_ZN1A4funcEv&gt;</span></span><br><span class="line">    a.<span class="built_in">func</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>从这段汇编代码可以看出：<br>1.编译器不一定给每个类都生成默认构造函数和析构函数；<br>2.类成员函数会隐藏参数this，通过把对象的首地址传进去，从而实现访问对象的数据<br>进一步：<br>类成员函数放在代码段，也就是说每个对象共享这个代码段，对象拥有的是数据的副本</p>
+<h5 id="4-虚函数"><a href="#4-虚函数" class="headerlink" title="4.虚函数"></a>4.虚函数</h5><p>虚函数的反汇编就不在这里分析了，可看<a href="https://liji53.github.io/2021/05/20/compileAssemblyLink/staticLd/">《静态链接》</a>对虚表反汇编的分析</p>
+<h3 id="c-11新特性的反汇编"><a href="#c-11新特性的反汇编" class="headerlink" title="c++11新特性的反汇编"></a>c++11新特性的反汇编</h3><p>我们选择比较简单的进行分析，而像std:function、智能指针的反汇编限于篇幅不在本次分析中。<br>反汇编的基础学完之后，大家可以好好利用vs和IDA，因为到目前为止，所有的分析都是静态的，而实际中动态的分析更加实用。</p>
+<h5 id="1-右值引用和移动语义"><a href="#1-右值引用和移动语义" class="headerlink" title="1.右值引用和移动语义"></a>1.右值引用和移动语义</h5><p>记得编译时加上-fno-elide-constructors，强制生成对应的构造函数，否则编译器很可能优化掉无用的构造函数</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">A</span>&#123;</span></span><br><span class="line">    <span class="keyword">int</span>* a;</span><br><span class="line">    <span class="built_in">A</span>():<span class="built_in">a</span>(<span class="keyword">new</span> <span class="built_in"><span class="keyword">int</span></span>(<span class="number">1</span>))&#123;&#125;</span><br><span class="line">    ~<span class="built_in">A</span>()&#123;<span class="keyword">delete</span> a;&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">  400910:	mov    QWORD PTR [rbp-0x8],rdi   # this指针</span></span><br><span class="line"><span class="comment">  400914:	mov    QWORD PTR [rbp-0x10],rsi  # right对象的地址  </span></span><br><span class="line"><span class="comment">  400918:	mov    edi,0x4                   # new的参数</span></span><br><span class="line"><span class="comment">  40091d:	call   400690 &lt;_Znwm@plt&gt;        # operateor new</span></span><br><span class="line"><span class="comment">  400922:	mov    rdx,QWORD PTR [rbp-0x10]</span></span><br><span class="line"><span class="comment">  400926:	mov    rdx,QWORD PTR [rdx]       # rdx = *right</span></span><br><span class="line"><span class="comment">  400929:	mov    edx,DWORD PTR [rdx]       # edx = right.a</span></span><br><span class="line"><span class="comment">  40092b:	mov    DWORD PTR [rax],edx       # new出来的空间 = right.a</span></span><br><span class="line"><span class="comment">  40092d:	mov    rdx,QWORD PTR [rbp-0x8]   # </span></span><br><span class="line"><span class="comment">  400931:	mov    QWORD PTR [rdx],rax       # this.a = new返回的地址</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">    <span class="built_in">A</span>(<span class="keyword">const</span> A&amp; right):<span class="built_in">a</span>(<span class="keyword">new</span> <span class="built_in"><span class="keyword">int</span></span>(*right.a))&#123;&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">  40093a:	mov    QWORD PTR [rbp-0x8],rdi   # this</span></span><br><span class="line"><span class="comment">  40093e:	mov    QWORD PTR [rbp-0x10],rsi  # right</span></span><br><span class="line"><span class="comment">  400942:	mov    rax,QWORD PTR [rbp-0x10]  </span></span><br><span class="line"><span class="comment">  400946:	mov    rdx,QWORD PTR [rax]        </span></span><br><span class="line"><span class="comment">  400949:	mov    rax,QWORD PTR [rbp-0x8]   </span></span><br><span class="line"><span class="comment">  40094d:	mov    QWORD PTR [rax],rdx       # a(right.a)</span></span><br><span class="line"><span class="comment">  400950:	mov    rax,QWORD PTR [rbp-0x10]</span></span><br><span class="line"><span class="comment">  400954:	mov    QWORD PTR [rax],0x0       # right.a = nullptr</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">    <span class="built_in">A</span>(A&amp;&amp; right):<span class="built_in">a</span>(right.a)&#123;right.a = <span class="literal">nullptr</span>;&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>从汇编来看，右值引用与普通引用是一回事，进一步来说如果引动构造函数和拷贝构造函数的实现一样，两者的汇编也一样。</p>
+<h5 id="2-lambda匿名函数"><a href="#2-lambda匿名函数" class="headerlink" title="2.lambda匿名函数"></a>2.lambda匿名函数</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*  </span></span><br><span class="line"><span class="comment">  400540:	mov    DWORD PTR [rbp-0x4],0x1</span></span><br><span class="line"><span class="comment">  400547:	mov    eax,DWORD PTR [rbp-0x4]</span></span><br><span class="line"><span class="comment">  40054a:	mov    DWORD PTR [rbp-0x10],eax</span></span><br><span class="line"><span class="comment">  40054d:	lea    rdx,[rbp-0x10]                    ; 变量s的地址</span></span><br><span class="line"><span class="comment">  400551:	lea    rax,[rbp-0x20]                    ; lambda对象的地址</span></span><br><span class="line"><span class="comment">  400555:	mov    rsi,rdx                              </span></span><br><span class="line"><span class="comment">  400558:	mov    rdi,rax</span></span><br><span class="line"><span class="comment">  40055b:	call   40051e &lt;`_ZZ4mainENUliiE_C1EOS_`&gt; ; 构造函数</span></span><br><span class="line"><span class="comment">  400560:	lea    rax,[rbp-0x20]</span></span><br><span class="line"><span class="comment">  400564:	mov    edx,0x3</span></span><br><span class="line"><span class="comment">  400569:	mov    esi,0x2</span></span><br><span class="line"><span class="comment">  40056e:	mov    rdi,rax</span></span><br><span class="line"><span class="comment">  400571:	call   4004fe &lt;_ZZ4mainENKUliiE_clEii&gt;   ; 仿函数</span></span><br><span class="line"><span class="comment">  400576:	mov    DWORD PTR [rbp-0x8],eax</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">int</span> s = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">auto</span> f = [=](<span class="keyword">int</span> a, <span class="keyword">int</span> b)-&gt;<span class="keyword">int</span> &#123;<span class="keyword">return</span> s + a + b; &#125;;</span><br><span class="line"><span class="keyword">int</span> c = <span class="built_in">f</span>(<span class="number">2</span>, <span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>这里调用了2个函数：_ZZ4mainENUliiE_C1EOS_ 和_ZZ4mainENKUliiE_clEii<br>我们用c++filt来看下他们到底是什么？</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">_ZZ4mainENUliiE_C1EOS_</span><br><span class="line">main::&#123;lambda(int, int)#1&#125;::main(&#123;lambda(int, int)#1&#125;&amp;&amp;)</span><br><span class="line">_ZZ4mainENKUliiE_clEii</span><br><span class="line">main::&#123;lambda(int, int)#1&#125;::operator()(int, int) const</span><br></pre></td></tr></table></figure>
+<p>第一个是构造函数？还是移动构造函数？，第二个是仿函数，下面分别看下它们的实现：</p>
+<figure class="highlight x86asm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">00000000004004fe &lt;_ZZ4mainENKUliiE_clEii&gt;:</span><br><span class="line">  ...</span><br><span class="line">  <span class="number">400502</span>:	<span class="keyword">mov</span>    <span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x8</span>],<span class="built_in">rdi</span>  <span class="comment">; this</span></span><br><span class="line">  <span class="number">400506</span>:	<span class="keyword">mov</span>    <span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0xc</span>],<span class="built_in">esi</span>  <span class="comment">; 2</span></span><br><span class="line">  <span class="number">400509</span>:	<span class="keyword">mov</span>    <span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x10</span>],<span class="built_in">edx</span> <span class="comment">; 3</span></span><br><span class="line">  40050c:	<span class="keyword">mov</span>    <span class="built_in">rax</span>,<span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x8</span>]  <span class="comment">; </span></span><br><span class="line">  <span class="number">400510</span>:	<span class="keyword">mov</span>    <span class="built_in">edx</span>,<span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rax</span>]      <span class="comment">; 捕获的变量s</span></span><br><span class="line">  <span class="number">400512</span>:	<span class="keyword">mov</span>    <span class="built_in">eax</span>,<span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0xc</span>]  <span class="comment">; </span></span><br><span class="line">  <span class="number">400515</span>:	<span class="keyword">add</span>    <span class="built_in">edx</span>,<span class="built_in">eax</span>                  <span class="comment">; edx=s+2</span></span><br><span class="line">  <span class="number">400517</span>:	<span class="keyword">mov</span>    <span class="built_in">eax</span>,<span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x10</span>] </span><br><span class="line">  40051a:	<span class="keyword">add</span>    <span class="built_in">eax</span>,<span class="built_in">edx</span>                  <span class="comment">; eax = edx+3</span></span><br><span class="line">  ...</span><br><span class="line">000000000040051e &lt;_ZZ4mainENUliiE_C1EOS_&gt;:</span><br><span class="line">  ...</span><br><span class="line">  <span class="number">400522</span>:	<span class="keyword">mov</span>    <span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x8</span>],<span class="built_in">rdi</span>   <span class="comment">; this</span></span><br><span class="line">  <span class="number">400526</span>:	<span class="keyword">mov</span>    <span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x10</span>],<span class="built_in">rsi</span>  <span class="comment">; 变量s的地址</span></span><br><span class="line">  40052a:	<span class="keyword">mov</span>    <span class="built_in">rax</span>,<span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x8</span>]</span><br><span class="line">  40052e:	<span class="keyword">mov</span>    <span class="built_in">rdx</span>,<span class="built_in">QWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rbp</span>-<span class="number">0x10</span>]</span><br><span class="line">  <span class="number">400532</span>:	<span class="keyword">mov</span>    <span class="built_in">edx</span>,<span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rdx</span>]       <span class="comment">; 值传递捕获变量s</span></span><br><span class="line">  <span class="number">400534</span>:	<span class="keyword">mov</span>    <span class="built_in">DWORD</span> <span class="built_in">PTR</span> [<span class="built_in">rax</span>],<span class="built_in">edx</span>       <span class="comment">; 捕获到的变量值放lamdba对象的第一项</span></span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<p>看完反汇编，让我们来反推下它的数据结构与实现代码(这部分仅个人猜测的代码，并无验证)：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">namespace</span> main&#123;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">lambdaIntInt</span>&#123;</span></span><br><span class="line">    <span class="keyword">private</span>:</span><br><span class="line">        <span class="keyword">int</span> s;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">        <span class="built_in">lambdaIntInt</span>(<span class="keyword">int</span> cap):<span class="built_in">s</span>(cap)&#123;&#125;</span><br><span class="line">        <span class="function"><span class="keyword">int</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span> <span class="keyword">const</span></span>&#123;</span><br><span class="line">            <span class="keyword">return</span> s + a + b;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看到这里，大家应该对编译器实现的lambda已经了然于心，至于lambda的其他用法的原理，大家自己反汇编即可。</p>
+<h5 id="3-初始化列表"><a href="#3-初始化列表" class="headerlink" title="3.初始化列表"></a>3.初始化列表</h5><p>看到现在，我们应该对反汇编已经有点感觉了，因此找了初始化列表做例子(够简单)，通过阅读汇编，看看能不能猜出对应的数据结构与实现算法</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> _<span class="title">E</span>&gt;</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">initializer_list</span>&#123;</span></span><br><span class="line">    <span class="comment">// 40072e: mov    QWORD PTR [rbp-0x8],rdi</span></span><br><span class="line">    <span class="comment">// 400732: mov    rax,QWORD PTR [rbp-0x8]</span></span><br><span class="line">    <span class="comment">// 400736: mov    rax,QWORD PTR [rax+0x8]</span></span><br><span class="line">    <span class="function"><span class="keyword">size_t</span> <span class="title">size</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 400740: mov    QWORD PTR [rbp-0x8],rdi</span></span><br><span class="line">    <span class="comment">// 400744: mov    rax,QWORD PTR [rbp-0x8]</span></span><br><span class="line">    <span class="comment">// 400748: mov    rax,QWORD PTR [rax]</span></span><br><span class="line">    <span class="function">const_iterator <span class="title">begin</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">//400757:	mov    QWORD PTR [rbp-0x18],rdi</span></span><br><span class="line">    <span class="comment">//40075b:	mov    rax,QWORD PTR [rbp-0x18]</span></span><br><span class="line">    <span class="comment">//40075f:	mov    rdi,rax</span></span><br><span class="line">    <span class="comment">//400762:	call   40073c &lt;_ZNKSt16initializer_listIiE5beginEv&gt;</span></span><br><span class="line">    <span class="comment">//400767:	mov    rbx,rax</span></span><br><span class="line">    <span class="comment">//40076a:	mov    rax,QWORD PTR [rbp-0x18]</span></span><br><span class="line">    <span class="comment">//40076e:	mov    rdi,rax</span></span><br><span class="line">    <span class="comment">//400771:	call   40072a &lt;_ZNKSt16initializer_listIiE4sizeEv&gt;</span></span><br><span class="line">    <span class="comment">//400776:	shl    rax,0x2</span></span><br><span class="line">    <span class="comment">//40077a:	add    rax,rbx</span></span><br><span class="line">    <span class="function">const_iterator <span class="title">end</span><span class="params">()</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>函数原型已经给出，函数开头和结尾的汇编代码去掉了。<br>看完反汇编代码，自己去linux上找源码，注意：vs的实现跟gnu的实现并不一致。</p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>书籍： 《老码识途 从机器码到框架的系统观逆向修炼之路》<br>       《C++反汇编与逆向分析技术揭秘》<br>       《汇编语言》<br>       《程序员的自我修养》</p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/" data-id="cl1d3xvh000001en4h3eqbt3u" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "c/c++反汇编",
+        "image": "https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/Images/regs_restore.jpg",
+        "keywords": "",
+        "genre": "编译、汇编、链接",
+        "datePublished": "2021-06-10",
+        "dateCreated": "2021-06-10",
+        "dateModified": "2021-06-10",
+        "url": "https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/",
+        "description": "c/c++反汇编有人说编程的最高境界是人机合一，为了达到这个境界，我们开始学习反汇编，做到写一段代码，脑中就自动反射出相应的汇编代码本文我们分析c/c++常用的语句，看它的汇编代码是怎样的，下面例子都是linux上编译的（对新手来说，直接用vs看反汇编，缺少了思考的过程）
+基本语句反汇编编译器不同、优化选项不同会导致生成的汇编代码不一致，接下来的汇编代码是gcc在没有优化的情况下编译出来的。
+1.",
+        "wordCount": 3064
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/07/05/pythonOther/deployWeb/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            花最小的学习成本部署web服务
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2021/06/10/pythonOther/dockerBuild/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">定制docker镜像</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/23/C++Project/LLVM/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/02/23/C++Project/LLVM/Images/LLVM_vs.png)" alt="LLVM(1)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/02/23/C++Project/LLVM/" class="title">LLVM(1)</a></p>
+                            <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/C++Basic/atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/C++Basic/atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/C++Project/lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/C++Project/lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/C++Project/lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/08/C++Basic/smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/C++Basic/smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/pythonOther/regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/pythonOther/regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>
