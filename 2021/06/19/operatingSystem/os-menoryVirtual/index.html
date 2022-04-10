@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>OS-虚拟memory | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="虚拟memory我们知道每个进程都有自己的连续内存空间，比方在64位系统中进程的内存布局：让进程误以为自己拥有完整的内存空间，这就是虚拟内存。而实现虚拟内存技术主要从以下几个角度考虑：  透明，不应该让用户进程感知到物理内存（基本功能） 高效，每一条指令都会跟内存打交道，效率是最重要的指标之一 保护，不光是进程间的保护，还包括内部数据的保护比方代码段只读属性  类似虚拟cpu的实现，虚拟内存也需要">
+<meta property="og:type" content="article">
+<meta property="og:title" content="OS-虚拟memory">
+<meta property="og:url" content="https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="虚拟memory我们知道每个进程都有自己的连续内存空间，比方在64位系统中进程的内存布局：让进程误以为自己拥有完整的内存空间，这就是虚拟内存。而实现虚拟内存技术主要从以下几个角度考虑：  透明，不应该让用户进程感知到物理内存（基本功能） 高效，每一条指令都会跟内存打交道，效率是最重要的指标之一 保护，不光是进程间的保护，还包括内部数据的保护比方代码段只读属性  类似虚拟cpu的实现，虚拟内存也需要">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/Images/memory_layout.png">
+<meta property="article:published_time" content="2021-06-19T16:42:07.000Z">
+<meta property="article:modified_time" content="2021-06-19T16:42:07.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/Images/memory_layout.png">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-operatingSystem/os-menoryVirtual" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        OS-虚拟memory
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/06/19/operatingSystem/os-menoryVirtual/" class="article-date">
+       <time datetime="2021-06-19T16:42:07.000Z" itemprop="datePublished">2021-06-19</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/06/19/operatingSystem/os-menoryVirtual/" class="article-date">
+     <time datetime="2021-06-19T16:42:07.000Z" itemprop="dateModified">2021-06-19</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="虚拟memory"><a href="#虚拟memory" class="headerlink" title="虚拟memory"></a>虚拟memory</h1><p>我们知道每个进程都有自己的连续内存空间，比方在64位系统中进程的内存布局：<br><img src="/2021/06/19/operatingSystem/os-menoryVirtual/Images/memory_layout.png"><br>让进程误以为自己拥有完整的内存空间，这就是虚拟内存。而实现虚拟内存技术主要从以下几个角度考虑：</p>
+<ol>
+<li>透明，不应该让用户进程感知到物理内存（基本功能）</li>
+<li>高效，每一条指令都会跟内存打交道，效率是最重要的指标之一</li>
+<li>保护，不光是进程间的保护，还包括内部数据的保护比方代码段只读属性</li>
+</ol>
+<p>类似<a href="https://liji53.github.io/2021/06/15/operatingSystem/os-virtualization/">虚拟cpu</a>的实现，虚拟内存也需要一些底层机制与上层策略</p>
+<h3 id="分页"><a href="#分页" class="headerlink" title="分页"></a>分页</h3><p>分页是实现虚拟内存的基本机制，简单来说就是把虚拟地址及物理地址分成诺干个固定大小的页(一般4K)，每个页会被OS(或MMU)映射到实际的物理内存，被映射的物理内存页称为页框(page frame)。</p>
+<h5 id="1-页表和页表项"><a href="#1-页表和页表项" class="headerlink" title="1. 页表和页表项"></a>1. 页表和页表项</h5><p>承载这个映射关系的数据结构叫做页表(page Table)(数组)，页表的每一项数据即页表项(page table entry)它的结构如下：<br><img src="/2021/06/19/operatingSystem/os-menoryVirtual/Images/page_table_entry.png"><br>其中PFN代表page frame number(页框号) 即实际物理地址的页号<br>其他位的含义这里简单介绍下：<br>present bit(P)：表示这个页是否在物理内存中，如果为0表示在硬盘中（缺页用到）<br>accessed bit(A)：表示这个页是否最近被访问（缺页用到）<br>dirty bit(D)：表示这个页是否写入过数据，如果为1则需要定时写入硬盘<br>read/write bit(R/W)：表示这个页是否可写<br>user/supervisor bit(U/S)：表示这个页属于用户模式还是内核模式能访问<br>PWT,PCD,PAT,G：跟硬件缓存相关</p>
+<h5 id="2-如何映射"><a href="#2-如何映射" class="headerlink" title="2. 如何映射"></a>2. 如何映射</h5><p>虚拟地址由2部分(后面讲多级页表时再更新)组成：</p>
+<ol>
+<li>VPN：virtual page number 即虚拟页号</li>
+<li>offset：页内偏移</li>
+</ol>
+<p>将虚拟地址转为物理地址，如下图(这里假设6位的地址空间，16byte的页大小)：<br><img src="/2021/06/19/operatingSystem/os-menoryVirtual/Images/address_translation.png"><br>图中Address Translation就是从页表中获取数据得到PFN再进行转换，但这里有2个问题需要搞清楚：</p>
+<ol>
+<li>Address Translation由谁来完成</li>
+<li>页表到底在哪里</li>
+</ol>
+<p>现代的操作系统Address Translation一般由MMU这个硬件来完成，我们先来看地址转化的伪代码（这段伪代码后面还会继续完善）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从虚拟地址中提取VPN</span></span><br><span class="line">VPN = (VirtualAddress &amp; VPN_MASK) &gt;&gt; SHIFT</span><br><span class="line"><span class="comment">// PTBR指的是页表的基地址，PTE指页表项</span></span><br><span class="line"><span class="comment">// 从页表中找到当前虚拟地址的页表项的地址</span></span><br><span class="line">PTEAddr = PTBR + (VPN * <span class="keyword">sizeof</span>(PTE))</span><br><span class="line"><span class="comment">// 获取当前页表项（注意：这里需要访问内存）</span></span><br><span class="line">PTE = AccessMemory(PTEAddr)</span><br><span class="line"><span class="comment">// 检查访问的虚拟地址是否合法</span></span><br><span class="line"><span class="keyword">if</span> (PTE.Valid == False)</span><br><span class="line">    RaiseException(SEGMENTATION_FAULT)</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (CanAccess(PTE.ProtectBits) == False)</span><br><span class="line">    RaiseException(PROTECTION_FAULT)</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">    <span class="comment">// 转化成物理地址</span></span><br><span class="line">    offset = VirtualAddress &amp; OFFSET_MASK</span><br><span class="line">    PhysAddr = (PTE.PFN &lt;&lt; PFN_SHIFT) | offset</span><br><span class="line">    <span class="comment">// 访问实际的物理内存</span></span><br><span class="line">    Register = AccessMemory(PhysAddr)</span><br></pre></td></tr></table></figure>
+<p>如果Address Translation这个动作由操作系统来完成，意味着每次访问内存都需要2次，性能直接下降了一半以上。而通过MMU则可以缓存常用的页表项，因此大部分时候只需访问一次内存。<br>页表位于内存中，只需要告诉MMU页表的基地址，MMU就可以自动根据VPN计算出页表的偏移从而取到PTE。<br>页表不需要通过虚拟地址映射，由OS告诉硬件页表的物理地址。(在进程切换时，通过设置CR3寄存器来告诉页表地址)</p>
+<h5 id="3-遗留问题"><a href="#3-遗留问题" class="headerlink" title="3.遗留问题"></a>3.遗留问题</h5><p>根据上面的算法，我们的内存管理存在两个严重的问题：</p>
+<ol>
+<li>正如前面所说，地址转化的时候需要访问2次内次，效率低下</li>
+<li>页表如果采用1维数组的方式实现，在32位系统中1个进程的虚表就占据了4M，而如果是64位系统，则。。。</li>
+</ol>
+<h3 id="TLB"><a href="#TLB" class="headerlink" title="TLB"></a>TLB</h3><p>第一个问题是如何如何让mmu的转化更快，这就需要缓存(TLB)进行帮助.</p>
+<h5 id="1-什么时候用缓存"><a href="#1-什么时候用缓存" class="headerlink" title="1.什么时候用缓存"></a>1.什么时候用缓存</h5><p>我们再来看下上面的伪代码：PTE = AccessMemory(PTEAddr) 如果这次的内存访问，能提前通过硬件缓存起来，这样就能减少一次内存访问了，这就是TLB的作用。<br>缓存作为一种常用技术，它的有效性常常依赖局部性原理：</p>
+<ol>
+<li>时间局部性：最近使用的数据大概率再次使用</li>
+<li>空间局部性：数据附近的数据很可能被使用</li>
+</ol>
+<p>TLB正是基于这2个局部性原理，从而加快页表的查询</p>
+<h5 id="2-更新算法"><a href="#2-更新算法" class="headerlink" title="2.更新算法"></a>2.更新算法</h5><p>现在基于TLB，来更新地址转化的算法：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">VPN = (VirtualAddress &amp; VPN_MASK) &gt;&gt; SHIFT</span><br><span class="line"><span class="comment">// 从TLB中查找页表项</span></span><br><span class="line">(Success, TlbEntry) = TLB_Lookup(VPN)</span><br><span class="line"><span class="keyword">if</span> (Success == True) <span class="comment">// 缓存命中</span></span><br><span class="line">    <span class="keyword">if</span> (CanAccess(TlbEntry.ProtectBits) == True)</span><br><span class="line">        Offset = VirtualAddress &amp; OFFSET_MASK</span><br><span class="line">        PhysAddr = (TlbEntry.PFN &lt;&lt; SHIFT) | Offset</span><br><span class="line">        AccessMemory(PhysAddr)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        RaiseException(PROTECTION_FAULT)</span><br><span class="line"><span class="keyword">else</span> <span class="comment">// TLB 没找到</span></span><br><span class="line">    PTEAddr = PTBR + (VPN * <span class="keyword">sizeof</span>(PTE))</span><br><span class="line">    PTE = AccessMemory(PTEAddr)</span><br><span class="line">    <span class="keyword">if</span> (PTE.Valid == False)</span><br><span class="line">        RaiseException(SEGMENTATION_FAULT)</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (CanAccess(PTE.ProtectBits) == False)</span><br><span class="line">        RaiseException(PROTECTION_FAULT)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="comment">// 更新TLB</span></span><br><span class="line">        TLB_Insert(VPN, PTE.PFN, PTE.ProtectBits)</span><br><span class="line">    <span class="comment">// 重新执行指令</span></span><br><span class="line">    RetryInstruction()</span><br></pre></td></tr></table></figure>
+<p>这个算法中，如果TLB miss，则通过页表查找页表项，找到之后再更新TLB，并重新执行指令。<br>TLB miss的过程其实即可以由MMU完成也可以由OS来完成，比方RISC指令集的MIPS就是通过OS完成的，而像X86这些CISC指令集的架构则通过硬件完成TLB miss<br>因此，如果由OS完成TLB miss，则是以下算法：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">VPN = (VirtualAddress &amp; VPN_MASK) &gt;&gt; SHIFT</span><br><span class="line"><span class="comment">// 从TLB中查找页表项</span></span><br><span class="line">(Success, TlbEntry) = TLB_Lookup(VPN)</span><br><span class="line"><span class="keyword">if</span> (Success == True) <span class="comment">// 缓存命中</span></span><br><span class="line">    <span class="keyword">if</span> (CanAccess(TlbEntry.ProtectBits) == True)</span><br><span class="line">        Offset = VirtualAddress &amp; OFFSET_MASK</span><br><span class="line">        PhysAddr = (TlbEntry.PFN &lt;&lt; SHIFT) | Offset</span><br><span class="line">        AccessMemory(PhysAddr)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        RaiseException(PROTECTION_FAULT)</span><br><span class="line"><span class="keyword">else</span> <span class="comment">// TLB 没找到</span></span><br><span class="line">    <span class="comment">// 通过产生中断，让OS来查找页表项，并更新TLB</span></span><br><span class="line">    RaiseException(TLB_MISS)</span><br></pre></td></tr></table></figure>
+
+<h5 id="3-TLB项"><a href="#3-TLB项" class="headerlink" title="3.TLB项"></a>3.TLB项</h5><p>TLB其实也是一个数组，一般有32、64或者128项，它的每一项内容如下：<br><img src="/2021/06/19/operatingSystem/os-menoryVirtual/Images/TLB_entry.png"><br>VPN：虚拟页号,这里只有19位，因为操作系统的虚拟地址占了一半(MIPS架构)<br>PFN：物理页号，有24位，因此最高可以支持64G的物理内存<br>G：全局共享位，如果为1表示这个虚拟地址被所有进程共享（可以用于共享库）<br>ASID：用于区分哪个进程，OS在进程切换时通过上下文切换，设置ASID的寄存器，这样MMU就能区分进程了。<br>C：内存页是如何被缓存的(跟硬件相关)<br>D：这个内存页是否被写入过<br>V：表示这个页的转化是否合法(PTE的V表示的这个页OS有没有分配)</p>
+<p>看到这里，其实我自己有几个未解之谜：</p>
+<ol>
+<li>硬件是如何根据VPN来查找TLB entry的？从它的数据结构来看，它需要一项一项的比较才行</li>
+<li>ASID只有8位，如果进程超过256个，怎么表示？</li>
+</ol>
+<p>不管如何，TLB作为底层机制，它的核心作用就是缓存部分PTE，从而加快MMU的地址转化</p>
+<h3 id="多级页表"><a href="#多级页表" class="headerlink" title="多级页表"></a>多级页表</h3><p>多级页表用于解决一维线性页表占用内存大的问题。</p>
+<h5 id="1-新的数据结构"><a href="#1-新的数据结构" class="headerlink" title="1.新的数据结构"></a>1.新的数据结构</h5><p><img src="/2021/06/19/operatingSystem/os-menoryVirtual/Images/multi_Level_page.png"><br>这部分内容个人觉得存粹就是数据结构的知识了，通过增加一层页目录，从而让大部分无用的虚拟地址不在占用页表空间。<br>这里仅仅展示了2级的页表，在实际linux内核中，为了支持64位地址空间，会有4级页表。</p>
+<h5 id="2-新的转化"><a href="#2-新的转化" class="headerlink" title="2.新的转化"></a>2.新的转化</h5><p>由于页表的数据结构改变，因此映射的方式也需要做细微调整。<br>内核在设计时一个页表、页目录的大小应该要刚好等于页大小。这里我们以2级页表、4K页大小、32位地址空间做示例，如果页表项的大小为4byte，则页目录刚好占10位。</p>
+<p>它的虚拟地址结构如下：<br><img src="/2021/06/19/operatingSystem/os-menoryVirtual/Images/vritual_address.png"><br>它的MMU地址转化伪代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">VPN = (VirtualAddress &amp; VPN_MASK) &gt;&gt; SHIFT</span><br><span class="line">(Success, TlbEntry) = TLB_Lookup(VPN)</span><br><span class="line"><span class="keyword">if</span> (Success == True) <span class="comment">// TLB Hit</span></span><br><span class="line">    ...  <span class="comment">//参考上一节的代码</span></span><br><span class="line"><span class="keyword">else</span> <span class="comment">// TLB Miss</span></span><br><span class="line">    <span class="comment">// 页目录的索引</span></span><br><span class="line">    PDIndex = (VPN &amp; PD_MASK) &gt;&gt; PD_SHIFT</span><br><span class="line">    <span class="comment">// 找到对应页目录项</span></span><br><span class="line">    PDEAddr = PDBR + (PDIndex * <span class="keyword">sizeof</span>(PDE))</span><br><span class="line">    PDE = AccessMemory(PDEAddr)</span><br><span class="line">    <span class="keyword">if</span> (PDE.Valid == False)</span><br><span class="line">        RaiseException(SEGMENTATION_FAULT)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="comment">// 页表的索引</span></span><br><span class="line">        PTIndex = (VPN &amp; PT_MASK) &gt;&gt; PT_SHIFT</span><br><span class="line">        <span class="comment">// 从页目录项中找到页表的基地址，在加上页内偏移地址，得到页表项的地址</span></span><br><span class="line">        PTEAddr = (PDE.PFN &lt;&lt; SHIFT) + (PTIndex * <span class="keyword">sizeof</span>(PTE))</span><br><span class="line">        PTE = AccessMemory(PTEAddr)</span><br><span class="line">        <span class="keyword">if</span> (PTE.Valid == False)</span><br><span class="line">            RaiseException(SEGMENTATION_FAULT)</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (CanAccess(PTE.ProtectBits) == False)</span><br><span class="line">            RaiseException(PROTECTION_FAULT)</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            TLB_Insert(VPN, PTE.PFN, PTE.ProtectBits)</span><br><span class="line">            RetryInstruction()</span><br></pre></td></tr></table></figure>
+
+<h3 id="缺页"><a href="#缺页" class="headerlink" title="缺页"></a>缺页</h3><p>从前面的分页机制中，我们已经实现了虚拟内存的功能，让用户感知不到物理内存，但物理内存空间毕竟是有限的，如果进程，把物理空间用完了，这怎么办呢？<br>这就需要再制造一个假象，让进程误以为有无穷大的物理内存。内核通过将物理内存的页置换到硬盘，实现这个假象。</p>
+<h5 id="缺页处理"><a href="#缺页处理" class="headerlink" title="缺页处理"></a>缺页处理</h5><p>如果发生TLB miss，并且虚拟地址映射的物理页不存在时(或物理页满)，则需要缺页处理，新的伪代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">VPN = (VirtualAddress &amp; VPN_MASK) &gt;&gt; SHIFT</span><br><span class="line">(Success, TlbEntry) = TLB_Lookup(VPN)</span><br><span class="line"><span class="keyword">if</span> (Success == True) <span class="comment">// TLB Hit</span></span><br><span class="line">    ...  <span class="comment">//参考前面的代码</span></span><br><span class="line"><span class="keyword">else</span> <span class="comment">// TLB Miss</span></span><br><span class="line">    PTEAddr = PTBR + (VPN * <span class="keyword">sizeof</span>(PTE))</span><br><span class="line">    PTE = AccessMemory(PTEAddr)</span><br><span class="line">    <span class="keyword">if</span> (PTE.Valid == False)</span><br><span class="line">        RaiseException(SEGMENTATION_FAULT)</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">if</span> (CanAccess(PTE.ProtectBits) == False)</span><br><span class="line">            RaiseException(PROTECTION_FAULT)</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (PTE.Present == True)</span><br><span class="line">            TLB_Insert(VPN, PTE.PFN, PTE.ProtectBits)</span><br><span class="line">            RetryInstruction()</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (PTE.Present == False)</span><br><span class="line">            <span class="comment">// 触发缺页中断，由OS处理中断</span></span><br><span class="line">            RaiseException(PAGE_FAULT)</span><br></pre></td></tr></table></figure>
+<p>一旦没有找到物理页，硬件就会触发page fault，于是OS就去处理缺页中断，它的伪代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 找一个空闲的物理页。</span></span><br><span class="line">PFN = FindFreePhysicalPage()</span><br><span class="line"><span class="keyword">if</span> (PFN == <span class="number">-1</span>) <span class="comment">// no free page found</span></span><br><span class="line">    PFN = EvictPage() <span class="comment">// 通过页置换算法，淘汰页</span></span><br><span class="line">    DiskRead(PTE.DiskAddr, pfn) <span class="comment">// 从硬盘中读取代码、数据</span></span><br><span class="line">    PTE.present = True <span class="comment">// 表示在物理内存中了</span></span><br><span class="line">    PTE.PFN = PFN <span class="comment">// </span></span><br><span class="line">    RetryInstruction() <span class="comment">// 从新执行指令</span></span><br></pre></td></tr></table></figure>
+<p>前面PTE中提到的present bit在这里终于有用武之地了</p>
+<h3 id="页置换策略"><a href="#页置换策略" class="headerlink" title="页置换策略"></a>页置换策略</h3><p>前面讲了缺页的处理，但哪个内存页置换出去呢？这关乎到进程的内存访问效率，因此页置换算法至关重要。</p>
+<h5 id="LRU算法"><a href="#LRU算法" class="headerlink" title="LRU算法"></a>LRU算法</h5><p>如果OS能知道进程未来需要访问哪个内存页，就可以根据哪个内存页最后使用就把这个页置换出去，这种算法无疑是最好的，但这就跟进程调度算法一样，OS并不知道未来是怎么样的。<br>虽然未来不可知，但我们可以通过历史来推断未来，经典的算法LRU和LFU就是基于历史的使用情况来推断未来的，其实它的思想跟前面讲TLB缓存的局部性思想是一致的。</p>
+<p>由于要实现精准的LRU算法，效率往往比较低下，因此一种近似LRU的算法在OS中更加常见：<br><img src="/2021/06/19/operatingSystem/os-menoryVirtual/Images/LRU_clock.png"><br>这种算法需要硬件和OS配合，当访问内存页时，由MMU硬件设置页表项的access bit(reference bit)为1，表示这个页最近被访问了。<br>当OS在处理缺页中断时，会遍历环形链表，如果reference bit位为0，则说明最近没有使用，因此可以置换，如上图所示。<br>进一步完善这个算法：如果页面写入过数据，则最好不要置换，因为OS后面会再次把页写入到磁盘，如果加上dirty bit，有以下优先级：</p>
+<ol>
+<li>reference bit为0，且dirty bit为0。优先级最高</li>
+<li>reference btt为0，且dirty bit为1</li>
+<li>reference btt为1，且dirty bit为1。优先级最低，需要经过一轮循环之后</li>
+</ol>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>书籍：《Operating Systems: Three Easy Pieces》<br>       <a target="_blank" rel="noopener" href="https://pages.cs.wisc.edu/~remzi/OSTEP/">线上书籍</a></p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/" data-id="cl1t27bh300001cn4esmwgkpa" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "OS-虚拟memory",
+        "image": "https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/Images/memory_layout.png",
+        "keywords": "",
+        "genre": "操作系统",
+        "datePublished": "2021-06-19",
+        "dateCreated": "2021-06-19",
+        "dateModified": "2021-06-19",
+        "url": "https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/",
+        "description": "虚拟memory我们知道每个进程都有自己的连续内存空间，比方在64位系统中进程的内存布局：让进程误以为自己拥有完整的内存空间，这就是虚拟内存。而实现虚拟内存技术主要从以下几个角度考虑：
+
+透明，不应该让用户进程感知到物理内存（基本功能）
+高效，每一条指令都会跟内存打交道，效率是最重要的指标之一
+保护，不光是进程间的保护，还包括内部数据的保护比方代码段只读属性
+
+类似虚拟cpu的实现，虚拟内存也需要",
+        "wordCount": 1160
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/07/05/pythonOther/deployWeb/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            花最小的学习成本部署web服务
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2021/06/15/operatingSystem/os-virtualization/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">OS-虚拟CPU</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/23/C++Project/LLVM/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/02/23/C++Project/LLVM/Images/LLVM_vs.png)" alt="LLVM(1)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/02/23/C++Project/LLVM/" class="title">LLVM(1)</a></p>
+                            <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/C++Basic/atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/C++Basic/atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/C++Project/lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/C++Project/lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/C++Project/lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/08/C++Basic/smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/C++Basic/smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/pythonOther/regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/pythonOther/regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>

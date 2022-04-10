@@ -12,12 +12,12 @@
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看下进程的">
+    <meta name="description" content="虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看">
 <meta property="og:type" content="article">
 <meta property="og:title" content="OS-虚拟CPU">
 <meta property="og:url" content="https://liji53.github.io/2021/06/15/operatingSystem/os-virtualization/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看下进程的">
+<meta property="og:description" content="虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://liji53.github.io/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png">
 <meta property="article:published_time" content="2021-06-15T21:54:20.000Z">
@@ -205,7 +205,7 @@
 
             
 
-            <h1 id="虚拟CPU"><a href="#虚拟CPU" class="headerlink" title="虚拟CPU"></a>虚拟CPU</h1><p>今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。<br>迷惑我们让我们产生多进程同时在做事情的假象的核心技术就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。<br>而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。<br>首先我们看下进程的状态转化图(实际不止3种)：<br><img src="/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png"><br>这张图包含了我们本次要讲的重点</p>
+            <h1 id="虚拟CPU"><a href="#虚拟CPU" class="headerlink" title="虚拟CPU"></a>虚拟CPU</h1><p>今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。<br>迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。<br>而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。<br>首先我们看下进程的状态转化图(实际不止3种)：<br><img src="/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png"><br>这张图包含了我们本次要讲的重点</p>
 <h3 id="进程切换"><a href="#进程切换" class="headerlink" title="进程切换"></a>进程切换</h3><p>看到进程切换，大家可能会想到通过OS来管理进程资源，由OS来切换进程，这不是很简单嘛？<br>但如果进程一直占有cpu，也就意味着无法进入到内核，这还怎么切换进程呢，同时如果这个进程要访问没有权限的资源时应该怎么办呢？</p>
 <h5 id="1-软中断-trap"><a href="#1-软中断-trap" class="headerlink" title="1.软中断(trap)"></a>1.软中断(trap)</h5><p>为了能够顺利进入到内核，主要有2种方式(软中断和硬中断)，我们先介绍主动进入内核的办法-系统调用(通过各种异常也能进入)，通过系统调用也解决了上面权限的问题。</p>
 <p>之前在<a href="https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/">《c/c++反汇编》</a>已经对应用层的系统调用汇编代码做过一波分析了。<br>现在我们再简单讲下后面的流程：通过syscall指令使执行逻辑从用户态切换到内核态，在进入到内核态之后，cpu会从指定的寄存器中读取内核代码的入口地址，进入内核代码之后，自然就可以通过rax读取系统调用号，再从system call table转到对应的处理函数中。</p>
@@ -214,7 +214,7 @@
 <h5 id="2-时钟中断"><a href="#2-时钟中断" class="headerlink" title="2.时钟中断"></a>2.时钟中断</h5><p>而另一种被动的进入内核的方法就是时钟中断，一旦时钟中断产生，cpu就会自动运行到内核态，怎么知道去哪里运行内核呢，跟前面的做法一样，在启动时给硬件设置对应的处理时钟中断地址。<br>依靠这个中断，我们就能把进程按照时间段进行切分(进程运行的基本时间单位)，一个进程运行一段时间，然后硬件定时器发生一个时钟中断，于是进程就被动的进入内核，内核再根据调度策略决定下面运行哪个程序，如此反复。<br>简单看下来自xv6的源码：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">timerinit()</span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// prepare information in scratch[] for timervec.</span></span><br><span class="line">  <span class="comment">// scratch[0..2] : space for timervec to save registers.</span></span><br><span class="line">  <span class="comment">// scratch[3] : address of CLINT MTIMECMP register.</span></span><br><span class="line">  <span class="comment">// scratch[4] : desired interval (in cycles) between timer interrupts.</span></span><br><span class="line">  uint64 *scratch = &amp;timer_scratch[id][<span class="number">0</span>];</span><br><span class="line">  scratch[<span class="number">3</span>] = CLINT_MTIMECMP(id);</span><br><span class="line">  scratch[<span class="number">4</span>] = interval;</span><br><span class="line">  <span class="comment">// 把定时器的参数写入到mscratch寄存器，timervec中需要读取对应的参数，并设置定时器。</span></span><br><span class="line">  w_mscratch((uint64)scratch);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// set the machine-mode trap handler.</span></span><br><span class="line">  <span class="comment">//在启动时给硬件设置对应的处理时钟中断的地址。</span></span><br><span class="line">  w_mtvec((uint64)timervec);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// enable machine-mode interrupts.</span></span><br><span class="line">  w_mstatus(r_mstatus() | MSTATUS_MIE);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// enable machine-mode timer interrupts.</span></span><br><span class="line">  w_mie(r_mie() | MIE_MTIE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>进程的切换主要靠时钟中断、系统调用，流程图：<br><img src="/2021/06/15/operatingSystem/os-virtualization/Images/interrupt_table.png"></p>
-<h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><p>从上面的进程切换中，我们已经了解底层实现的机制，但我们知道寄存器只有这么一些，切换后进程如何回到一开始的状态呢？<br>上下文切换主要分为2部分：</p>
+<h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><p>从上面的进程切换中，我们已经了解底层实现的机制，但我们知道寄存器只有这么一些，切换后进程如何回到一开始的状态呢？<br>上下文切换主要分为2部分(其实还应该包括页表的切换等)：</p>
 <ol>
 <li>硬件自动保存的寄存器</li>
 <li>当OS决定切换时，手动保存的寄存器</li>
@@ -227,7 +227,7 @@
 <li>周转时间： Tturnaround = Tcompletion − Tarrival</li>
 <li>响应时间： Tresponse = Tfirstrun − Tarrival</li>
 </ol>
-<h5 id="2种基本算法-只介绍相关概念"><a href="#2种基本算法-只介绍相关概念" class="headerlink" title="2种基本算法(只介绍相关概念)"></a>2种基本算法(只介绍相关概念)</h5><p>最短作业优先(Shortest Job First):<br>这是一种周转时间最好的算法，它的策略就是根据程序运行时间(最短优先)来决定运行哪个程序，但这种算法有几个问题：</p>
+<h5 id="2种基本算法"><a href="#2种基本算法" class="headerlink" title="2种基本算法"></a>2种基本算法</h5><p>最短作业优先(Shortest Job First):<br>这是一种周转时间最好的算法，它的策略就是根据程序运行时间(最短优先)来决定运行哪个程序，但这种算法有几个问题：</p>
 <ol>
 <li>OS并不知道进程的运行时长是多少</li>
 <li>响应时间长，需要等最短作业的程序运行完，才响应，可能存在饿死现象</li>
@@ -344,7 +344,7 @@
         "dateCreated": "2021-06-15",
         "dateModified": "2021-06-15",
         "url": "https://liji53.github.io/2021/06/15/operatingSystem/os-virtualization/",
-        "description": "虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看下进程的",
+        "description": "虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看",
         "wordCount": 422
     }
 </script>
@@ -426,11 +426,11 @@
         
 <nav id="article-nav">
     
-        <a href="/2021/07/05/pythonOther/deployWeb/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2021/06/19/operatingSystem/os-menoryVirtual/" id="article-nav-newer" class="article-nav-link-wrap">
         <strong class="article-nav-caption">下一篇</strong>
         <p class="article-nav-title">
         
-            花最小的学习成本部署web服务
+            OS-虚拟memory
         
         </p>
         <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
@@ -567,7 +567,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -577,7 +577,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
