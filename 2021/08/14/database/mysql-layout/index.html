@@ -206,7 +206,7 @@
             
 
             <h1 id="mysql-存储布局"><a href="#mysql-存储布局" class="headerlink" title="mysql-存储布局"></a>mysql-存储布局</h1><p>现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。<br>下面我们将开始解密mysql数据库的底层原理，但在学习一样东西之前，我们要先熟知它的整体框架:<br><img src="/2021/08/14/database/mysql-layout/Images/arch.png"><br>这里我们跳过server层，直接来到存储引擎一层(InnoDB)。</p>
-<h3 id="表空间布局"><a href="#表空间布局" class="headerlink" title="表空间布局"></a>表空间布局</h3><p>先学习表空间的数据布局，是因为了解存储结构之后（底层机制）更加有助于我们学习上层策略(索引、事务等)。<br>表空间最直观的感受就是一个文件，下面我们就要讲这个文件内部数据是如何管理的。</p>
+<h3 id="表空间布局"><a href="#表空间布局" class="headerlink" title="表空间布局"></a>表空间布局</h3><p>先学习表空间的数据布局，是因为了解存储结构之后（底层机制）更加有助于我们学习上层策略(索引、事务等)。<br>表空间其实就是一个文件，下面我们就要讲这个文件内部数据是如何管理的。</p>
 <h5 id="1-表空间结构"><a href="#1-表空间结构" class="headerlink" title="1.表空间结构"></a>1.表空间结构</h5><p>mysql对表空间的管理，按照”组(group)-区(extent)-页(page) “进行管理，其中页的大小为16k，也是mysql操作的最小单元；页的上一级是区，管理了64个页，一个区的大小为1M；最上层的是组，管理了256个区。<br>如图所示：<br><img src="/2021/08/14/database/mysql-layout/Images/table_space.png"><br>其中我们看到像FSP_HDR、IBUF_BITMAP 等这些16k大小的条目就是所谓的页。<br>这里我们需要清楚mysql这么设计的原因：</p>
 <ol>
 <li>让数据连续存储，在进行范围查询(范围查询等讲索引时揭秘)的时候能减少随机IO。</li>
