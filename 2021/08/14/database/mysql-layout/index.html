@@ -12,19 +12,19 @@
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="mysql-存储布局现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。下面我们将开始解密mysql数据库的底层原理，但在学习mysql之前，我们要先熟知它的整体框架:这里我们跳过server层，直接来到存储引擎一层(只看InnoDB)。可能我们平常在软件设计时，大部分打交道的都是内存中的">
+    <meta name="description" content="mysql-存储布局我们平常在软件设计时，大部分打交道的都是内存中的数据结构。这次我们来看看InnoDB在文件中是如何设计数据结构的(回顾mysql-整体架构InnoDB架构的On-Disk Structures)。 磁盘架构从前面一节的架构图中，我们可以看到有多种表空间文件，如系统表空间(ibdata1)、独立表空间(表名.ibd)等。除了表空间，还存在doublewrite 文件，重做日志文件">
 <meta property="og:type" content="article">
 <meta property="og:title" content="mysql-存储布局">
 <meta property="og:url" content="https://liji53.github.io/2021/08/14/database/mysql-layout/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="mysql-存储布局现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。下面我们将开始解密mysql数据库的底层原理，但在学习mysql之前，我们要先熟知它的整体框架:这里我们跳过server层，直接来到存储引擎一层(只看InnoDB)。可能我们平常在软件设计时，大部分打交道的都是内存中的">
+<meta property="og:description" content="mysql-存储布局我们平常在软件设计时，大部分打交道的都是内存中的数据结构。这次我们来看看InnoDB在文件中是如何设计数据结构的(回顾mysql-整体架构InnoDB架构的On-Disk Structures)。 磁盘架构从前面一节的架构图中，我们可以看到有多种表空间文件，如系统表空间(ibdata1)、独立表空间(表名.ibd)等。除了表空间，还存在doublewrite 文件，重做日志文件">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://liji53.github.io/2021/08/14/database/mysql-layout/Images/arch.png">
+<meta property="og:image" content="https://liji53.github.io/2021/08/14/database/mysql-layout/Images/double_write_arch.png">
 <meta property="article:published_time" content="2021-08-14T22:20:07.000Z">
 <meta property="article:modified_time" content="2021-08-14T22:20:07.000Z">
 <meta property="article:author" content="Liji">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://liji53.github.io/2021/08/14/database/mysql-layout/Images/arch.png">
+<meta name="twitter:image" content="https://liji53.github.io/2021/08/14/database/mysql-layout/Images/double_write_arch.png">
     
 
     
@@ -205,16 +205,27 @@
 
             
 
-            <h1 id="mysql-存储布局"><a href="#mysql-存储布局" class="headerlink" title="mysql-存储布局"></a>mysql-存储布局</h1><p>现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。<br>下面我们将开始解密mysql数据库的底层原理，但在学习mysql之前，我们要先熟知它的整体框架:<br><img src="/2021/08/14/database/mysql-layout/Images/arch.png"><br>这里我们跳过server层，直接来到存储引擎一层(只看InnoDB)。<br>可能我们平常在软件设计时，大部分打交道的都是内存中的数据结构。这次我们看看存储介质中的数据结构设计。</p>
-<h3 id="表空间布局"><a href="#表空间布局" class="headerlink" title="表空间布局"></a>表空间布局</h3><p>先学习表空间的数据布局，是因为了解存储结构之后（底层机制）更加有助于我们学习上层策略(索引、事务等)。<br>表空间其实就是一个文件，下面我们就要讲这个文件内部数据是如何管理的。</p>
+            <h1 id="mysql-存储布局"><a href="#mysql-存储布局" class="headerlink" title="mysql-存储布局"></a>mysql-存储布局</h1><p>我们平常在软件设计时，大部分打交道的都是内存中的数据结构。这次我们来看看InnoDB在文件中是如何设计数据结构的(回顾<a href>mysql-整体架构</a>InnoDB架构的On-Disk Structures)。</p>
+<h3 id="磁盘架构"><a href="#磁盘架构" class="headerlink" title="磁盘架构"></a>磁盘架构</h3><p>从前面一节的架构图中，我们可以看到有多种表空间文件，如系统表空间(ibdata1)、独立表空间(表名.ibd)等。<br>除了表空间，还存在doublewrite 文件，重做日志文件。</p>
+<h5 id="1-表空间"><a href="#1-表空间" class="headerlink" title="1. 表空间"></a>1. 表空间</h5><p>InnoDB中包含多种表空间，如：</p>
+<ol>
+<li>系统表空间，change buffer的页存储在这里</li>
+<li>独立表空间，设置了innodb_file_per_table之后，用户创建的每个表都会生成对应的表名.idb</li>
+<li>通用表空间，在创建表的时候可以指定数据存储到对应的通用表空间，从逻辑上，我们可以把它看成是多个独立表空间的集合。</li>
+<li>Undo 表空间，保存了undo log的表空间</li>
+<li>临时表空间</li>
+</ol>
+<h5 id="2-boublewrite-文件"><a href="#2-boublewrite-文件" class="headerlink" title="2.boublewrite 文件"></a>2.boublewrite 文件</h5><p>double write 用于保证数据的可靠性，我们知道HDD的扇区大小是512B，而InnoDB中一个页的大小是16K，如果在写一个页的过程中，突然断电了，磁盘只能保证扇区的写入是原子的，却不能保证16K页的数据原子性。<br>这跟redo log的作用并不是一回事，redo log保证的是事务的原子性，它只会记录对页的操作。一旦16K的页只写了1K的数据，这个页从结构来说就被破坏了，因此double write用于保证页的结构性完整。<br>它的原理如图所示：<br><img src="/2021/08/14/database/mysql-layout/Images/double_write_arch.png"><br>从版本8.0.20开始，boublewrite从系统表空间移到了单独的文件中。<br>double write由于是顺序写入，比起将数据写入到数据文件中，开销并不是很大。<br>默认是2个文件分别对应flush list 和LRU list</p>
+<h5 id="3-redo-log文件"><a href="#3-redo-log文件" class="headerlink" title="3.redo log文件"></a>3.redo log文件</h5><p>redo log的作用我们后面在讲，这里我们简单了解下它的物理文件的结构即可。<br>默认存在ib_logfile0 和ib_logfile1 两个文件。<br>它的结构如图所示：<br><img src="/2021/08/14/database/mysql-layout/Images/redo_physical.png"><br>其中前2048个字节，用来存储一些管理信息。比方说当前日志文件从哪里开始恢复数据(也就是checkpoint的位置)。<br>而后面的数据就是redo log buffer的镜像(回顾<a href>mysql-整体架构</a>)。<br>如果出现日志写满了，则从头覆盖写第一个文件。</p>
+<h3 id="表空间管理"><a href="#表空间管理" class="headerlink" title="表空间管理"></a>表空间管理</h3><p>下面我们了解下表空间内部数据是如何管理的。</p>
 <h5 id="1-表空间结构"><a href="#1-表空间结构" class="headerlink" title="1.表空间结构"></a>1.表空间结构</h5><p>mysql对表空间的管理，按照”组(group)-区(extent)-页(page) “进行管理，其中页的大小为16k，也是mysql操作的最小单元；页的上一级是区，管理了64个页，一个区的大小为1M；最上层的是组，管理了256个区。<br>如图所示：<br><img src="/2021/08/14/database/mysql-layout/Images/table_space.png"><br>其中我们看到像FSP_HDR、IBUF_BITMAP 等这些16k大小的条目就是所谓的页。<br>这里我们需要清楚mysql这么设计的原因：</p>
 <ol>
-<li>让数据连续存储，在进行范围查询(范围查询等讲索引时揭秘)时能减少随机IO。</li>
+<li>让数据连续存储，在进行范围查询(通过聚簇索引查询)时能减少随机IO。</li>
 <li>虽然表空间是一个文件，但物理上可能是不连续的(参考<a href="https://liji53.github.io/2021/07/10/operatingSystem/os-fileSystem/">文件系统</a>)，在数据量到达一定程度时，mysql按区来申请空间，用于保证物理空间的连续。</li>
 <li>将表空间划分成组、区，这样能方便管理页</li>
 </ol>
 <p>图中的表空间虽然比较简单，但在细入到各个页的结构之前，我们还需要清楚其他的一些基本概念。</p>
-<h5 id="2-段与碎片区"><a href="#2-段与碎片区" class="headerlink" title="2.段与碎片区"></a>2.段与碎片区</h5><p>mysql里面也有段的概念，跟编译时将程序分成代码段、数据段的概念类似，mysql将每个区、甚至页按照功能属性进行逻辑分类，比方说一张表至少可以分为数据和索引2个段。<br>段是按照区为单位进行申请的，但如果一张表的数据量很小，这时候也按照区为单位进行空间申请就可能照成浪费。<br>因此有专门的碎片区用于存储这些数据量比较小的表，等这些少量数据增长到一定大小的时候，就开始按照区为单位进行申请。</p>
+<h5 id="2-段与碎片区"><a href="#2-段与碎片区" class="headerlink" title="2.段与碎片区"></a>2.段与碎片区</h5><p>mysql里面也有段的概念，跟编译时将程序分成代码段、数据段的概念类似，mysql将每个区、甚至页按照功能属性进行逻辑分类，比方说一张表至少可以分为数据、索引、回滚三个段。<br>段是按照区为单位进行申请的。但如果一张表的数据量很小，这时候也按照区为单位进行空间申请就可能照成浪费。<br>因此有专门的碎片区用于存储这些数据量比较小的表，等这些少量数据增长到一定大小的时候（32页），就开始按照区为单位进行申请。</p>
 <h5 id="3-系统表空间"><a href="#3-系统表空间" class="headerlink" title="3.系统表空间"></a>3.系统表空间</h5><p>除了上面的独立表空间(用户创建的表)，还存在系统表空间，用于存储整个系统的属性：<br><img src="/2021/08/14/database/mysql-layout/Images/sys_table_space.png"><br>我们看到除了第一个组的第一个区不一样，其他结构跟独立表空间一摸一样。而第一个区新增了第4-第8页，分别表示:</p>
 <ol>
 <li>SYS Insert Buffer Header 存储Insert Buffer的头部信息</li>
@@ -223,49 +234,49 @@
 <li>SYS First Rollback Segment 第一个回滚段的页面</li>
 <li>SYS Data Dictionary Header 数据字典头部信息</li>
 </ol>
-<p>这5种页等用到的时候在单独介绍他们的结构，在这里不再展开。</p>
-<h5 id="4-页的通用部分"><a href="#4-页的通用部分" class="headerlink" title="4.页的通用部分"></a>4.页的通用部分</h5><p>每个页都是16k，它们(共有11种页)有相同部分的结构：<br><img src="/2021/08/14/database/mysql-layout/Images/page_common.png"><br>其中File Header描述了页的通用信息，比方说页号、页类型、校验和、上一个页号、下一个页号、日志序列号等。<br>File Trailer 用于校验页是否完整，它的校验过程:</p>
+<h5 id="4-逻辑结构"><a href="#4-逻辑结构" class="headerlink" title="4.逻辑结构"></a>4.逻辑结构</h5><p>搞清楚了表空间的物理存储结构之后，我们简单再看下它的逻辑存储结构：<br><img src="/2021/08/14/database/mysql-layout/Images/page_logic_arc.png"></p>
+<h3 id="区管理"><a href="#区管理" class="headerlink" title="区管理"></a>区管理</h3><p>innodb通过XDES Entry表来管理组内的256个区。<br>表空间头部信息页(FSP_HDR)和扩展描述页(XDES)用来存储XDES Entry表</p>
+<h5 id="1-页的通用部分"><a href="#1-页的通用部分" class="headerlink" title="1. 页的通用部分"></a>1. 页的通用部分</h5><p>每个页都是16k，它们(共有11种页)有相同部分的结构：<br><img src="/2021/08/14/database/mysql-layout/Images/page_common.png"><br>其中File Header描述了页的通用信息，比方说页号、页类型、校验和、上一个页号、下一个页号、日志序列号等。<br>File Trailer 用于校验页是否完整，它的校验过程:</p>
 <ol>
 <li>修改数据时，File Header记录下新数据的校验和。</li>
 <li>先写入File Header和数据内容，等File Header写入成功，再写入File Trailer</li>
 <li>如果中间宕机了，只要比对File Header和File Trailer的校验和是否一致就性了</li>
 </ol>
-<h3 id="表空间头部信息页-FSP-HDR-和扩展描述页-XDES"><a href="#表空间头部信息页-FSP-HDR-和扩展描述页-XDES" class="headerlink" title="表空间头部信息页(FSP_HDR)和扩展描述页(XDES)"></a>表空间头部信息页(FSP_HDR)和扩展描述页(XDES)</h3><p>FSP_HDR和XDES的结构类似，可以对照着一起看。</p>
-<h5 id="数据格式"><a href="#数据格式" class="headerlink" title="数据格式"></a>数据格式</h5><p>FSP_HDR页的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/FSP_HDR.png"><br>XDES页的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/XDES.png"></p>
-<h5 id="区块描述符-XDES-Entry"><a href="#区块描述符-XDES-Entry" class="headerlink" title="区块描述符(XDES Entry)"></a>区块描述符(XDES Entry)</h5><p>FSP_HDR和XDES都有一张XDES Entry表，这张表记录了所属组256个区的信息。<br>这些信息包括：</p>
+<h5 id="2-表空间头部信息页-FSP-HDR-和扩展描述页-XDES"><a href="#2-表空间头部信息页-FSP-HDR-和扩展描述页-XDES" class="headerlink" title="2.表空间头部信息页(FSP_HDR)和扩展描述页(XDES)"></a>2.表空间头部信息页(FSP_HDR)和扩展描述页(XDES)</h5><p>FSP_HDR和XDES的结构类似，可以对照着一起看。<br>FSP_HDR页的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/FSP_HDR.png"><br>XDES页的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/XDES.png"></p>
+<h5 id="3-区块描述符-XDES-Entry"><a href="#3-区块描述符-XDES-Entry" class="headerlink" title="3.区块描述符(XDES Entry)"></a>3.区块描述符(XDES Entry)</h5><p>FSP_HDR和XDES都有一张XDES Entry表，这张表记录了所属组256个区的信息。<br>这些信息包括：</p>
 <ol>
 <li>属于哪个段(如果是碎片区则无效)；</li>
 <li>上一个XDES Entry和下一个XDES Entry的指针；</li>
 <li>区的种类（包括空闲区、有剩余空间的碎片区、没有剩余空间的碎片区、附属于某个段的区）；</li>
 <li>页的空闲bitmap表</li>
 </ol>
-<p>段和碎片区的概念大家已经清楚了，而第4项用于快速找到当前组剩余的空闲页。<br>下面我们重点看下它的2个指针的作用，这种结构一般用于双向链表。<br>假设你要插入一条数据，这时候如果数据比较少，则mysql从碎片区找空闲页<br>而如果当前的数据量比较大，mysql则从对应的段中找有空闲页的区<br>因此如果不使用链表，而是全遍历，就又影响性能了。<br>mysql根据区的种类以及段ID将不同类型的区链接了起来。<br>直属于表空间：<br>&nbsp;&nbsp;&nbsp;&nbsp;1. 碎片区：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 空闲碎片区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 有剩余空间的碎片区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.3 没有剩余空间的碎片区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;2. 段1：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 属于段1，空闲区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 属于段1，有剩余空间的链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 属于段1，没有剩余空间的链表<br>&nbsp;&nbsp;&nbsp;&nbsp;3. 段2：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;…</p>
+<p>段和碎片区的概念大家已经清楚了，而第4项用于快速找到当前组剩余的空闲页。<br>下面我们重点看下它的2个指针的作用，它用于双向链表。<br>假设你要插入一条数据，这时候如果数据比较少，则mysql从碎片区找空闲页。<br>而如果当前的数据量比较大，InnoDB则从对应的段中找有空闲页的区。<br>因此如果不使用链表，而是全遍历，就又影响性能了。<br>mysql根据区的种类以及段ID将不同类型的区链接了起来。<br>直属于表空间：<br>&nbsp;&nbsp;&nbsp;&nbsp;1. 碎片区：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.1 空闲碎片区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.2 有剩余空间的碎片区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1.3 没有剩余空间的碎片区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;2. 段1：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 属于段1，空闲区链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 属于段1，有剩余空间的链表<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 属于段1，没有剩余空间的链表<br>&nbsp;&nbsp;&nbsp;&nbsp;3. 段2：<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;…</p>
 <p>将这些区链接之后，就不需要对所有的XDES entry进行遍历了。(可以适当的想想内存池管理)</p>
-<h5 id="File-Space-Header结构"><a href="#File-Space-Header结构" class="headerlink" title="File Space Header结构"></a>File Space Header结构</h5><p>前面我们讲了XDES Entry的双向链表，但链表的入口在哪里的？<br>其中碎片区的链表入口在File Space Header，这个结构体属于FSP_HDR特有的，因此我们可以把碎片区理解成是表空间直属的。<br>由于在FSP_HDR页格式的图中已经描述了每个字段的内容，因此不再细说。</p>
-<h3 id="段信息节点页-INODE"><a href="#段信息节点页-INODE" class="headerlink" title="段信息节点页(INODE)"></a>段信息节点页(INODE)</h3><p>XDES Entry用于描述区的信息，而INODE Entry用于描述段的信息。</p>
-<h5 id="1-数据格式"><a href="#1-数据格式" class="headerlink" title="1. 数据格式"></a>1. 数据格式</h5><p>INODE页的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/INODE_page.png"><br>如果表空间中的段特别多(索引很多)，一个INODE页可能放不下所有的INODE Entry，因此需要申请新的INODE页，于是mysql也把Inode页链接了起来。<br>List Node for INODE Page List就是用于链接的(前后指针)，而这个链表的入口也在FSP_HDR的File Space Header中。</p>
+<h5 id="4-File-Space-Header结构"><a href="#4-File-Space-Header结构" class="headerlink" title="4.File Space Header结构"></a>4.File Space Header结构</h5><p>前面我们讲了XDES Entry的双向链表，但链表的入口在哪里的？<br>其中碎片区的链表入口在File Space Header，这个结构体属于FSP_HDR特有的，因此我们可以把碎片区理解成是表空间直属的。<br>由于在FSP_HDR页格式的图中已经描述了每个字段的内容，因此不再细说。</p>
+<h3 id="段管理"><a href="#段管理" class="headerlink" title="段管理"></a>段管理</h3><p>XDES Entry用于描述区的信息，而INODE Entry用于描述段的信息。</p>
+<h5 id="1-段信息节点页-数据格式"><a href="#1-段信息节点页-数据格式" class="headerlink" title="1. 段信息节点页 - 数据格式"></a>1. 段信息节点页 - 数据格式</h5><p>INODE页的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/INODE_page.png"><br>如果表空间中的段特别多(索引很多)，一个INODE页可能放不下所有的INODE Entry，因此需要申请新的INODE页，于是List Node再次出现。<br>List Node for INODE Page List就是用于链接的(前后指针)，而这个链表的入口也在FSP_HDR的File Space Header中。</p>
 <h5 id="2-段描述符-INODE-Entry"><a href="#2-段描述符-INODE-Entry" class="headerlink" title="2. 段描述符(INODE Entry)"></a>2. 段描述符(INODE Entry)</h5><p>格式如下：<br><img src="/2021/08/14/database/mysql-layout/Images/INODE_entry.png"><br>前面在讲XDES Entry的双向链表时，我们已经把碎片区的链表入口找到了，而属于某个段的链表入口则是在这个结构中。<br>除了3个链表的入口以外，还有32个碎片页的页号记录。这32个碎片页是在表数据小的时候用到。。。（回看”段与碎片区”的描述）</p>
-<h3 id="数据-索引页-INDEX"><a href="#数据-索引页-INDEX" class="headerlink" title="数据/索引页(INDEX)"></a>数据/索引页(INDEX)</h3><p>前面讲的都是mysql用于管理所用到的数据格式，下面我们看看用户的实际数据是怎么存储的。<br>在mysql中存储数据的页和存储索引的页在结构上是没有区别的。</p>
-<h5 id="1-数据格式-1"><a href="#1-数据格式-1" class="headerlink" title="1.数据格式"></a>1.数据格式</h5><p><img src="/2021/08/14/database/mysql-layout/Images/data_index.png"><br>其中Infimum和Supremum是最小、最大记录，这2条记录是系统自动给我们生成的。</p>
-<h5 id="2-行记录格式"><a href="#2-行记录格式" class="headerlink" title="2.行记录格式"></a>2.行记录格式</h5><p>每一个用户记录的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/record_head.png"><br>图中第一行的内容如下：</p>
+<h3 id="页-数据-索引页-INDEX"><a href="#页-数据-索引页-INDEX" class="headerlink" title="页-数据/索引页(INDEX)"></a>页-数据/索引页(INDEX)</h3><p>前面讲的都是InnoDB用于管理表空间所用到的数据格式，下面我们看看用户的实际数据是怎么存储的。<br>在mysql中存储数据的页和存储索引的页在结构上是没有区别的。</p>
+<h5 id="1-数据页格式"><a href="#1-数据页格式" class="headerlink" title="1.数据页格式"></a>1.数据页格式</h5><p><img src="/2021/08/14/database/mysql-layout/Images/data_index.png"><br>其中Infimum和Supremum是最小、最大记录，这2条记录是系统自动给我们生成的。</p>
+<h5 id="2-行记录格式"><a href="#2-行记录格式" class="headerlink" title="2.行记录格式"></a>2.行记录格式</h5><p>每一条用户记录的格式：<br><img src="/2021/08/14/database/mysql-layout/Images/record_head.png"><br>图中第一行的内容如下：</p>
 <ol>
 <li>变长字段长度列表：存储varchar字符串类型的时候，用于记录字符串的长度</li>
 <li>NULL值列表：记录列的值是否为NULL的bitmap表，只要创建创建表的时候没有not NULL声明，就会有相应的bit位。</li>
 <li>记录头信息：重点关注next_record用于链表(理解成next指针)，这是为了让mysql的数据按照主建的大小顺序排列。</li>
 </ol>
-<h5 id="3-页目录（Page-Directory）"><a href="#3-页目录（Page-Directory）" class="headerlink" title="3.页目录（Page Directory）"></a>3.页目录（Page Directory）</h5><p>在一个页中，mysql除了会把记录从小到大排序以外，还会对页内数据进行分组，而且每个分组的记录数在1-8条，如果超过8条，则会将记录进行拆分。<br>这么做的原因自然还是为了加快查找速度，通过分组只要遍历组和相应组的1-8条记录即可。<br>页目录就是用来存放分组信息(当前组最大节点的偏移地址)：<br><img src="/2021/08/14/database/mysql-layout/Images/page_directory.png"><br>图中内部数据指针省略了。</p>
-<h5 id="4-页面头部（Page-Header）"><a href="#4-页面头部（Page-Header）" class="headerlink" title="4.页面头部（Page Header）"></a>4.页面头部（Page Header）</h5><p>这个结构自然用于存放本页的全局信息。比如有多少条记录，第一条记录的入口地址， Page Directory槽的个数，还未使用的空间大小等，感兴趣的自己看书。</p>
-<h3 id="总结图"><a href="#总结图" class="headerlink" title="总结图"></a>总结图</h3><p>上面的这些数据结构除了专业搞mysql的，可能根本记不住，因此如果某一天要用到了，可以参考下面这张全图:<br><img src="/2021/08/14/database/mysql-layout/Images/overall.png"><br>这些数据结构背后的设计，更加值得我们学习，比方：</p>
+<h5 id="3-页目录（Page-Directory）"><a href="#3-页目录（Page-Directory）" class="headerlink" title="3.页目录（Page Directory）"></a>3.页目录（Page Directory）</h5><p>在一个页中，InnoDB除了会把记录从小到大排序以外，还会对页内数据进行分组，而且每个分组的记录数在1-8条，如果超过8条，则会将记录进行拆分。<br>这么做的原因自然还是为了加快查找速度，通过分组只要遍历组和相应组的1-8条记录即可。<br>页目录就是用来存放分组信息(指向当前组最大节点的偏移地址)：<br><img src="/2021/08/14/database/mysql-layout/Images/page_directory.png"><br>图中内部数据指针只画了部分，大家理解即可。</p>
+<h5 id="4-页面头部（Page-Header）"><a href="#4-页面头部（Page-Header）" class="headerlink" title="4.页面头部（Page Header）"></a>4.页面头部（Page Header）</h5><p>这个结构自然用于存放本页的全局信息。比如有多少条记录，第一条记录的入口地址， Page Directory槽的个数，还未使用的空间大小等，感兴趣的自己看《MySQL是怎样运行的：从根儿上理解MySQL》。</p>
+<h3 id="总结图"><a href="#总结图" class="headerlink" title="总结图"></a>总结图</h3><p>上面的这些数据结构除了专业搞mysql的，可能根本记不住，如果某一天要用到了，可以参考下面这张全图:<br><img src="/2021/08/14/database/mysql-layout/Images/overall.png"><br>这些数据结构背后的设计，更加值得我们学习，比方：</p>
 <ol>
 <li>文件内部分组、分区、分页的分层管理</li>
 <li>段与碎片区的概念</li>
-<li>在文件中如何快速找到空闲的页</li>
-<li>数据量大时和数据量小时应该如何处理</li>
-<li>文件中如何实现链表、双向链表、页目录(类似散列表)</li>
-<li>如何避免随机IO，如何提高磁盘读写IO</li>
-<li>如何保证数据的一致性(日志文件系统也有类似的机制)<br>等等。。。</li>
+<li>如何快速找到空闲的页</li>
+<li>数据量小的时候如何避免空间浪费，数据量大的时候如何保证物理空间连续。</li>
+<li>如何在文件中实现链表、双向链表、页目录</li>
+<li>如何避免随机IO，提高磁盘读写效率</li>
+<li>如何保证数据的一致性<br>等等。。。</li>
 </ol>
-<h3 id="资料"><a href="#资料" class="headerlink" title="资料"></a>资料</h3><p>书籍：<br>《MySQL是怎样运行的：从根儿上理解MySQL》图片均来自本书</p>
+<h3 id="资料"><a href="#资料" class="headerlink" title="资料"></a>资料</h3><p>书籍：<br>《MySQL是怎样运行的：从根儿上理解MySQL》<br>《Mysql技术内幕 InnoDB存储引擎》（第二版）<br>《高性能MySql》（第三版）<br>官方资料：<br><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-storage-engine.html">https://dev.mysql.com/doc/refman/8.0/en/innodb-storage-engine.html</a><br>PS：<br>如果对InnoDB的存储格式感兴趣，强烈推荐《MySQL是怎样运行的：从根儿上理解MySQL》</p>
 
         </div>
         <footer class="article-footer">
@@ -344,15 +355,16 @@
             "name": "Liji"
         },
         "headline": "mysql-存储布局",
-        "image": "https://liji53.github.io/2021/08/14/database/mysql-layout/Images/arch.png",
+        "image": "https://liji53.github.io/2021/08/14/database/mysql-layout/Images/double_write_arch.png",
         "keywords": "",
         "genre": "数据库",
         "datePublished": "2021-08-14",
         "dateCreated": "2021-08-14",
         "dateModified": "2021-08-14",
         "url": "https://liji53.github.io/2021/08/14/database/mysql-layout/",
-        "description": "mysql-存储布局现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。下面我们将开始解密mysql数据库的底层原理，但在学习mysql之前，我们要先熟知它的整体框架:这里我们跳过server层，直接来到存储引擎一层(只看InnoDB)。可能我们平常在软件设计时，大部分打交道的都是内存中的",
-        "wordCount": 173
+        "description": "mysql-存储布局我们平常在软件设计时，大部分打交道的都是内存中的数据结构。这次我们来看看InnoDB在文件中是如何设计数据结构的(回顾mysql-整体架构InnoDB架构的On-Disk Structures)。
+磁盘架构从前面一节的架构图中，我们可以看到有多种表空间文件，如系统表空间(ibdata1)、独立表空间(表名.ibd)等。除了表空间，还存在doublewrite 文件，重做日志文件",
+        "wordCount": 232
     }
 </script>
 
@@ -433,20 +445,20 @@
         
 <nav id="article-nav">
     
-        <a href="/2021/09/02/pythonOther/oracleMigration/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2021/08/21/database/mysql-index/" id="article-nav-newer" class="article-nav-link-wrap">
         <strong class="article-nav-caption">下一篇</strong>
         <p class="article-nav-title">
         
-            oracle数据迁移
+            mysql-索引
         
         </p>
         <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
     </a>
     
     
-        <a href="/2021/07/30/pythonOther/deployMonitor/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2021/08/11/database/mysql-arch/" id="article-nav-older" class="article-nav-link-wrap">
         <strong class="article-nav-caption">上一篇</strong>
-        <p class="article-nav-title">数据监控(influxDb+grafana)</p>
+        <p class="article-nav-title">mysql-整体架构</p>
         <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
         </a>
     
@@ -574,7 +586,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -584,7 +596,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 

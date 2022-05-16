@@ -169,10 +169,159 @@
         <article class="article article-summary">
     <div class="article-summary-inner">
         
+        <a href="/2021/09/04/database/mysql-lock/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/09/04/database/mysql-lock/Images/undo_indexPage.png)" alt="mysql-并发" class="thumbnail-image"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/09/04/database/mysql-lock/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+            </div>
+            <div class="date"><time datetime="2021-09-04T13:20:46.000Z" itemprop="datePublished">2021-09-04</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2021/09/04/database/mysql-lock/">mysql-并发</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            mysql-并发对于MySql服务器来说，可能同时要处理多个事务。如果在处理多事务的时候，让事务排队进行这样对性能的影响非常大。如何让Mysql既有较好的隔离性，又有较好的性能，这就是MVCC和锁要做的事情。
+隔离与MVCC1. 事务并发问题
+脏写：一个事务修改了另一个未提交事务修改过的数据
+脏读：一个事务读到了另一个未提交事务修改过的数据
+不可重复读：一个事务只能读到另一个已经提交的事务修改过的
+        </p>
+    </div>
+</article>
+    
+
+    
+    
+    
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
+        <a href="/2021/08/29/database/mysql-transaction/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/08/29/database/mysql-transaction/Images/redo_log.png)" alt="mysql-事务" class="thumbnail-image"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/08/29/database/mysql-transaction/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+            </div>
+            <div class="date"><time datetime="2021-08-29T18:42:00.000Z" itemprop="datePublished">2021-08-29</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2021/08/29/database/mysql-transaction/">mysql-事务</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            mysql-事务先看下事务的概念：需要保证原子性、隔离性、一致性和持久性（AICD）的一个或多个数据库操作。
+redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是把对数据的修改记录下来，如果出现宕机，在重启的时候对数据进行恢复(与double write的区别mysql-存储布局)。它的机制可以与日志文件系统如ext3、ext4 对比学习，参考操作系统-文件系统
+1.
+        </p>
+    </div>
+</article>
+    
+        </div>
+    
+
+    
+    
+    
+    
+        <div class="article-row">
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
+        <a href="/2021/08/21/database/mysql-index/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/08/21/database/mysql-index/Images/index_directory.png)" alt="mysql-索引" class="thumbnail-image"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/08/21/database/mysql-index/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+            </div>
+            <div class="date"><time datetime="2021-08-21T13:21:02.000Z" itemprop="datePublished">2021-08-21</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2021/08/21/database/mysql-index/">mysql-索引</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            mysql-索引在使用数据库时，表索引的设计，以及使用sql语句时如何使用索引，是DBA、开发非常关心的事情。如果连索引的实现原理都不清楚，根本就无法写出高效的查询语句，也无法对表结构进行优化。
+聚簇索引1.索引的结构我们已经知道了在一个页中如何通过页目录对页内数据进行查找（回顾mysql-存储布局数据页格式）。而如何快速找到数据在哪个页中，则通过索引实现，索引页和数据页的页类型是相同的，因为In
+        </p>
+    </div>
+</article>
+    
+
+    
+    
+    
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
         <a href="/2021/08/14/database/mysql-layout/" class="thumbnail">
     
     
-        <span style="background-image:url(/2021/08/14/database/mysql-layout/Images/arch.png)" alt="mysql-存储布局" class="thumbnail-image"></span>
+        <span style="background-image:url(/2021/08/14/database/mysql-layout/Images/double_write_arch.png)" alt="mysql-存储布局" class="thumbnail-image"></span>
     
     
         
@@ -202,7 +351,59 @@
     
 
         <p class="article-excerpt">
-            mysql-存储布局现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。下面我们将开始解密mysql数据库的底层原理，但在学习mysql之前，我们要先熟知它的整体框架:这里我们跳过server层，直接来到存储引擎一层(只看InnoDB)。可能我们平常在软件设计时，大部分打交道的都是内存中的
+            mysql-存储布局我们平常在软件设计时，大部分打交道的都是内存中的数据结构。这次我们来看看InnoDB在文件中是如何设计数据结构的(回顾mysql-整体架构InnoDB架构的On-Disk Structures)。
+磁盘架构从前面一节的架构图中，我们可以看到有多种表空间文件，如系统表空间(ibdata1)、独立表空间(表名.ibd)等。除了表空间，还存在doublewrite 文件，重做日志文件
+        </p>
+    </div>
+</article>
+    
+        </div>
+    
+
+    
+    
+    
+    
+        <div class="article-row">
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
+        <a href="/2021/08/11/database/mysql-arch/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/08/11/database/mysql-arch/Images/arch_mysql.png)" alt="mysql-整体架构" class="thumbnail-image"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/08/11/database/mysql-arch/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+            </div>
+            <div class="date"><time datetime="2021-08-11T19:20:30.000Z" itemprop="datePublished">2021-08-11</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2021/08/11/database/mysql-arch/">mysql-整体架构</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            mysql-整体架构现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。在《Mysql技术内幕 InnoDB存储引擎》中作者认为一个新的OLTP项目不使用mysql InnoDB存储引擎是非常愚蠢的（非常的自信）。
+数据库的分类关系型数据库(sql)：适合存储结构化数据(抽象成二维表格模型
         </p>
     </div>
 </article>
@@ -396,7 +597,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -406,7 +607,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 

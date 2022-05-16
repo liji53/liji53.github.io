@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>mysql-整体架构 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="mysql-整体架构现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。在《Mysql技术内幕 InnoDB存储引擎》中作者认为一个新的OLTP项目不使用mysql InnoDB存储引擎是非常愚蠢的（非常的自信）。 数据库的分类关系型数据库(sql)：适合存储结构化数据(抽象成二维表格模型">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql-整体架构">
+<meta property="og:url" content="https://liji53.github.io/2021/08/11/database/mysql-arch/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="mysql-整体架构现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。在《Mysql技术内幕 InnoDB存储引擎》中作者认为一个新的OLTP项目不使用mysql InnoDB存储引擎是非常愚蠢的（非常的自信）。 数据库的分类关系型数据库(sql)：适合存储结构化数据(抽象成二维表格模型">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/2021/08/11/database/mysql-arch/Images/arch_mysql.png">
+<meta property="article:published_time" content="2021-08-11T19:20:30.000Z">
+<meta property="article:modified_time" content="2021-08-11T19:20:30.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/2021/08/11/database/mysql-arch/Images/arch_mysql.png">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-database/mysql-arch" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        mysql-整体架构
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/08/11/database/mysql-arch/" class="article-date">
+       <time datetime="2021-08-11T19:20:30.000Z" itemprop="datePublished">2021-08-11</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/08/11/database/mysql-arch/" class="article-date">
+     <time datetime="2021-08-11T19:20:30.000Z" itemprop="dateModified">2021-08-11</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="mysql-整体架构"><a href="#mysql-整体架构" class="headerlink" title="mysql-整体架构"></a>mysql-整体架构</h1><p>现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。<br>在《Mysql技术内幕 InnoDB存储引擎》中作者认为一个新的OLTP项目不使用mysql InnoDB存储引擎是非常愚蠢的（非常的自信）。</p>
+<h3 id="数据库的分类"><a href="#数据库的分类" class="headerlink" title="数据库的分类"></a>数据库的分类</h3><p>关系型数据库(sql)：适合存储结构化数据(抽象成二维表格模型)，支持事务保证ACID，支持SQL适合复杂、多表的查询，缺点是海量数据的读写效率以及可扩展性。<br>非关系型数据库(NoSql)：常给web应用提供可扩展的高性能数据库，有redis、HBase、BigTable、MongoDB</p>
+<p>行数据库和列数据库：行数据库存储数据的方式是一行行存储的，适合OLTP应用。列数据库按列存储，因此每一列数据都为索引(数据即索引)，适合OLAP应用</p>
+<p>OLTP(on line transaction processing)：对数据做增删改的操作频繁的应用，要求稳定性、实时性。如银行交易系统、淘宝购物等。<br>OLAP(on line analytical processing)：对数据的查询频繁、查询量大的应用，适合做数据分析，为决策提供支持。</p>
+<p>按照上面分类，我们的主角InnoDB属于关系型数据库-行数据库-目标群体主要面向OLTP的应用。</p>
+<h3 id="整体架构"><a href="#整体架构" class="headerlink" title="整体架构"></a>整体架构</h3><p>在学习mysql之前，我们要先熟知它的整体框架:<br><img src="/2021/08/11/database/mysql-arch/Images/arch_mysql.png"><br>server层(后续介绍优化器)在这里不做介绍。而存储引擎我们只看InnoDB的实现。<br>InnoDB与其他mysql存储引擎的比较，参考官网：<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/storage-engines.html">https://dev.mysql.com/doc/refman/8.0/en/storage-engines.html</a><br>InnoDB的架构：<br><img src="/2021/08/11/database/mysql-arch/Images/arch_InnoDB.png"><br>聚焦到内存池以及存储磁盘的架构：<br><img src="/2021/08/11/database/mysql-arch/Images/innodb-architecture.png"><br>这张图有点复杂，我们先看内存部分。</p>
+<h3 id="内存架构"><a href="#内存架构" class="headerlink" title="内存架构"></a>内存架构</h3><h5 id="1-buffer-pool-结构"><a href="#1-buffer-pool-结构" class="headerlink" title="1. buffer pool - 结构"></a>1. buffer pool - 结构</h5><p>InnoDB会申请一大块内存，并对这块内存进行分页，一个页的大小是16K。<br><img src="/2021/08/11/database/mysql-arch/Images/buffer_pool.png"><br>其中控制块记录了对应缓存页的表空间ID、页号、链表节点信息等。<br>而在多线程的环境中，为了减少锁的开销，一般会通过减少锁的空间颗粒度从而减少锁的冲突(参考<a href="https://liji53.github.io/2021/06/29/operatingSystem/os-concurrency/">操作系统-并发</a>)<br>因此将buffer pool设计成多个小的buffer pool，能有效提升多线程的性能。<br>如图所示：<br><img src="/2021/08/11/database/mysql-arch/Images/buffer_linklist.png"><br>其中chunk是mysql申请内存的单位，这样可以细化内存申请的颗粒度，避免大规模的内存拷贝。</p>
+<h5 id="2-buffer-pool-free链表、Flush链表、LRU链表"><a href="#2-buffer-pool-free链表、Flush链表、LRU链表" class="headerlink" title="2. buffer pool - free链表、Flush链表、LRU链表"></a>2. buffer pool - free链表、Flush链表、LRU链表</h5><p>mysql针对不同的业务场景，将不同状态的缓存页的控制块按照链表的形式链接了起来。</p>
+<ol>
+<li>free链表, 当我们要访问数据时，先通过哈希表（key为表空间ID+页号，散列算法为mod，哈希桶的个数为比buffer pool页数*2大一点的质数）来快速定位是否在buffer pool中，如果不在pool中，则从free链表中取一个空闲的缓存页控制块<br><img src="/2021/08/11/database/mysql-arch/Images/buffer_freelist.png"></li>
+<li>flush链表，当我们修改了这个页的数据，于是就变成了脏页，需要在未来的某个时间点写入磁盘。而flush链表就是记录了哪些页需要flush到磁盘。</li>
+<li>LRU链表，如果buffer pool的空间满了，而需要访问的页没有命中时，就需要从磁盘中读一个页，并把当前buffer pool中的一个页淘汰掉，LRU链表管理了缓存池中页的可用性。</li>
+</ol>
+<p>Free和flush链表不涉及太复杂的策略，但LRU的策略是我们需要清楚的（LRU策略会经常遇到，比方在<a href="https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/">操作系统-虚拟memory</a>就遇到过）<br>mysql会把LRU链表分成2部分：young和old,分表表示热数据和冷数据<br>如图所示：<br><img src="/2021/08/11/database/mysql-arch/Images/buffer_LRUlist.png"><br>它的策略如下：</p>
+<ol>
+<li>每次从磁盘中读一个新的页时，会把新的页放入到old区的头部。这样就能防止把一些真正的热数据淘汰</li>
+<li>记录缓存页第一次访问时间，如果在一定时间间隔后，再次访问了这个缓存页，就会把它移动到young区域的头部。防止出现短时间内访问大量使用频率非常低的页面。</li>
+<li>第二条策略会导致链表节点移动频繁，因此只有被访问的缓存页位于young 区域的1/4 后边，才会被移动到LRU链表头部。</li>
+</ol>
+<h5 id="3-change-buffer-insert-buffer"><a href="#3-change-buffer-insert-buffer" class="headerlink" title="3. change buffer(insert buffer)"></a>3. change buffer(insert buffer)</h5><p>change buffer是insert buffer的升级，官方文档中就叫change buffer。<br>change buffer只有在对非唯一的二级索引进行DML操作才会使用。<br>必须是二级索引的原因：二级索引对主键的存放是散列的，对于HDD存储，随机读写的代价是巨大的，参考<a href="https://liji53.github.io/2021/07/10/operatingSystem/os-fileSystem/">文件系统</a>。因此在DML操作时，如果需要修改的二级索引页不在buffer pool中，则会先放入到change buffer，避免随机读写。<br>而必须是非唯一索引的原因：非唯一索引不需要读整个索引判断是否唯一，再次避免了随机读<br>它的架构如图所示：<br><img src="/2021/08/11/database/mysql-arch/Images/innodb-change-buffer.png"><br>从图中可以知道：</p>
+<ol>
+<li>change buffer 属于buffer pool的一部分（默认最大使用25%的buffer pool）</li>
+<li>InnoDB会以一定的周期将insert buffer中的索引页和实际数据页合并。如果宕机了，inset buffer数据较多的话，需要花大量时间恢复数据。</li>
+</ol>
+<p>change buffer页的数据也是按照B+树组织的，其中叶子节点存放了二级索引的记录。<br>insert buffer bitmap用于记录实际二级索引页的剩余可用空间(下一节看它的物理位置)，帮助change buffer 与二级索引进行合并。</p>
+<h5 id="4-自适应哈希索引"><a href="#4-自适应哈希索引" class="headerlink" title="4. 自适应哈希索引"></a>4. 自适应哈希索引</h5><p>从内存池的架构图中，我们可以知道，自适应哈希索引是对buffer pool中的数据页建立索引，并不是对全表建立索引。<br>而有意思的是自适应这个词，这表示InnoDB会监控对索引页的查询，只有在一定情况下才对数据页建立索引，它的策略如下：</p>
+<ol>
+<li>对数据页的访问模式必须是一样的（如where a = ‘xxx’, 不支持范围查询）</li>
+<li>以条件1的模式访问了100次</li>
+<li>以条件1的模式访问了N次，其中N=页中记录*1/16</li>
+</ol>
+<p>同时为了减少锁的冲突，InnoDB将自适应哈希索引默认分成8个分区(可以通过参数修改)<br>注意：在buffer pool中我们提到了用于判断数据是否在buffer pool的哈希表，这两个不是一回事。</p>
+<h5 id="5-log-buffer"><a href="#5-log-buffer" class="headerlink" title="5. log buffer"></a>5. log buffer</h5><p>这里的log 指redo log，不包括undo log（后面详细介绍这两个）。<br>log也需要写入到磁盘，跟普通数据一样，不可能有一条log就立马写入磁盘，因此redo log同样需要buffer（默认16M）。<br>redo log buffer同样也进行分页管理，一个页是512B（跟HDD的扇区大小一致，这样能保证原子，因此redo log 不需要double write策略）。<br>如图所示：<br><img src="/2021/08/11/database/mysql-arch/Images/redo_buffer.png"><br>关于redo log buffer 的管理，我们后面再讲，先知道有这个东西即可。</p>
+<h3 id="后台线程"><a href="#后台线程" class="headerlink" title="后台线程"></a>后台线程</h3><p>这里我们主要讲InnoDB中的后台线程，而不是server层用于负责连接以及负责执行sql的线程。</p>
+<h5 id="1-线程分类"><a href="#1-线程分类" class="headerlink" title="1.线程分类"></a>1.线程分类</h5><p>InnoDB中主要有以下4种线程:</p>
+<ol>
+<li>Master Thread: 主要负责将缓存池中的数据异步刷新到磁盘。</li>
+<li>IO Thread：主要负责异步IO的回调处理，默认有4个read、4个write、1个insert buffer、1个log</li>
+<li>Purge Thread：事务提交后，undo log可能不再需要了，该线程用来回收无用的undo log页。（回收的策略由于涉及到read View，在后面讲）</li>
+<li>Page cleaner Thread: 将脏页的更新都放到这个线程中执行</li>
+</ol>
+<h5 id="2-Master-Thread"><a href="#2-Master-Thread" class="headerlink" title="2.Master Thread"></a>2.Master Thread</h5><p>Master Thread的逻辑参考《Mysql技术内幕 InnoDB存储引擎》，只写了部分逻辑</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">master_thread</span>():</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="keyword">if</span> InnoDB <span class="keyword">is</span> idle:  </span><br><span class="line">            <span class="comment"># innodb_io_capacity(参数)表示磁盘吞吐量，默认200</span></span><br><span class="line">            <span class="comment"># 官方给出的参考是如果是7200RPM的HDD，建议把这个参数改成100，如果是SSD磁盘，建议把这个参数改大</span></span><br><span class="line">            <span class="keyword">if</span> last_ten_second_io &lt; innodb_io_capacity:</span><br><span class="line">                do_buffer_pool_flush_to_disk(<span class="number">100</span>)   <span class="comment"># 将100个脏页写如磁盘</span></span><br><span class="line">            do_merge_insert_buffer()                <span class="comment"># insert buffer的索引合并到硬盘</span></span><br><span class="line">            do_log_buffer_flush_to_disk()           <span class="comment"># 将redo log刷新到磁盘</span></span><br><span class="line">            do_full_purge()                         <span class="comment"># 回收undo 页</span></span><br><span class="line">            <span class="keyword">if</span> buf_get_modified_ratio_pct &gt; <span class="number">70</span>%:     </span><br><span class="line">                do_buffer_pool_flush_to_disk()      <span class="comment"># 脏页刷新到硬盘，新版本中已经放到Page cleaner Thread中执行。</span></span><br><span class="line">        <span class="keyword">else</span>: </span><br><span class="line">            do_log_buffer_flush_to_disk()           <span class="comment"># 将redo log刷新到磁盘</span></span><br><span class="line">            <span class="keyword">if</span> last_one_second_io &lt; <span class="number">5</span> % innodb_io_capacity:</span><br><span class="line">                do_merge_insert_buffer()            <span class="comment"># 磁盘io压力不大,将insert buffer的索引合并到硬盘</span></span><br><span class="line">            <span class="comment"># buf_get_modified_ratio_pct(参数)，默认90</span></span><br><span class="line">            <span class="comment"># 当脏页的数量大于90%时，则进行脏页刷新</span></span><br><span class="line">            <span class="keyword">if</span> buf_get_modified_ratio_pct &gt; innodb_max_dirty_pages_pct:</span><br><span class="line">                do_buffer_pool_flush_to_disk()      <span class="comment"># 脏页刷新到硬盘，新版本中已经放到Page cleaner Thread中执行。</span></span><br><span class="line">            <span class="keyword">if</span> no_user_active:</span><br><span class="line">                do_full_purge()                     <span class="comment"># 回收undo 页</span></span><br><span class="line">            sleep(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+<p>主要是干这些事情：</p>
+<ol>
+<li>刷新脏页到磁盘（已经交给新的线程做了）</li>
+<li>合并插入缓存的数据（尽量在空闲的时候）</li>
+<li>将redo log数据刷新到磁盘（为保证原子性，总时执行）</li>
+<li>回收无用的undo log页（已经交给新的线程执行了）</li>
+</ol>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>书籍：<br>《MySQL是怎样运行的：从根儿上理解MySQL》<br>《Mysql技术内幕 InnoDB存储引擎》（第二版）<br>《高性能MySql》（第三版）<br>官方资料：<br><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/innodb-storage-engine.html">https://dev.mysql.com/doc/refman/8.0/en/innodb-storage-engine.html</a></p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/08/11/database/mysql-arch/" data-id="cl2u2v3u100011cn40r3gbubd" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "mysql-整体架构",
+        "image": "https://liji53.github.io/2021/08/11/database/mysql-arch/Images/arch_mysql.png",
+        "keywords": "",
+        "genre": "数据库",
+        "datePublished": "2021-08-11",
+        "dateCreated": "2021-08-11",
+        "dateModified": "2021-08-11",
+        "url": "https://liji53.github.io/2021/08/11/database/mysql-arch/",
+        "description": "mysql-整体架构现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。在《Mysql技术内幕 InnoDB存储引擎》中作者认为一个新的OLTP项目不使用mysql InnoDB存储引擎是非常愚蠢的（非常的自信）。
+数据库的分类关系型数据库(sql)：适合存储结构化数据(抽象成二维表格模型",
+        "wordCount": 677
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/08/14/database/mysql-layout/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            mysql-存储布局
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2021/07/30/pythonOther/deployMonitor/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">数据监控(influxDb+grafana)</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/23/C++Project/LLVM/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/02/23/C++Project/LLVM/Images/LLVM_vs.png)" alt="LLVM(1)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/02/23/C++Project/LLVM/" class="title">LLVM(1)</a></p>
+                            <p class="item-date"><time datetime="2022-02-23T02:11:25.000Z" itemprop="datePublished">2022-02-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/02/04/C++Basic/atomic/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/02/04/C++Basic/atomic/" class="title">atomic</a></p>
+                            <p class="item-date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/13/C++Project/lexAndYacc/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2022/01/13/C++Project/lexAndYacc/Images/compiler_flow.png)" alt="利用lex和yacc做代码检查(上)" class="thumbnail-image"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/01/13/C++Project/lexAndYacc/" class="title">利用lex和yacc做代码检查(上)</a></p>
+                            <p class="item-date"><time datetime="2022-01-13T09:15:34.000Z" itemprop="datePublished">2022-01-13</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/01/08/C++Basic/smart-ptr/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></p>
+                            <p class="item-title"><a href="/2022/01/08/C++Basic/smart-ptr/" class="title">smart_ptr</a></p>
+                            <p class="item-date"><time datetime="2022-01-08T21:48:07.000Z" itemprop="datePublished">2022-01-08</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2021/12/03/pythonOther/regxStudy/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2021/12/03/pythonOther/regxStudy/" class="title">正则表达式入门</a></p>
+                            <p class="item-date"><time datetime="2021-12-03T02:22:13.000Z" itemprop="datePublished">2021-12-03</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/08/11/database/mysql-arch/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>
