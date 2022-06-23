@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>cryptography-对称密码 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="对称密码(共享密码)对称加密算法简单来说，就是把数据尽可能的打乱，并能把打乱的数据还原。 DESDES是以每64位为单位对明文进行加密的对称加密算法。它的密钥长度为56位(不包括8位校验码)。 Feistel结构Feistel网络是一种加密设计结构，而非加密算法。很多对称加密算法都采用这种设计结构。如下图所示(三轮)：每一轮解密的过程：这2张图中长得像网一样的结构就叫做Feistel网络。对于Fe">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cryptography-对称密码">
+<meta property="og:url" content="https://liji53.github.io/2021/09/20/cryptograghy/cryptography-cipher/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="对称密码(共享密码)对称加密算法简单来说，就是把数据尽可能的打乱，并能把打乱的数据还原。 DESDES是以每64位为单位对明文进行加密的对称加密算法。它的密钥长度为56位(不包括8位校验码)。 Feistel结构Feistel网络是一种加密设计结构，而非加密算法。很多对称加密算法都采用这种设计结构。如下图所示(三轮)：每一轮解密的过程：这2张图中长得像网一样的结构就叫做Feistel网络。对于Fe">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://liji53.github.io/2021/09/20/cryptograghy/cryptography-cipher/Images/des_round.png">
+<meta property="article:published_time" content="2021-09-20T18:40:11.000Z">
+<meta property="article:modified_time" content="2021-09-20T18:40:11.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://liji53.github.io/2021/09/20/cryptograghy/cryptography-cipher/Images/des_round.png">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/LLVM/">LLVM</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-cryptograghy/cryptography-cipher" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        cryptography-对称密码
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2021/09/20/cryptograghy/cryptography-cipher/" class="article-date">
+       <time datetime="2021-09-20T18:40:11.000Z" itemprop="datePublished">2021-09-20</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2021/09/20/cryptograghy/cryptography-cipher/" class="article-date">
+     <time datetime="2021-09-20T18:40:11.000Z" itemprop="dateModified">2021-09-20</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="对称密码-共享密码"><a href="#对称密码-共享密码" class="headerlink" title="对称密码(共享密码)"></a>对称密码(共享密码)</h1><p>对称加密算法简单来说，就是把数据尽可能的打乱，并能把打乱的数据还原。</p>
+<h3 id="DES"><a href="#DES" class="headerlink" title="DES"></a>DES</h3><p>DES是以每64位为单位对明文进行加密的对称加密算法。它的密钥长度为56位(不包括8位校验码)。</p>
+<h5 id="Feistel结构"><a href="#Feistel结构" class="headerlink" title="Feistel结构"></a>Feistel结构</h5><p>Feistel网络是一种加密设计结构，而非加密算法。很多对称加密算法都采用这种设计结构。<br>如下图所示(三轮)：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/des_round.png"><br>每一轮解密的过程：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/des_decrypt.png"><br>这2张图中长得像网一样的结构就叫做Feistel网络。<br>对于Feistel网络，我们需要知道：</p>
+<ol>
+<li>无论轮函数怎样实现（即使论函数不可逆),只要子密钥正确，就可以解密，因此轮函数可以设计的无比复杂。</li>
+<li>Feistel网络的轮数，可以任意增加，无论经过多少轮，都能解密</li>
+</ol>
+<h5 id="DES算法"><a href="#DES算法" class="headerlink" title="DES算法"></a>DES算法</h5><p>DES是16轮的Feistel型加密算法。<br>在进行16轮加密之前，DES会先对明文做一个固定的初始置换IP（其实这个置换对安全没有任何用处），等到16轮加密完成之后还会做一次逆置换。所谓的置换其实就是按照固定的规则把第N位的数据放到其他位置，把数据打乱而已。<br>下面我们看下DES的轮函数流程：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/des_Func.png"><br>这里扩展置换就是把32位的数据按照固定的位置置换表扩展成48位。<br>S盒变换根据固定的算法，把48位的数据变成32位，S盒也是保证安全的关键。<br>P盒变换就是根据另一张固定的位置置换表(做法跟第一步的初始置换IP类似)把数据打乱。<br>可以看到每一个步骤都需要按照固定的格式进行转化，限于篇幅，如果对它感兴趣，可以看《密码学原理与实践》。<br>子密码的生成过程，可以参考博客：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/TheFutureIsNow/p/10794182.html">https://www.cnblogs.com/TheFutureIsNow/p/10794182.html</a></p>
+<h5 id="3DES"><a href="#3DES" class="headerlink" title="3DES"></a>3DES</h5><p>DES已经可以被暴力破解了，而3DES就是用于增加DES的强度，其实就是对DES重复进行3次。如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/des_3des.png"><br>3DES的密钥长度为3*56=168位，其中中间的步骤不是加密而是解密这是为了兼容普通的DES。<br>3DES的主要问题就是运行速度并不快，安全性也不如AES。</p>
+<h3 id="AES"><a href="#AES" class="headerlink" title="AES"></a>AES</h3><p>AES是目前的主流对称加密算法，有128、192、256三种密钥长度。</p>
+<h5 id="AES算法"><a href="#AES算法" class="headerlink" title="AES算法"></a>AES算法</h5><p>AES并没有使用Feistel结构，但也要经过多轮加密，加密的轮数与密钥的长度相关(128位密钥需要10轮)。<br>AES也是分组加密，每组128位，比起DES，加密、解密的过程中可以按字节、行、列为单位进行并行计算。<br>每一轮的加密步骤如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/aes_encrypt.png"><br>其中SubBytes、ShiftRows、MixColumns的算法实现，自行参考《密码学原理与实践》</p>
+<h5 id="AES性能"><a href="#AES性能" class="headerlink" title="AES性能"></a>AES性能</h5><p>AES加解密的速度与数据长度线性相关。<br>从2008年开始，X86架构中开始支持AES-NI指令集，这种指令集能帮助AES加解密加速。<br>通过命令grep aes /proc/cpuinfo可以查看cpu是否支持。如果cpu支持，自然首选AES。<br>而在一些嵌入式领域中，如果不支持AES硬解，可以选择ChaCha20 算法。这个算法的性能比AES更加强大。</p>
+<h3 id="分组密码的模式"><a href="#分组密码的模式" class="headerlink" title="分组密码的模式"></a>分组密码的模式</h3><p>分组密码的模式指的是将明文分组之后，如果明文长度超过分组长度，需要对分组进行迭代加密，从而使整个明文都加密。<br>分组密码的模式并不是某一种加密算法特有的，是分组密文的迭代过程。</p>
+<h5 id="ECB模式"><a href="#ECB模式" class="headerlink" title="ECB模式"></a>ECB模式</h5><p>这种模式将明文分组之后各自加密成密文分组。如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/module_ECB.png"><br>如果存在多个相同的明文分组，会导致生成相同的密文分组，因此ECB存在风险，实际中不要使用</p>
+<h5 id="CBC模式"><a href="#CBC模式" class="headerlink" title="CBC模式"></a>CBC模式</h5><p>CBC(Cipher Block Chaining)模式中，明文分组需要与前一个密文分组进行异或运算，如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/module_CBC.png"><br>CBC模式的主要问题是加密的过程必须串行，无法并行，因此在效率上比较差。</p>
+<h5 id="CFB模式"><a href="#CFB模式" class="headerlink" title="CFB模式"></a>CFB模式</h5><p>CFB(Cipher FeedBack)模式中，会对前一个密文分组进行加密，如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/module_CFB.png"><br>CFB可以用重放攻击，所谓的重放攻击就是利用之前的数据再次发给接收人，从而欺骗接收者。<br>如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/module_CFB_attack.png"><br>这里成功的篡改了数据，因此CFB模式也不能使用。</p>
+<h5 id="CTR模式"><a href="#CTR模式" class="headerlink" title="CTR模式"></a>CTR模式</h5><p>CTR(CounTeR)模式通过对累加计数器加密来生成密钥流。如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/module_CFB_attack.png"><br>由于计数器的加密过程、明文的异或计算都可以并行，因此这种模式是实现中常用的模式(GCM模式中的C指的就是这个模式)<br>最常见的GCM模式，我们在最后进行补充。</p>
+<h3 id="消息认证码"><a href="#消息认证码" class="headerlink" title="消息认证码"></a>消息认证码</h3><p>消息认证码(message authentication code)用于确认数据的完整性,简称MAC。</p>
+<h5 id="散列函数"><a href="#散列函数" class="headerlink" title="散列函数"></a>散列函数</h5><p>介绍MAC之前，需要知道散列函数的概念。<br>散列函数能将任意长度单向计算出一个固定长度的值。如图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/mac_hash.png"><br>所谓的单向指的是无法通过计算出的值反推出原文。<br>一般我们把计算出来的值称为摘要、指纹<br>而散列函数一般也叫哈希函数，常见的散列算法有MD5、SHA-1、SHA-256、SHA-384等。<br>其中MD5、SHA-1 已经被破解，这里的破解指的是已经找到2个不同的数据却具有相同的散列值。<br>散列函数是校验数据完整性（一致性）的核心，消息认证码、数字签名、认证等都必须依赖散列函数。<br>校验的过程如下图所示：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/mac_hash_finger.png"></p>
+<h5 id="对散列函数的攻击"><a href="#对散列函数的攻击" class="headerlink" title="对散列函数的攻击"></a>对散列函数的攻击</h5><p>对散列函数的攻击，这里我们主要是了解下生日攻击。<br>这种攻击方式并不是通过寻找特定散列值的数据，而是找两个散列值相同的2条消息，这是对单向散列函数的“强抗碰撞性”的攻击。<br>生日攻击的破解难度比暴力破解的难度要小很多。<br>举个暴力破解的例子：<br>你去买房，通过房产局跟房东签订了电子合同，合同里写明了100w的房款，并且双方保留一份合同的散列值。<br>你是一名黑客，想要把合同的100w改成10w，于是你不停的修改电子合同，不停的计算散列值，期望找到一个相同的散列值，这样就能替换原合同了。<br>生日攻击的例子：<br>你同样去买房，但这次你不通过房产局签合同，你直接跟房东签合同，你拿出事先准备好的电子合同，并双方保留散列值。<br>晚上你偷偷摸摸入侵电脑把电子合同换成另一份事先准备好的具有相同散列值的合同。于是房东跟你毁约了，并赔偿了你一笔违约金。。。</p>
+<h5 id="消息认证码的校验过程"><a href="#消息认证码的校验过程" class="headerlink" title="消息认证码的校验过程"></a>消息认证码的校验过程</h5><p>仅靠数据摘要对数据进行验证在需要通信的场景中是不够的。攻击者完全可以同时篡改你的数据+指纹。<br>我们先看下消息认证码的过程：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/mac_procedure.png"><br>它的思想其实就是利用共享密钥是只有你我两人知道这个一个特征实现的。<br>注意这里共享密钥并不是用于加密数据的，只是跟消息进行组合。</p>
+<h5 id="HMAC的实现"><a href="#HMAC的实现" class="headerlink" title="HMAC的实现"></a>HMAC的实现</h5><p>消息认证码的实现可以有多种，我们大概看下HMAC的实现：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/mac_hmac.png"><br>如果仅通过HMAC机制仍然存在漏洞，攻击者可以重放攻击：<br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/mac_repeat.png"><br>因此在通信的过程中，消息里常常带一个随机数nonce字段，每次通信nonce都会发生变化，于是就无法重放攻击了。</p>
+<h3 id="GCM模式"><a href="#GCM模式" class="headerlink" title="GCM模式"></a>GCM模式</h3><p>最后我们再来介绍下GCM模式，前面介绍的CBC、CFB、CTR等模式只能提供加密的功能，但不具备校验数据完整性的功能。</p>
+<h5 id="工作原理"><a href="#工作原理" class="headerlink" title="工作原理"></a>工作原理</h5><p>GCM模式同时具备了2种功能（AEAD），简单来说就是 CTR模式 + GMAC机制（另一种MAC）<br>它的实现过程（图片来自：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/376692295%EF%BC%89%EF%BC%9A">https://zhuanlan.zhihu.com/p/376692295）：</a><br><img src="/2021/09/20/cryptograghy/cryptography-cipher/Images/gcm_impl.jpg"></p>
+<h3 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h3><p>书籍：<br>《图解密码技术》<br>《密码学原理与实践》（第二版）<br>网上资料：<br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/TheFutureIsNow/p/10794182.html">https://www.cnblogs.com/TheFutureIsNow/p/10794182.html</a><br><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/376692295">https://zhuanlan.zhihu.com/p/376692295</a></p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2021/09/20/cryptograghy/cryptography-cipher/" data-id="cl4nux6ha000015n4f916gpnx" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "cryptography-对称密码",
+        "image": "https://liji53.github.io/2021/09/20/cryptograghy/cryptography-cipher/Images/des_round.png",
+        "keywords": "",
+        "genre": "密码学",
+        "datePublished": "2021-09-20",
+        "dateCreated": "2021-09-20",
+        "dateModified": "2021-09-20",
+        "url": "https://liji53.github.io/2021/09/20/cryptograghy/cryptography-cipher/",
+        "description": "对称密码(共享密码)对称加密算法简单来说，就是把数据尽可能的打乱，并能把打乱的数据还原。
+DESDES是以每64位为单位对明文进行加密的对称加密算法。它的密钥长度为56位(不包括8位校验码)。
+Feistel结构Feistel网络是一种加密设计结构，而非加密算法。很多对称加密算法都采用这种设计结构。如下图所示(三轮)：每一轮解密的过程：这2张图中长得像网一样的结构就叫做Feistel网络。对于Fe",
+        "wordCount": 117
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2021/09/20/cryptograghy/cryptography-publicKey/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            cryptography-公钥密码
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2021/09/10/pythonOther/difflibParse/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">探索difflib(初探匹配算法)</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/25/cryptograghy/cryptography-tls/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/25/cryptograghy/cryptography-tls/" class="title">cryptography-tls</a></p>
+                            <p class="item-date"><time datetime="2022-05-25T08:42:21.000Z" itemprop="datePublished">2022-05-25</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-ip/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-ip/" class="title">net-ip</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:28:48.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-tcp/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-tcp/" class="title">net-tcp</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:28:26.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-http/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-http/" class="title">net_http</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:27:38.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/04/21/LLVM/llvm-syntax/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/04/21/LLVM/llvm-syntax/" class="title">Clang Static Analyzer符号</a></p>
+                            <p class="item-date"><time datetime="2022-04-21T07:42:33.000Z" itemprop="datePublished">2022-04-21</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2021/09/20/cryptograghy/cryptography-cipher/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>

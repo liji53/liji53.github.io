@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>Clang Static Analyzer符号 | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="Clang Static Analyzer 基于AST的检查Clang Static Analyzer 的检查可以分为三种：  基于AST(abstract syntax tree)的检查 基于CFG(Control flow graph)的检查 基于Exploded graph的检查（核心）  但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：  编译过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Clang Static Analyzer符号">
+<meta property="og:url" content="https://liji53.github.io/2022/04/21/LLVM/llvm-syntax/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="Clang Static Analyzer 基于AST的检查Clang Static Analyzer 的检查可以分为三种：  基于AST(abstract syntax tree)的检查 基于CFG(Control flow graph)的检查 基于Exploded graph的检查（核心）  但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：  编译过">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-04-21T07:42:33.000Z">
+<meta property="article:modified_time" content="2022-04-21T07:42:33.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/LLVM/">LLVM</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/LLVM/">LLVM</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-LLVM/llvm-syntax" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        Clang Static Analyzer符号
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2022/04/21/LLVM/llvm-syntax/" class="article-date">
+       <time datetime="2022-04-21T07:42:33.000Z" itemprop="datePublished">2022-04-21</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2022/04/21/LLVM/llvm-syntax/" class="article-date">
+     <time datetime="2022-04-21T07:42:33.000Z" itemprop="dateModified">2022-04-21</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <h1 id="Clang-Static-Analyzer-基于AST的检查"><a href="#Clang-Static-Analyzer-基于AST的检查" class="headerlink" title="Clang Static Analyzer 基于AST的检查"></a>Clang Static Analyzer 基于AST的检查</h1><p>Clang Static Analyzer 的检查可以分为三种：</p>
+<ol>
+<li>基于AST(abstract syntax tree)的检查</li>
+<li>基于CFG(Control flow graph)的检查</li>
+<li>基于Exploded graph的检查（核心）</li>
+</ol>
+<p>但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：</p>
+<ol>
+<li>编译过程：（clang前端）词法-&gt;语法-&gt;语义-&gt;IR-&gt;优化-&gt;CodeGen (llvm后端)</li>
+<li>AST：语法解析之后的产物，最简单最直观的学习方法就是用clang -Xclang -ast-dump -fsyntax-only</li>
+</ol>
+<h3 id="AST的结构"><a href="#AST的结构" class="headerlink" title="AST的结构"></a>AST的结构</h3><p>虽然用-ast-dump能清楚看到每句源码对应的AST节点，但这里还是要强调下AST的2种最基本的类型Decl和Stmt</p>
+<h5 id="1-Decl"><a href="#1-Decl" class="headerlink" title="1.Decl"></a>1.Decl</h5><p>Decl就是声明，比方:</p>
+<table>
+<thead>
+<tr>
+<th>语句</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>typedef int (* main_t )( int , char **);</td>
+<td>TypedefDecl</td>
+</tr>
+<tr>
+<td>int foo(int argc, char** argv);</td>
+<td>FunctionDecl</td>
+</tr>
+<tr>
+<td>int i;</td>
+<td>VarDecl</td>
+</tr>
+<tr>
+<td>AST的入口节点</td>
+<td>TranslationUnitDecl</td>
+</tr>
+</tbody></table>
+<p>Decl系列的类继承图以及常用方法可以看<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1Decl.html">Decl</a></p>
+<h5 id="2-Stmt"><a href="#2-Stmt" class="headerlink" title="2.Stmt"></a>2.Stmt</h5><p>Stmt就是定义（有内存分配的）、函数调用、表达式等，比方：</p>
+<table>
+<thead>
+<tr>
+<th>语句</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>{…}</td>
+<td>CompoundStmt</td>
+</tr>
+<tr>
+<td>if (…)</td>
+<td>IfStmt</td>
+</tr>
+<tr>
+<td>return -1;</td>
+<td>ReturnStmt</td>
+</tr>
+</tbody></table>
+<p>Stmt系列的类继承图以及常用方法可以看<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1Stmt.html">Stmt</a></p>
+<h5 id="3-Expr"><a href="#3-Expr" class="headerlink" title="3.Expr"></a>3.Expr</h5><p>Expr属于Stmt的子类，比方：</p>
+<table>
+<thead>
+<tr>
+<th>语句</th>
+<th>类型</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>foo();</td>
+<td>CallExpr</td>
+</tr>
+<tr>
+<td>char buf[1] = {0};</td>
+<td>InitListExpr</td>
+</tr>
+<tr>
+<td>new CXXNewExpr(foo)</td>
+<td>CXXNewExpr</td>
+</tr>
+<tr>
+<td>整数</td>
+<td>IntegerLiteral</td>
+</tr>
+<tr>
+<td>x &lt;= y</td>
+<td>BinaryOperator</td>
+</tr>
+</tbody></table>
+<p>Expr系列的类继承图以及常用方法可以看<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1Expr.html">Expr</a></p>
+<h3 id="AST的遍历"><a href="#AST的遍历" class="headerlink" title="AST的遍历"></a>AST的遍历</h3><p>AST的遍历是通过继承（include/clang/AST/*Visitor.h）遍历类来实现的，常用的有：</p>
+<ol>
+<li>ConstStmtVisitor</li>
+<li>ConstDeclVistor</li>
+<li>RecursiveASTVisitor</li>
+</ol>
+<h5 id="1-通过ConstStmtVisitor遍历Stmt"><a href="#1-通过ConstStmtVisitor遍历Stmt" class="headerlink" title="1. 通过ConstStmtVisitor遍历Stmt"></a>1. 通过ConstStmtVisitor遍历Stmt</h5><p>通过ConstStmtVisitor 可以遍历属于Stmt类及其子类的节点，包括Expr。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WalkAST</span> :</span> <span class="keyword">public</span> ConstStmtVisitor&lt;WalkAST&gt; &#123;</span><br><span class="line">  <span class="comment">// 递归遍历子节点，这个是必须实现的</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">VisitChildren</span><span class="params">(<span class="keyword">const</span> Stmt *S)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> Stmt *Child : S-&gt;<span class="built_in">children</span>())</span><br><span class="line">      <span class="keyword">if</span> (Child)</span><br><span class="line">        <span class="keyword">this</span>-&gt;<span class="built_in">Visit</span>(Child);</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 需要检查什么类型的Stmt，则重写对应的方法，如下面的这三个方法</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">VisitStmt</span><span class="params">(<span class="keyword">const</span> Stmt *S)</span> </span>&#123; </span><br><span class="line">    <span class="comment">// do some checking</span></span><br><span class="line">    <span class="built_in">VisitChildren</span>(S); </span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">VisitCallExpr</span><span class="params">(<span class="keyword">const</span> CallExpr *CE)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// do some checking </span></span><br><span class="line">    <span class="built_in">VisitChildren</span>(CE);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">VisitWhileStmt</span><span class="params">(<span class="keyword">const</span> WhileStmt *WS)</span> </span>&#123; </span><br><span class="line">    <span class="comment">// do some checking </span></span><br><span class="line">    <span class="built_in">VisitChildren</span>(WS);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是：如while(true) 这种语句即属于Stmt也属于WhileStmt，但回调的时候只会调用WhileStmt，即<strong>优先回调子集</strong>。<br>ConstDeclVistor与ConstStmtVisitor的用法相似，不再重复。</p>
+<h5 id="2-通过RecursiveASTVisitor遍历"><a href="#2-通过RecursiveASTVisitor遍历" class="headerlink" title="2. 通过RecursiveASTVisitor遍历"></a>2. 通过RecursiveASTVisitor遍历</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyClass</span> :</span> <span class="keyword">public</span> RecursiveASTVisitor&lt;MyClass&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 需要检查什么类型的Stmt，则重写对应的方法，如下面的这三个方法，返回true表示继续遍历。</span></span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">VisitWhileStmt</span><span class="params">(<span class="keyword">const</span> WhileStmt *S)</span> </span>&#123;</span><br><span class="line">    llvm::<span class="built_in">errs</span>() &lt;&lt; <span class="string">&quot;VisitWhileStmt!!!!&quot;</span> &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">VisitStmt</span><span class="params">(<span class="keyword">const</span> Stmt *S)</span> </span>&#123;</span><br><span class="line">    llvm::<span class="built_in">errs</span>() &lt;&lt; <span class="string">&quot;VisitStmt!!!!&quot;</span> &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">VisitCallExpr</span><span class="params">(<span class="keyword">const</span> CallExpr *CE)</span></span>&#123;</span><br><span class="line">    llvm::<span class="built_in">errs</span>() &lt;&lt; <span class="string">&quot;VisitCallExpr!!!!&quot;</span> &lt;&lt; <span class="string">&#x27;\n&#x27;</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>RecursiveASTVisitor 有三种类型的接口：</p>
+<ol>
+<li>Traverse* 这种接口是遍历AST的入口，如TraverseDecl、TraverseStmt</li>
+<li>WalkUpFrom* 这种接口会向前调用父类的WalkUpFrom</li>
+<li>Visit* 这种接口会回调实际的访问节点</li>
+</ol>
+<p>如果遇到像while即属于Stmt也属于WhileStmt的，则RecursiveASTVisitor不像ConstStmtVisitor只会调用子集，而是会先调用VisitStmt，再调用一遍VisitWhileStmt</p>
+<h3 id="Checkers的注册函数（AST）"><a href="#Checkers的注册函数（AST）" class="headerlink" title="Checkers的注册函数（AST）"></a>Checkers的注册函数（AST）</h3><p>这里我们暂时只关注三个跟AST相关的program point（其他program point后面唠叨）:</p>
+<ol>
+<li>ASTCodeBody               会回调函数体</li>
+<li>ASTDecl&lt;****&gt;         回调****Decl类型</li>
+<li>checkEndOfTranslationUnit 回调整个AST</li>
+</ol>
+<h5 id="检查器"><a href="#检查器" class="headerlink" title="检查器"></a>检查器</h5><p>这里我们简单搭一个检查器的实现框架：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestChecker</span> :</span> <span class="keyword">public</span> Checker</span><br><span class="line">    &lt;check::ASTCodeBody, check::ASTDecl&lt;FunctionDecl&gt;, </span><br><span class="line">    check::ASTDecl&lt;VarDecl&gt;, check::EndOfTranslationUnit&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// Clang Static Analyzer core会回调这些注册函数，从而实现错误诊断代码逻辑</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">checkASTCodeBody</span><span class="params">(<span class="keyword">const</span> Decl *D, AnalysisManager &amp;mgr,</span></span></span><br><span class="line"><span class="function"><span class="params">                        BugReporter &amp;BR)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">    MyClass Walker = <span class="built_in">MyClass</span>();  <span class="comment">// 参考上小节AST的遍历</span></span><br><span class="line">    Walker.<span class="built_in">TraverseStmt</span>(D-&gt;<span class="built_in">getBody</span>());</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">checkASTDecl</span><span class="params">(<span class="keyword">const</span> FunctionDecl *D, AnalysisManager &amp;Mgr,</span></span></span><br><span class="line"><span class="function"><span class="params">                    BugReporter &amp;BR)</span> <span class="keyword">const</span> </span>&#123;&#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">checkASTDecl</span><span class="params">(<span class="keyword">const</span> VarDecl *D, AnalysisManager &amp;Mgr,</span></span></span><br><span class="line"><span class="function"><span class="params">                    BugReporter &amp;BR)</span> <span class="keyword">const</span> </span>&#123;&#125;</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">checkEndOfTranslationUnit</span><span class="params">(<span class="keyword">const</span> TranslationUnitDecl *TU,</span></span></span><br><span class="line"><span class="function"><span class="params">                    AnalysisManager &amp;Mgr, BugReporter &amp;BR)</span> <span class="keyword">const</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="AST-matchers"><a href="#AST-matchers" class="headerlink" title="AST matchers"></a>AST matchers</h3><p>如果你觉得上面的遍历AST的实现比较啰嗦的话，还可以通过AST matchers来实现。<br>AST Matchers内部帮你实现了遍历的流程，你只需要注册你关注的代码模式即可。</p>
+<h5 id="1-通过Callback实现"><a href="#1-通过Callback实现" class="headerlink" title="1.通过Callback实现"></a>1.通过Callback实现</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册id，回调中通过这个ID可以找到你想要检查的代码</span></span><br><span class="line"><span class="keyword">constexpr</span> llvm::StringLiteral WarnAtNode = <span class="string">&quot;id&quot;</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">HandleMatch</span> :</span> <span class="keyword">public</span> MatchFinder::MatchCallback &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">Run</span><span class="params">(<span class="keyword">const</span> MatchFinder::MatchResult &amp;Result)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> CallExpr *Class = Result.Nodes.getStmtAs&lt;CallExpr&gt;(WarnAtNode);    </span><br><span class="line">    <span class="comment">// 如果注册的时候，用的是decl(XXXX),则参考这么这种</span></span><br><span class="line">    <span class="comment">// const CXXRecordDecl *Class = Result.Nodes.GetDeclAs&lt;CXXRecordDecl&gt;(WarnAtNode);</span></span><br><span class="line">    <span class="comment">// 可以做业务，比方提交错误报告</span></span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">MatchFinder finder;</span><br><span class="line">finder.<span class="built_in">AddMatcher</span>(<span class="built_in">stmt</span>(<span class="built_in">hasDescendant</span>(<span class="built_in">callExpr</span>(</span><br><span class="line">    <span class="built_in">callee</span>(<span class="built_in">functionDecl</span>(<span class="built_in">hasName</span>(<span class="string">&quot;main&quot;</span>)))).<span class="built_in">bind</span>(<span class="string">&quot;id&quot;</span>))), <span class="keyword">new</span> HandleMatch);</span><br><span class="line"><span class="comment">// 开始匹配，会遍历AST</span></span><br><span class="line">finder.<span class="built_in">matchAST</span>(ASTContext);</span><br></pre></td></tr></table></figure>
+<h5 id="2-更简洁的实现"><a href="#2-更简洁的实现" class="headerlink" title="2.更简洁的实现"></a>2.更简洁的实现</h5><p>通过ASTMatchFinder.h提供的match函数，可以不需要实现上面的Callback，原理其实是一样的，只不过ASTMatchFinder.h把Callback封装了。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">constexpr</span> llvm::StringLiteral WarnAtNode = <span class="string">&quot;id&quot;</span>;</span><br><span class="line"><span class="comment">// Matches返回所有已经匹配到的代码</span></span><br><span class="line"><span class="keyword">auto</span> Matches = <span class="built_in">match</span>(<span class="built_in">stmt</span>(<span class="built_in">hasDescendant</span>(<span class="built_in">callExpr</span>(</span><br><span class="line">        <span class="built_in">callee</span>(<span class="built_in">functionDecl</span>(<span class="built_in">hasName</span>(<span class="string">&quot;main&quot;</span>)))).<span class="built_in">bind</span>(<span class="string">&quot;id&quot;</span>))), <span class="keyword">new</span> HandleMatch);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> &amp;Match : Matches)&#123;</span><br><span class="line">  <span class="comment">// 在emitDiagnostics中可以做一些业务逻辑，比方提交日志。</span></span><br><span class="line">  <span class="built_in">emitDiagnostics</span>(Match, D, BR, AM, <span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h3 id="参考资料-amp-例子"><a href="#参考资料-amp-例子" class="headerlink" title="参考资料&amp;例子"></a>参考资料&amp;例子</h3><p>找了2个简单的例子，供大家阅读：<br>推荐阅读<a target="_blank" rel="noopener" href="https://code.woboq.org/llvm/clang/lib/StaticAnalyzer/Checkers/CStringSyntaxChecker.cpp.html">CStringSyntaxChecker</a>来熟悉基于AST遍历的检查<br>推荐阅读<a target="_blank" rel="noopener" href="https://code.woboq.org/llvm/clang/lib/StaticAnalyzer/Checkers/PointerIterationChecker.cpp.html">PointerIterationChecker</a>来熟悉AST Matchers的检查</p>
+
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2022/04/21/LLVM/llvm-syntax/" data-id="cl4qlsw3q000120n4edke2ik4" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "Clang Static Analyzer符号",
+        "image": "https://liji53.github.io",
+        "keywords": "",
+        "genre": "LLVM",
+        "datePublished": "2022-04-21",
+        "dateCreated": "2022-04-21",
+        "dateModified": "2022-04-21",
+        "url": "https://liji53.github.io/2022/04/21/LLVM/llvm-syntax/",
+        "description": "Clang Static Analyzer 基于AST的检查Clang Static Analyzer 的检查可以分为三种：
+
+基于AST(abstract syntax tree)的检查
+基于CFG(Control flow graph)的检查
+基于Exploded graph的检查（核心）
+
+但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：
+
+编译过",
+        "wordCount": 923
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+        <a href="/2022/05/23/network/net-http/" id="article-nav-newer" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">下一篇</strong>
+        <p class="article-nav-title">
+        
+            net_http
+        
+        </p>
+        <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
+    </a>
+    
+    
+        <a href="/2022/02/23/LLVM/llvm-environment/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">Clang Static Analyzer环境</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/25/cryptograghy/cryptography-tls/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/25/cryptograghy/cryptography-tls/" class="title">cryptography-tls</a></p>
+                            <p class="item-date"><time datetime="2022-05-25T08:42:21.000Z" itemprop="datePublished">2022-05-25</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-ip/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-ip/" class="title">net-ip</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:28:48.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-tcp/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-tcp/" class="title">net-tcp</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:28:26.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-http/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-http/" class="title">net_http</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:27:38.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/04/21/LLVM/llvm-syntax/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/04/21/LLVM/llvm-syntax/" class="title">Clang Static Analyzer符号</a></p>
+                            <p class="item-date"><time datetime="2022-04-21T07:42:33.000Z" itemprop="datePublished">2022-04-21</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2022/04/21/LLVM/llvm-syntax/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>
