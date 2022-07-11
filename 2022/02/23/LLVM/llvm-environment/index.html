@@ -6,18 +6,18 @@
     
 
     
-    <title>Clang Static Analyzer环境 | 么么博客</title>
+    <title>【Clang Static Analyzer】环境 | 么么博客</title>
     
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="Clang Static Analyzer 安装和运行最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。 VS中构建LLVM参考资料：https:&#x2F;&#x2F;llvm">
+    <meta name="description" content="【Clang Static Analyzer】 安装和运行最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。 VS中构建LLVM参考资料：https:&#x2F;&#x2F;ll">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Clang Static Analyzer环境">
+<meta property="og:title" content="【Clang Static Analyzer】环境">
 <meta property="og:url" content="https://liji53.github.io/2022/02/23/LLVM/llvm-environment/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="Clang Static Analyzer 安装和运行最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。 VS中构建LLVM参考资料：https:&#x2F;&#x2F;llvm">
+<meta property="og:description" content="【Clang Static Analyzer】 安装和运行最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。 VS中构建LLVM参考资料：https:&#x2F;&#x2F;ll">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://liji53.github.io/2022/02/23/LLVM/llvm-environment/Images/LLVM_vs.png">
 <meta property="article:published_time" content="2022-02-23T02:11:25.000Z">
@@ -163,7 +163,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-        Clang Static Analyzer环境
+        【Clang Static Analyzer】环境
         </h1>
     
 
@@ -205,7 +205,7 @@
 
             
 
-            <h1 id="Clang-Static-Analyzer-安装和运行"><a href="#Clang-Static-Analyzer-安装和运行" class="headerlink" title="Clang Static Analyzer 安装和运行"></a>Clang Static Analyzer 安装和运行</h1><p>最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。</p>
+            <h1 id="【Clang-Static-Analyzer】-安装和运行"><a href="#【Clang-Static-Analyzer】-安装和运行" class="headerlink" title="【Clang Static Analyzer】 安装和运行"></a>【Clang Static Analyzer】 安装和运行</h1><p>最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。</p>
 <h3 id="VS中构建LLVM"><a href="#VS中构建LLVM" class="headerlink" title="VS中构建LLVM"></a>VS中构建LLVM</h3><p>参考资料：<a target="_blank" rel="noopener" href="https://llvm.org/docs/GettingStartedVS.html">https://llvm.org/docs/GettingStartedVS.html</a></p>
 <h5 id="1-环境预准备"><a href="#1-环境预准备" class="headerlink" title="1.环境预准备"></a>1.环境预准备</h5><p> Visual Studio 2019+，用2017试过，但构建失败了<br> Cmake<br> python3.6+<br> pip install psutil</p>
 <h5 id="2-vs打开LLVM项目"><a href="#2-vs打开LLVM项目" class="headerlink" title="2.vs打开LLVM项目"></a>2.vs打开LLVM项目</h5><p> 下载LLVM项目：<br> <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/llvm/llvm-project.git</span><br></pre></td></tr></table></figure><br> 用cmake生成vs项目文件</p>
@@ -307,7 +307,7 @@
             "@type": "Person",
             "name": "Liji"
         },
-        "headline": "Clang Static Analyzer环境",
+        "headline": "【Clang Static Analyzer】环境",
         "image": "https://liji53.github.io/2022/02/23/LLVM/llvm-environment/Images/LLVM_vs.png",
         "keywords": "",
         "genre": "LLVM",
@@ -315,8 +315,8 @@
         "dateCreated": "2022-02-23",
         "dateModified": "2022-02-23",
         "url": "https://liji53.github.io/2022/02/23/LLVM/llvm-environment/",
-        "description": "Clang Static Analyzer 安装和运行最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。
-VS中构建LLVM参考资料：https://llvm",
+        "description": "【Clang Static Analyzer】 安装和运行最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩展性+丰富的文档）作为学习的对象，并尝试运用到我们的项目中去。本文我们将重点围绕llvm环境搭建，并实现一个简单的static analyzer checker。
+VS中构建LLVM参考资料：https://ll",
         "wordCount": 659
     }
 </script>
@@ -402,7 +402,7 @@ VS中构建LLVM参考资料：https://llvm",
         <strong class="article-nav-caption">下一篇</strong>
         <p class="article-nav-title">
         
-            Clang Static Analyzer基于AST的检查
+            【Clang Static Analyzer】基于AST检查
         
         </p>
         <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
@@ -513,10 +513,10 @@ VS中构建LLVM参考资料：https://llvm",
                     <li>
                         
                         <div class="item-thumbnail">
-                            <a href="/2022/04/21/LLVM/llvm-syntax/" class="thumbnail">
+                            <a href="/2022/05/14/LLVM/llvm-CFG/" class="thumbnail">
     
     
-        <span class="thumbnail-image thumbnail-none"></span>
+        <span style="background-image:url(/2022/05/14/LLVM/llvm-CFG/Images/CFG.png)" alt="【Clang Static Analyzer】CFG和Path-sensitive checker回调函数" class="thumbnail-image"></span>
     
     
 </a>
@@ -525,8 +525,8 @@ VS中构建LLVM参考资料：https://llvm",
                         
                         <div class="item-inner">
                             <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
-                            <p class="item-title"><a href="/2022/04/21/LLVM/llvm-syntax/" class="title">Clang Static Analyzer基于AST的检查</a></p>
-                            <p class="item-date"><time datetime="2022-04-21T07:42:33.000Z" itemprop="datePublished">2022-04-21</time></p>
+                            <p class="item-title"><a href="/2022/05/14/LLVM/llvm-CFG/" class="title">【Clang Static Analyzer】CFG和Path-sensitive checker回调函数</a></p>
+                            <p class="item-date"><time datetime="2022-05-14T17:12:43.000Z" itemprop="datePublished">2022-05-14</time></p>
                         </div>
                     </li>
                 
@@ -539,7 +539,7 @@ VS中构建LLVM参考资料：https://llvm",
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -549,7 +549,7 @@ VS中构建LLVM参考资料：https://llvm",
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 

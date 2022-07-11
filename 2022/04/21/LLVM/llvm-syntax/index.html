@@ -6,18 +6,18 @@
     
 
     
-    <title>Clang Static Analyzer基于AST的检查 | 么么博客</title>
+    <title>【Clang Static Analyzer】基于AST检查 | 么么博客</title>
     
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="Clang Static Analyzer 基于AST的检查Clang Static Analyzer 的检查可以分为三种：  基于AST(abstract syntax tree)的检查 基于CFG(Control flow graph)的检查 基于Exploded graph的检查（核心）  但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：  编译过">
+    <meta name="description" content="【Clang Static Analyzer】 基于AST检查Clang Static Analyzer 的检查可以分为三种：  基于AST(abstract syntax tree)的检查 基于CFG(Control flow graph)的检查 基于Exploded graph的检查（核心）  但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：  编译">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Clang Static Analyzer基于AST的检查">
+<meta property="og:title" content="【Clang Static Analyzer】基于AST检查">
 <meta property="og:url" content="https://liji53.github.io/2022/04/21/LLVM/llvm-syntax/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="Clang Static Analyzer 基于AST的检查Clang Static Analyzer 的检查可以分为三种：  基于AST(abstract syntax tree)的检查 基于CFG(Control flow graph)的检查 基于Exploded graph的检查（核心）  但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：  编译过">
+<meta property="og:description" content="【Clang Static Analyzer】 基于AST检查Clang Static Analyzer 的检查可以分为三种：  基于AST(abstract syntax tree)的检查 基于CFG(Control flow graph)的检查 基于Exploded graph的检查（核心）  但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：  编译">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-04-21T07:42:33.000Z">
 <meta property="article:modified_time" content="2022-04-21T07:42:33.000Z">
@@ -161,7 +161,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-        Clang Static Analyzer基于AST的检查
+        【Clang Static Analyzer】基于AST检查
         </h1>
     
 
@@ -203,7 +203,7 @@
 
             
 
-            <h1 id="Clang-Static-Analyzer-基于AST的检查"><a href="#Clang-Static-Analyzer-基于AST的检查" class="headerlink" title="Clang Static Analyzer 基于AST的检查"></a>Clang Static Analyzer 基于AST的检查</h1><p>Clang Static Analyzer 的检查可以分为三种：</p>
+            <h1 id="【Clang-Static-Analyzer】-基于AST检查"><a href="#【Clang-Static-Analyzer】-基于AST检查" class="headerlink" title="【Clang Static Analyzer】 基于AST检查"></a>【Clang Static Analyzer】 基于AST检查</h1><p>Clang Static Analyzer 的检查可以分为三种：</p>
 <ol>
 <li>基于AST(abstract syntax tree)的检查</li>
 <li>基于CFG(Control flow graph)的检查</li>
@@ -215,7 +215,7 @@
 <li>AST：语法解析之后的产物，最简单最直观的学习方法就是用clang -Xclang -ast-dump -fsyntax-only</li>
 </ol>
 <h3 id="AST的结构"><a href="#AST的结构" class="headerlink" title="AST的结构"></a>AST的结构</h3><p>虽然用-ast-dump能清楚看到每句源码对应的AST节点，但这里还是要强调下AST的2种最基本的类型Decl和Stmt</p>
-<h5 id="1-Decl"><a href="#1-Decl" class="headerlink" title="1.Decl"></a>1.Decl</h5><p>Decl就是声明，比方:</p>
+<h5 id="1-Decl"><a href="#1-Decl" class="headerlink" title="1.Decl"></a>1.Decl</h5><p>Decl是声明，比方:</p>
 <table>
 <thead>
 <tr>
@@ -241,7 +241,7 @@
 </tr>
 </tbody></table>
 <p>Decl系列的类继承图以及常用方法可以看<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1Decl.html">Decl</a></p>
-<h5 id="2-Stmt"><a href="#2-Stmt" class="headerlink" title="2.Stmt"></a>2.Stmt</h5><p>Stmt就是定义（有内存分配的）、函数调用、表达式等，比方：</p>
+<h5 id="2-Stmt"><a href="#2-Stmt" class="headerlink" title="2.Stmt"></a>2.Stmt</h5><p>Stmt是定义（有内存分配的）、函数调用、表达式等，比方：</p>
 <table>
 <thead>
 <tr>
@@ -263,7 +263,7 @@
 </tr>
 </tbody></table>
 <p>Stmt系列的类继承图以及常用方法可以看<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1Stmt.html">Stmt</a></p>
-<h5 id="3-Expr"><a href="#3-Expr" class="headerlink" title="3.Expr"></a>3.Expr</h5><p>Expr属于Stmt的子类，比方：</p>
+<h5 id="3-Expr"><a href="#3-Expr" class="headerlink" title="3.Expr"></a>3.Expr</h5><p>Expr是表达式，属于Stmt的子类，比方：</p>
 <table>
 <thead>
 <tr>
@@ -288,8 +288,12 @@
 <td>IntegerLiteral</td>
 </tr>
 <tr>
-<td>x &lt;= y</td>
+<td>二目运算</td>
 <td>BinaryOperator</td>
+</tr>
+<tr>
+<td>一目操作(除了sizeof和alignof)</td>
+<td>UnaryOperator</td>
 </tr>
 </tbody></table>
 <p>Expr系列的类继承图以及常用方法可以看<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1Expr.html">Expr</a></p>
@@ -310,7 +314,7 @@
 <li>Visit* 这种接口会回调实际的访问节点</li>
 </ol>
 <p>如果遇到像while即属于Stmt也属于WhileStmt的，则RecursiveASTVisitor不像ConstStmtVisitor只会调用子集，而是会先调用VisitStmt，再调用一遍VisitWhileStmt</p>
-<h3 id="Checkers的注册函数（AST）"><a href="#Checkers的注册函数（AST）" class="headerlink" title="Checkers的注册函数（AST）"></a>Checkers的注册函数（AST）</h3><p>这里我们暂时只关注三个跟AST相关的program point（其他program point后面唠叨）:</p>
+<h3 id="Checkers的注册回调函数（AST）"><a href="#Checkers的注册回调函数（AST）" class="headerlink" title="Checkers的注册回调函数（AST）"></a>Checkers的注册回调函数（AST）</h3><p>这里我们暂时只关注三个跟AST相关的回调函数（Path-sensitive的后面唠叨）:</p>
 <ol>
 <li>ASTCodeBody               会回调函数体</li>
 <li>ASTDecl&lt;****&gt;         回调****Decl类型</li>
@@ -403,7 +407,7 @@
             "@type": "Person",
             "name": "Liji"
         },
-        "headline": "Clang Static Analyzer基于AST的检查",
+        "headline": "【Clang Static Analyzer】基于AST检查",
         "image": "https://liji53.github.io",
         "keywords": "",
         "genre": "LLVM",
@@ -411,7 +415,7 @@
         "dateCreated": "2022-04-21",
         "dateModified": "2022-04-21",
         "url": "https://liji53.github.io/2022/04/21/LLVM/llvm-syntax/",
-        "description": "Clang Static Analyzer 基于AST的检查Clang Static Analyzer 的检查可以分为三种：
+        "description": "【Clang Static Analyzer】 基于AST检查Clang Static Analyzer 的检查可以分为三种：
 
 基于AST(abstract syntax tree)的检查
 基于CFG(Control flow graph)的检查
@@ -419,8 +423,8 @@
 
 但不管哪种方法，在实现一个checker之前，我们需要对编译过程以及AST有一个直观的了解：
 
-编译过",
-        "wordCount": 923
+编译",
+        "wordCount": 919
     }
 </script>
 
@@ -501,11 +505,11 @@
         
 <nav id="article-nav">
     
-        <a href="/2022/05/23/network/net-http/" id="article-nav-newer" class="article-nav-link-wrap">
+        <a href="/2022/05/14/LLVM/llvm-CFG/" id="article-nav-newer" class="article-nav-link-wrap">
         <strong class="article-nav-caption">下一篇</strong>
         <p class="article-nav-title">
         
-            net_http
+            【Clang Static Analyzer】CFG和Path-sensitive checker回调函数
         
         </p>
         <i class="icon fa fa-chevron-right" id="icon-chevron-right"></i>
@@ -514,7 +518,7 @@
     
         <a href="/2022/02/23/LLVM/llvm-environment/" id="article-nav-older" class="article-nav-link-wrap">
         <strong class="article-nav-caption">上一篇</strong>
-        <p class="article-nav-title">Clang Static Analyzer环境</p>
+        <p class="article-nav-title">【Clang Static Analyzer】环境</p>
         <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
         </a>
     
@@ -616,10 +620,10 @@
                     <li>
                         
                         <div class="item-thumbnail">
-                            <a href="/2022/04/21/LLVM/llvm-syntax/" class="thumbnail">
+                            <a href="/2022/05/14/LLVM/llvm-CFG/" class="thumbnail">
     
     
-        <span class="thumbnail-image thumbnail-none"></span>
+        <span style="background-image:url(/2022/05/14/LLVM/llvm-CFG/Images/CFG.png)" alt="【Clang Static Analyzer】CFG和Path-sensitive checker回调函数" class="thumbnail-image"></span>
     
     
 </a>
@@ -628,8 +632,8 @@
                         
                         <div class="item-inner">
                             <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
-                            <p class="item-title"><a href="/2022/04/21/LLVM/llvm-syntax/" class="title">Clang Static Analyzer基于AST的检查</a></p>
-                            <p class="item-date"><time datetime="2022-04-21T07:42:33.000Z" itemprop="datePublished">2022-04-21</time></p>
+                            <p class="item-title"><a href="/2022/05/14/LLVM/llvm-CFG/" class="title">【Clang Static Analyzer】CFG和Path-sensitive checker回调函数</a></p>
+                            <p class="item-date"><time datetime="2022-05-14T17:12:43.000Z" itemprop="datePublished">2022-05-14</time></p>
                         </div>
                     </li>
                 
@@ -642,7 +646,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -652,7 +656,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
