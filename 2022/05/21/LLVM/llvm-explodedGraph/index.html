@@ -12,12 +12,12 @@
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="【Clang Static Analyzer】 Exploded Graph和内存模型基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行检查。打个比方，我们用GDB调试的时候打断点，然后在这个断点处查看上下文，能知道当前程序的变量值、调用堆栈等信息。前面我们讲的Path-sensitive checker回调函数就可以理解成是程序断点，而Exploded Graph就是断点">
+    <meta name="description" content="Exploded-Graph和内存模型 Exploded-graph Program-Point Program-State Exploded-graph图   内存模型 SVal MemRegion SymExpr 三者与Exploded-graph的联系   参考资料与例子    Exploded-Graph和内存模型基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行">
 <meta property="og:type" content="article">
 <meta property="og:title" content="【Clang Static Analyzer】Exploded Graph和内存模型">
 <meta property="og:url" content="https://liji53.github.io/2022/05/21/LLVM/llvm-explodedGraph/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="【Clang Static Analyzer】 Exploded Graph和内存模型基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行检查。打个比方，我们用GDB调试的时候打断点，然后在这个断点处查看上下文，能知道当前程序的变量值、调用堆栈等信息。前面我们讲的Path-sensitive checker回调函数就可以理解成是程序断点，而Exploded Graph就是断点">
+<meta property="og:description" content="Exploded-Graph和内存模型 Exploded-graph Program-Point Program-State Exploded-graph图   内存模型 SVal MemRegion SymExpr 三者与Exploded-graph的联系   参考资料与例子    Exploded-Graph和内存模型基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://liji53.github.io/2022/05/21/LLVM/llvm-explodedGraph/Images/Exploded_graph_node.png">
 <meta property="article:published_time" content="2022-05-21T10:45:01.000Z">
@@ -205,12 +205,31 @@
 
             
 
-            <h1 id="【Clang-Static-Analyzer】-Exploded-Graph和内存模型"><a href="#【Clang-Static-Analyzer】-Exploded-Graph和内存模型" class="headerlink" title="【Clang Static Analyzer】 Exploded Graph和内存模型"></a>【Clang Static Analyzer】 Exploded Graph和内存模型</h1><p>基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行检查。打个比方，我们用GDB调试的时候打断点，然后在这个断点处查看上下文，能知道当前程序的变量值、调用堆栈等信息。<br>前面我们讲的Path-sensitive checker回调函数就可以理解成是程序断点，而Exploded Graph就是断点处的上下文信息，包括当前变量的值，表达式的值，符号的约束信息等。</p>
-<h3 id="Exploded-graph"><a href="#Exploded-graph" class="headerlink" title="Exploded graph"></a>Exploded graph</h3><p>Path-sensitive checker的核心数据结构是Exploded graph，Exploded graph由Exploded graph node组成，Exploded graph node包含Program Point和Program State<br>如图所示：<br><img src="/2022/05/21/LLVM/llvm-explodedGraph/Images/Exploded_graph_node.png"></p>
-<h5 id="1-Program-Point"><a href="#1-Program-Point" class="headerlink" title="1.Program Point"></a>1.Program Point</h5><p>表示当前程序执行的位置。一般来说，我们写checker用到它的机会不多，往往在checkEndAnalysis(还记得一系列的回调函数把)遍历Exploded graph才用。<br><strong>一个CFGElement往往对应一个Program Point或者多个Program Point</strong>，下面是Program Point的部分信息：</p>
+            <ul>
+<li><a href="#Exploded-Graph%E5%92%8C%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B">Exploded-Graph和内存模型</a><ul>
+<li><a href="#Exploded-graph">Exploded-graph</a><ul>
+<li><a href="#Program-Point">Program-Point</a></li>
+<li><a href="#Program-State">Program-State</a></li>
+<li><a href="#Exploded-graph%E5%9B%BE">Exploded-graph图</a></li>
+</ul>
+</li>
+<li><a href="#%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B">内存模型</a><ul>
+<li><a href="#SVal">SVal</a></li>
+<li><a href="#MemRegion">MemRegion</a></li>
+<li><a href="#SymExpr">SymExpr</a></li>
+<li><a href="#%E4%B8%89%E8%80%85%E4%B8%8EExploded-graph%E7%9A%84%E8%81%94%E7%B3%BB">三者与Exploded-graph的联系</a></li>
+</ul>
+</li>
+<li><a href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99%E4%B8%8E%E4%BE%8B%E5%AD%90">参考资料与例子</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="Exploded-Graph和内存模型"><a href="#Exploded-Graph和内存模型" class="headerlink" title="Exploded-Graph和内存模型"></a>Exploded-Graph和内存模型</h1><p>基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行检查。打个比方，我们用GDB调试的时候打断点，然后在这个断点处查看上下文，能知道当前程序的变量值、调用堆栈等信息。CSA也是类似的检查过程。<br>前面我们讲的Path-sensitive checker回调函数就可以理解成是程序断点，而Exploded Graph就是断点处的上下文信息，包括当前变量的值，表达式的值，符号的约束信息等。</p>
+<h3 id="Exploded-graph"><a href="#Exploded-graph" class="headerlink" title="Exploded-graph"></a>Exploded-graph</h3><p>Path-sensitive checker的核心数据结构是Exploded graph，Exploded graph由Exploded graph node组成，Exploded graph node包含Program Point和Program State<br>如图所示：<br><img src="/2022/05/21/LLVM/llvm-explodedGraph/Images/Exploded_graph_node.png"></p>
+<h5 id="Program-Point"><a href="#Program-Point" class="headerlink" title="Program-Point"></a>Program-Point</h5><p>表示当前程序执行的位置。一般来说，我们写checker用到它的机会不多，往往在checkEndAnalysis(还记得一系列的回调函数把)遍历Exploded graph才用。<br><strong>一个CFGElement往往对应一个Program Point或者多个Program Point</strong>，下面是Program Point的部分信息：</p>
 <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 部分关键信息</span></span><br><span class="line">&#123; </span><br><span class="line">    &quot;kind&quot;: &quot;Statement&quot;,   # Program Point的类型</span><br><span class="line">    &quot;block_id&quot;: 3,         # 对应CFG的block ID， BlockEntrance类型的才有</span><br><span class="line">    &quot;stmt_kind&quot;: &quot;DeclStmt&quot;, # stmt的类型</span><br><span class="line">    &quot;stmt_id&quot;: 670,          # 对应stmt的id，stmt和Program Point的对应关系是1对1或1对多</span><br><span class="line">    &quot;stmt_point_kind&quot;: &quot;PostStmt&quot;, # 当前程序执行的位置</span><br><span class="line">    &quot;node_id&quot;: 7,          # Exploded graph node号，注意与block_id的区别</span><br><span class="line">    &quot;is_sink&quot;: 0           # 1的话表示后面不需要再执行了</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>详细资料<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1ProgramPoint.html">ProgramPoint</a></p>
-<h5 id="2-Program-State"><a href="#2-Program-State" class="headerlink" title="2.Program State"></a>2.Program State</h5><p>Program State包含我们要检查的核心信息，包含以下内容：</p>
+<h5 id="Program-State"><a href="#Program-State" class="headerlink" title="Program-State"></a>Program-State</h5><p>Program State包含我们要检查的核心信息，包含以下内容：</p>
 <ul>
 <li><strong>Environment: 表达式的符号值（注意这些符号值生命短暂）</strong></li>
 <li><strong>Region Store: 表示上下文变量的符号值（如果变量后面不再用到了，会DeadSymbol，即会删除Region Store中对应的变量）</strong></li>
@@ -219,7 +238,7 @@
 <li>GDM：用于存储checker的自定义的状态信息</li>
 </ul>
 <p>关于Region Store、Environment、Constraints里面存的是什么，后面还会继续讲，我们先清楚大概的内容即可。</p>
-<h5 id="3-Exploded-graph图"><a href="#3-Exploded-graph图" class="headerlink" title="3.Exploded graph图"></a>3.Exploded graph图</h5><p>通过-cc1 -analyze -analyzer-checker=”debug.ViewExplodedGraph” 可以查看相关的图，但这个图非常的大，我只能截取部分内容：</p>
+<h5 id="Exploded-graph图"><a href="#Exploded-graph图" class="headerlink" title="Exploded-graph图"></a>Exploded-graph图</h5><p>通过-cc1 -analyze -analyzer-checker=”debug.ViewExplodedGraph” 可以查看相关的图，但这个图非常的大，我只能截取部分内容：</p>
 <p><img src="/2022/05/21/LLVM/llvm-explodedGraph/Images/Exploded_graph.png"><br>这个图其实有一定的迷惑性，我一开始的时候，以为一个方框代表一个Exploded graph node。但其实CSA为了简化展示，把<strong>具有相同的Program State放在了一起</strong>。<br>建议自己动手生成下，仔细观察下不同的代码对应的Exploded graph.</p>
 <h3 id="内存模型"><a href="#内存模型" class="headerlink" title="内存模型"></a>内存模型</h3><p>我们在写代码时，会涉及到变量的名字、内存地址、内存地址的值等相关概念, 同样的在CSA中同样也有类似的概念, 如”int a = 0”</p>
 <ul>
@@ -241,7 +260,7 @@
 <h5 id="MemRegion"><a href="#MemRegion" class="headerlink" title="MemRegion"></a>MemRegion</h5><p>MemRegion是所有Region的基类，不仅<strong>表示存储SVal的内存区域，同时也表示内存段的信息</strong>(如代码段、堆栈段等)<br>因此MemRegion分为2大类：</p>
 <ul>
 <li>MemSpaceRegion表示内存段的信息，共有5种类型，分别对应实际程序运行时的代码段、数据段、堆、栈</li>
-<li>SubRegion表示内存区域，比方变量的内存区域VarRegion。SubRegion是有内存大小的（getStaticSize），而MemSpaceRegion是没有大小的。</li>
+<li>SubRegion表示内存区域，比方变量的内存区域VarRegion。SubRegion是有内存大小的，而MemSpaceRegion是没有大小的。</li>
 </ul>
 <p>比较常用的是SubRegion，下面列举部分常见的：</p>
 <ul>
@@ -261,7 +280,7 @@
 <li><a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1ento_1_1SymbolCast.html">SymbolCast</a> 表示无法对类型转化符号执行的符号值</li>
 </ul>
 <p>详情：<a target="_blank" rel="noopener" href="https://clang.llvm.org/doxygen/classclang_1_1ento_1_1SymExpr.html">SymExpr</a></p>
-<h5 id="三者与Exploded-graph的联系"><a href="#三者与Exploded-graph的联系" class="headerlink" title="三者与Exploded graph的联系"></a>三者与Exploded graph的联系</h5><p>对于SVal、MemRegion、SymExpr的概念我们已经有初步的了解了，下面我们结合Exploded graph的Program State来看下他们的联系：</p>
+<h5 id="三者与Exploded-graph的联系"><a href="#三者与Exploded-graph的联系" class="headerlink" title="三者与Exploded-graph的联系"></a>三者与Exploded-graph的联系</h5><p>对于SVal、MemRegion、SymExpr的概念我们已经有初步的了解了，下面我们结合Exploded graph的Program State来看下他们的联系：</p>
 <table>
 <thead>
 <tr>
@@ -296,7 +315,7 @@
 <td></td>
 </tr>
 </tbody></table>
-<h3 id="参考资料-amp-例子"><a href="#参考资料-amp-例子" class="headerlink" title="参考资料&amp;例子"></a>参考资料&amp;例子</h3><p>用到Program Point来检查可参考下面案例：<br>推荐阅读<a target="_blank" rel="noopener" href="https://code.woboq.org/llvm/clang/lib/StaticAnalyzer/Checkers/UnreachableCodeChecker.cpp.html">UnreachableCodeChecker</a></p>
+<h3 id="参考资料与例子"><a href="#参考资料与例子" class="headerlink" title="参考资料与例子"></a>参考资料与例子</h3><p>用到Program Point来检查可参考下面案例：<br>推荐阅读<a target="_blank" rel="noopener" href="https://code.woboq.org/llvm/clang/lib/StaticAnalyzer/Checkers/UnreachableCodeChecker.cpp.html">UnreachableCodeChecker</a></p>
 <p>相关的博客：<br><a target="_blank" rel="noopener" href="https://www.zhihu.com/people/movietravelcode/posts">https://www.zhihu.com/people/movietravelcode/posts</a><br>这篇文章以及<a target="_blank" rel="noopener" href="https://github.com/haoNoQ/clang-analyzer-guide/releases/download/v0.1/clang-analyzer-guide-v0.1.pdf">《Clang-analyzer-guild-v0.1》</a>让我对内存模型的理解省去大量的时间</p>
 
         </div>
@@ -383,8 +402,27 @@
         "dateCreated": "2022-05-21",
         "dateModified": "2022-05-21",
         "url": "https://liji53.github.io/2022/05/21/LLVM/llvm-explodedGraph/",
-        "description": "【Clang Static Analyzer】 Exploded Graph和内存模型基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行检查。打个比方，我们用GDB调试的时候打断点，然后在这个断点处查看上下文，能知道当前程序的变量值、调用堆栈等信息。前面我们讲的Path-sensitive checker回调函数就可以理解成是程序断点，而Exploded Graph就是断点",
-        "wordCount": 486
+        "description": "
+Exploded-Graph和内存模型
+Exploded-graph
+Program-Point
+Program-State
+Exploded-graph图
+
+
+内存模型
+SVal
+MemRegion
+SymExpr
+三者与Exploded-graph的联系
+
+
+参考资料与例子
+
+
+
+Exploded-Graph和内存模型基于Exploded Graph检查指的是结合代码执行过程中的上下文来进行",
+        "wordCount": 479
     }
 </script>
 
@@ -476,9 +514,9 @@
     </a>
     
     
-        <a href="/2022/05/14/LLVM/llvm-CFG/" id="article-nav-older" class="article-nav-link-wrap">
+        <a href="/2022/05/21/LLVM/llvm-PathChecker/" id="article-nav-older" class="article-nav-link-wrap">
         <strong class="article-nav-caption">上一篇</strong>
-        <p class="article-nav-title">【Clang Static Analyzer】CFG和Path-sensitive checker回调函数</p>
+        <p class="article-nav-title">【Clang Static Analyzer】基于Exploded Graph的检查</p>
         <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
         </a>
     
@@ -606,7 +644,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -616,7 +654,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
