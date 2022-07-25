@@ -169,6 +169,56 @@
         <article class="article article-summary">
     <div class="article-summary-inner">
         
+        <a href="/2021/09/04/database/mysql-lock/" class="thumbnail">
+    
+    
+        <span style="background-image:url(/2021/09/04/database/mysql-lock/Images/undo_indexPage.png)" alt="mysql-并发" class="thumbnail-image"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/09/04/database/mysql-lock/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+            </div>
+            <div class="date"><time datetime="2021-09-04T13:20:46.000Z" itemprop="datePublished">2021-09-04</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2021/09/04/database/mysql-lock/">mysql-并发</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            mysql-并发对于MySql服务器来说，可能同时要处理多个事务。如果在处理多事务的时候，让事务排队进行这样对性能的影响非常大。如何让Mysql既有较好的隔离性，又有较好的性能，这就是MVCC和锁要做的事情。
+隔离与MVCC1. 事务并发问题
+脏写：一个事务修改了另一个未提交事务修改过的数据
+脏读：一个事务读到了另一个未提交事务修改过的数据
+不可重复读：一个事务只能读到另一个已经提交的事务修改过的
+        </p>
+    </div>
+</article>
+    
+
+    
+    
+    
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
         <a href="/2021/09/02/pythonOther/oracleMigration/" class="thumbnail">
     
     
@@ -210,10 +260,14 @@ https://www.oracle.com/cn/database/technologies/instant-client/winx64-64-downloa
     </div>
 </article>
     
+        </div>
+    
 
     
     
     
+    
+        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -258,14 +312,10 @@ redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是�
     </div>
 </article>
     
-        </div>
-    
 
     
     
     
-    
-        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -309,10 +359,14 @@ redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是�
     </div>
 </article>
     
+        </div>
+    
 
     
     
     
+    
+        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -356,14 +410,10 @@ redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是�
     </div>
 </article>
     
-        </div>
-    
 
     
     
     
-    
-        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -407,10 +457,14 @@ redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是�
     </div>
 </article>
     
+        </div>
+    
 
     
     
     
+    
+        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -454,14 +508,10 @@ redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是�
     </div>
 </article>
     
-        </div>
-    
 
     
     
     
-    
-        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -508,10 +558,14 @@ HDD的硬件特性如上图，你需要清楚的是
     </div>
 </article>
     
+        </div>
+    
 
     
     
     
+    
+        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -558,14 +612,10 @@ HDD的硬件特性如上图，你需要清楚的是
     </div>
 </article>
     
-        </div>
-    
 
     
     
     
-    
-        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -605,58 +655,6 @@ HDD的硬件特性如上图，你需要清楚的是
         <p class="article-excerpt">
             并发并发、互斥、同步在实际开发过程中经常会用到，本文将聚焦于互斥与同步，除了了解底层的互斥原理，还将重点学习glic提供的几种互斥机制。
 底层原子操作原子操作：将多个步骤合成一个操作，这个操作要么成功，要么失败。底层原子操作由硬件提供，在阅读同步相关的源码时，会经常看到类似atomic_compare_exchange，atomic_fetch_add等类似的函数，其实这些函数就是封装了这些底层的
-        </p>
-    </div>
-</article>
-    
-
-    
-    
-    
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
-        <a href="/2021/06/19/operatingSystem/os-menoryVirtual/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2021/06/19/operatingSystem/os-menoryVirtual/Images/memory_layout.png)" alt="OS-虚拟memory" class="thumbnail-image"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/06/19/operatingSystem/os-menoryVirtual/">0</span>
-    
-</span>
-
-
-    
-</a>
-
-        
-        <div class="article-meta">
-            <div class="category">
-            <a class="article-category-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a>
-            </div>
-            <div class="date"><time datetime="2021-06-19T16:42:07.000Z" itemprop="datePublished">2021-06-19</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2021/06/19/operatingSystem/os-menoryVirtual/">OS-虚拟memory</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            虚拟memory我们知道每个进程都有自己的连续内存空间，比方在64位系统中进程的内存布局：让进程误以为自己拥有完整的内存空间，这就是虚拟内存。而实现虚拟内存技术主要从以下几个角度考虑：
-
-透明，不应该让用户进程感知到物理内存（基本功能）
-高效，每一条指令都会跟内存打交道，效率是最重要的指标之一
-保护，不光是进程间的保护，还包括内部数据的保护比方代码段只读属性
-
-类似虚拟cpu的实现，虚拟内存也需要
         </p>
     </div>
 </article>
@@ -748,6 +746,46 @@ HDD的硬件特性如上图，你需要清楚的是
                     <li>
                         
                         <div class="item-thumbnail">
+                            <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="title">【Clang Static Analyzer】浮点变量与零比较检查(原创)</a></p>
+                            <p class="item-date"><time datetime="2022-07-02T09:19:31.000Z" itemprop="datePublished">2022-07-02</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/06/11/LLVM/llvm-PathChecker/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/06/11/LLVM/llvm-PathChecker/" class="title">【Clang Static Analyzer】基于Exploded Graph的检查</a></p>
+                            <p class="item-date"><time datetime="2022-06-11T20:45:01.000Z" itemprop="datePublished">2022-06-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
                             <a href="/2022/05/25/cryptograghy/cryptography-tls/" class="thumbnail">
     
     
@@ -805,46 +843,6 @@ HDD的硬件特性如上图，你需要清楚的是
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2022/05/23/network/net-http/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2022/05/23/network/net-http/" class="title">net_http</a></p>
-                            <p class="item-date"><time datetime="2022-05-23T06:27:38.000Z" itemprop="datePublished">2022-05-23</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2022/05/21/LLVM/llvm-explodedGraph/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2022/05/21/LLVM/llvm-explodedGraph/Images/Exploded_graph_node.png)" alt="【Clang Static Analyzer】Exploded Graph和内存模型" class="thumbnail-image"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
-                            <p class="item-title"><a href="/2022/05/21/LLVM/llvm-explodedGraph/" class="title">【Clang Static Analyzer】Exploded Graph和内存模型</a></p>
-                            <p class="item-date"><time datetime="2022-05-21T10:45:01.000Z" itemprop="datePublished">2022-05-21</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -854,7 +852,7 @@ HDD的硬件特性如上图，你需要清楚的是
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -864,7 +862,7 @@ HDD的硬件特性如上图，你需要清楚的是
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 

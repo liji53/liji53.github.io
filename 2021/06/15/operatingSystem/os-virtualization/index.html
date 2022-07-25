@@ -12,12 +12,12 @@
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看">
+    <meta name="description" content="虚拟CPU面试的时候，我们经常会被问道线程与进程的区别(进程是操作系统进行资源分配(除了cpu)的基本单位，线程是进行cpu调度的基本单位)。但这次我不是唠嗑线程与进程的区别，而是聚焦到进程能够实现并发（迷惑我们以为拥有完整cpu）的相关技术-即虚拟CPU。实现虚拟CPU的技术，主要靠几种底层机制(时钟中断、软中断、上下文切换)以及一种上层策略(进程调度策略)来实现。首先我们看下进程的状态转化图(">
 <meta property="og:type" content="article">
 <meta property="og:title" content="OS-虚拟CPU">
 <meta property="og:url" content="https://liji53.github.io/2021/06/15/operatingSystem/os-virtualization/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看">
+<meta property="og:description" content="虚拟CPU面试的时候，我们经常会被问道线程与进程的区别(进程是操作系统进行资源分配(除了cpu)的基本单位，线程是进行cpu调度的基本单位)。但这次我不是唠嗑线程与进程的区别，而是聚焦到进程能够实现并发（迷惑我们以为拥有完整cpu）的相关技术-即虚拟CPU。实现虚拟CPU的技术，主要靠几种底层机制(时钟中断、软中断、上下文切换)以及一种上层策略(进程调度策略)来实现。首先我们看下进程的状态转化图(">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://liji53.github.io/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png">
 <meta property="article:published_time" content="2021-06-15T21:54:20.000Z">
@@ -205,9 +205,14 @@
 
             
 
-            <h1 id="虚拟CPU"><a href="#虚拟CPU" class="headerlink" title="虚拟CPU"></a>虚拟CPU</h1><p>今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。<br>迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。<br>而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。<br>首先我们看下进程的状态转化图(实际不止3种)：<br><img src="/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png"><br>这张图包含了我们本次要讲的重点</p>
-<h3 id="进程切换"><a href="#进程切换" class="headerlink" title="进程切换"></a>进程切换</h3><p>看到进程切换，大家可能会想到通过OS来管理进程资源，由OS来切换进程，这不是很简单嘛？<br>但如果进程一直占有cpu，也就意味着无法进入到内核，这还怎么切换进程呢，同时如果这个进程要访问没有权限的资源时应该怎么办呢？</p>
-<h5 id="1-软中断-trap"><a href="#1-软中断-trap" class="headerlink" title="1.软中断(trap)"></a>1.软中断(trap)</h5><p>为了能够顺利进入到内核，主要有2种方式(软中断和硬中断)，我们先介绍主动进入内核的办法-系统调用(通过各种异常也能进入)，通过系统调用也解决了上面权限的问题。</p>
+            <h1 id="虚拟CPU"><a href="#虚拟CPU" class="headerlink" title="虚拟CPU"></a>虚拟CPU</h1><p>面试的时候，我们经常会被问道线程与进程的区别(进程是操作系统进行资源分配(除了cpu)的基本单位，线程是进行cpu调度的基本单位)。<br>但这次我不是唠嗑线程与进程的区别，而是聚焦到进程能够实现并发（迷惑我们以为拥有完整cpu）的相关技术-即虚拟CPU。<br>实现虚拟CPU的技术，主要靠几种底层机制(时钟中断、软中断、上下文切换)以及一种上层策略(进程调度策略)来实现。<br>首先我们看下进程的状态转化图(实际不止3种)：<br><img src="/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png"><br>这张图里红色的内容就是我们要唠叨的重点了。</p>
+<h3 id="进程切换"><a href="#进程切换" class="headerlink" title="进程切换"></a>进程切换</h3><p>对于进程切换，初学者可能会理所当然的认为是操作系统在管理、切换进程，这当然没错。但是否有过这样的疑问：一个执行中的进程，如果占据了CPU，那操作系统是如何夺回CPU的，要知道CPU只会干“PC=PC+1”</p>
+<h5 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h5><p>计算机靠中断来实现从用户进程到内核的切换，中断在计算机里的重要性无可替代，简单来说中断就是打断运行中的cpu，并告诉cpu先去处理其他紧急的事情。<br>如果继续研究下去，就又产生2个问题，中断是如何打断cpu的，cpu怎么知道要去处理该中断的紧急事件？<br>中断分为：</p>
+<ol>
+<li>内中断：系统调用(trap)、各种异常(如缺页、地址越界)等内部事件。</li>
+<li>外中断：由外部设备产生的事件，如磁盘完成数据准备，时钟设备的一个时钟周期已到，等等。</li>
+</ol>
+<h5 id="1-内中断-系统调用"><a href="#1-内中断-系统调用" class="headerlink" title="1.内中断-系统调用"></a>1.内中断-系统调用</h5><p>为了能够顺利进入到内核，主要有2种方式(软中断和硬中断)，我们先介绍主动进入内核的办法-系统调用(通过各种异常也能进入)，通过系统调用也解决了上面权限的问题。</p>
 <p>之前在<a href="https://liji53.github.io/2021/06/10/compileAssemblyLink/disassembly/">《c/c++反汇编》</a>已经对应用层的系统调用汇编代码做过一波分析了。<br>现在我们再简单讲下后面的流程：通过syscall指令使执行逻辑从用户态切换到内核态，在进入到内核态之后，cpu会从指定的寄存器中读取内核代码的入口地址，进入内核代码之后，自然就可以通过rax读取系统调用号，再从system call table转到对应的处理函数中。</p>
 <p>到这里我们就会产生一些困惑，因为从用户态到内核态，硬件到底做了什么呢？在《Operating Systems: Three Easy Pieces》写道：硬件会把cpu的模式从用户模式切换到内核模式，同时会保存寄存器到内核栈，但实际呢？<br>其实最好的答案还是亲自到官方上找相应cpu架构的指令集。比方<a target="_blank" rel="noopener" href="https://www.intel.cn/content/www/cn/zh/developer/articles/technical/intel-sdm.html">intel</a>，从Intel® 64 and IA-32 Architectures Software Developer’s Manual Volume 2B: Instruction Set Reference, M-U这一章节就有syscall的描述</p>
 <p>最后我们再来理解下这个流程：<br><img src="/2021/06/15/operatingSystem/os-virtualization/Images/set_trap_table.png"></p>
@@ -343,8 +348,8 @@
         "dateCreated": "2021-06-15",
         "dateModified": "2021-06-15",
         "url": "https://liji53.github.io/2021/06/15/operatingSystem/os-virtualization/",
-        "description": "虚拟CPU今天我们的主角是进程，通过任务管理器即可以看到当前运行着的进程，不知道你有没有疑惑过为什么可以有这么多的进程同时运行。迷惑我们让我们产生多进程同时在做事情的假象的核心技术(之一)就是’虚拟cpu’，即把CPU共享给每个进程，以至于让进程误认为自己拥有全部的cpu。而实现虚拟cpu的技术，主要通过几种底层机制(时钟中断、软中断、上下文切换)以及1种上层策略(进程调度策略)来实现。首先我们看",
-        "wordCount": 419
+        "description": "虚拟CPU面试的时候，我们经常会被问道线程与进程的区别(进程是操作系统进行资源分配(除了cpu)的基本单位，线程是进行cpu调度的基本单位)。但这次我不是唠嗑线程与进程的区别，而是聚焦到进程能够实现并发（迷惑我们以为拥有完整cpu）的相关技术-即虚拟CPU。实现虚拟CPU的技术，主要靠几种底层机制(时钟中断、软中断、上下文切换)以及一种上层策略(进程调度策略)来实现。首先我们看下进程的状态转化图(",
+        "wordCount": 423
     }
 </script>
 
@@ -460,6 +465,46 @@
                     <li>
                         
                         <div class="item-thumbnail">
+                            <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="title">【Clang Static Analyzer】浮点变量与零比较检查(原创)</a></p>
+                            <p class="item-date"><time datetime="2022-07-02T09:19:31.000Z" itemprop="datePublished">2022-07-02</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/06/11/LLVM/llvm-PathChecker/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/06/11/LLVM/llvm-PathChecker/" class="title">【Clang Static Analyzer】基于Exploded Graph的检查</a></p>
+                            <p class="item-date"><time datetime="2022-06-11T20:45:01.000Z" itemprop="datePublished">2022-06-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
                             <a href="/2022/05/25/cryptograghy/cryptography-tls/" class="thumbnail">
     
     
@@ -517,46 +562,6 @@
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2022/05/23/network/net-http/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2022/05/23/network/net-http/" class="title">net_http</a></p>
-                            <p class="item-date"><time datetime="2022-05-23T06:27:38.000Z" itemprop="datePublished">2022-05-23</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2022/05/21/LLVM/llvm-explodedGraph/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2022/05/21/LLVM/llvm-explodedGraph/Images/Exploded_graph_node.png)" alt="【Clang Static Analyzer】Exploded Graph和内存模型" class="thumbnail-image"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
-                            <p class="item-title"><a href="/2022/05/21/LLVM/llvm-explodedGraph/" class="title">【Clang Static Analyzer】Exploded Graph和内存模型</a></p>
-                            <p class="item-date"><time datetime="2022-05-21T10:45:01.000Z" itemprop="datePublished">2022-05-21</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -566,7 +571,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -576,7 +581,7 @@
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 

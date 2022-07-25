@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    
+
+    
+    <title>【Clang Static Analyzer】浮点变量与零比较检查(原创) | 么么博客</title>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="keywords" content="" />
+    
+    <meta name="description" content="浮点变量与零比较检查 分析可行性 1.测试文件 2.确定回调函数   代码实现 1.回调函数实现 2.获取左值右值的符号值 3.检查符号值是否为0 4.提交错误报告      浮点变量与零比较检查在C&#x2F;C++中，不可将浮点变量用”&#x3D;&#x3D;”或”!&#x3D;”与数字直接比较，而应该转化成”&gt;&#x3D;”或”&lt;&#x3D;”此形式进行比较。这条检查在CSA的已有检查规则中并不存在，因此我们自己来实现下。这里我们只给出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="【Clang Static Analyzer】浮点变量与零比较检查(原创)">
+<meta property="og:url" content="https://liji53.github.io/2022/07/02/LLVM/llvm-floatCmpZero/index.html">
+<meta property="og:site_name" content="么么博客">
+<meta property="og:description" content="浮点变量与零比较检查 分析可行性 1.测试文件 2.确定回调函数   代码实现 1.回调函数实现 2.获取左值右值的符号值 3.检查符号值是否为0 4.提交错误报告      浮点变量与零比较检查在C&#x2F;C++中，不可将浮点变量用”&#x3D;&#x3D;”或”!&#x3D;”与数字直接比较，而应该转化成”&gt;&#x3D;”或”&lt;&#x3D;”此形式进行比较。这条检查在CSA的已有检查规则中并不存在，因此我们自己来实现下。这里我们只给出">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-07-02T09:19:31.000Z">
+<meta property="article:modified_time" content="2022-07-02T09:19:31.000Z">
+<meta property="article:author" content="Liji">
+<meta name="twitter:card" content="summary">
+    
+
+    
+        <link rel="alternate" href="https://github.com/liji53/liji53.github.io" title="么么博客" type="application/atom+xml" />
+    
+
+    
+
+    
+<link rel="stylesheet" href="/libs/font-awesome/css/font-awesome.min.css">
+
+    
+<link rel="stylesheet" href="/libs/titillium-web/styles.css">
+
+    
+<link rel="stylesheet" href="/libs/source-code-pro/styles.css">
+
+
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    
+<script src="/libs/jquery/3.5.0/jquery.min.js"></script>
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/lightgallery/css/lightgallery.min.css">
+
+    
+    
+        
+<link rel="stylesheet" href="/libs/justified-gallery/justifiedGallery.min.css">
+
+    
+    
+    
+    
+
+
+<meta name="generator" content="Hexo 5.4.0"></head>
+
+<body>
+    <div id="wrap">
+        <header id="header">
+    <div id="header-outer" class="outer">
+        <div class="container">
+            <div class="container-inner">
+                <div id="header-title">
+                    <h1 class="logo-wrap">
+                        <a href="/" class="logo"></a>
+                    </h1>
+                    
+                </div>
+                <div id="header-inner" class="nav-container">
+                    <a id="main-nav-toggle" class="nav-icon fa fa-bars"></a>
+                    <div class="nav-container-inner">
+                        <ul id="main-nav">
+                            
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/">主页</a>
+                                </li>
+                            
+                                    <ul class="main-nav-list"><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/LLVM/">LLVM</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a></li><li class="main-nav-list-item"><a class="main-nav-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a></li></ul>
+                                
+                                <li class="main-nav-list-item" >
+                                    <a class="main-nav-list-link" href="/about/index.html">关于</a>
+                                </li>
+                            
+                        </ul>
+                        <nav id="sub-nav">
+                            <div id="search-form-wrap">
+
+    <form class="search-form">
+        <input type="text" class="ins-search-input search-form-input" placeholder="搜索" />
+        <button type="submit" class="search-form-submit"></button>
+    </form>
+    <div class="ins-search">
+    <div class="ins-search-mask"></div>
+    <div class="ins-search-container">
+        <div class="ins-input-wrapper">
+            <input type="text" class="ins-search-input" placeholder="想要查找什么..." />
+            <span class="ins-close ins-selectable"><i class="fa fa-times-circle"></i></span>
+        </div>
+        <div class="ins-section-wrapper">
+            <div class="ins-section-container"></div>
+        </div>
+    </div>
+</div>
+<script>
+(function (window) {
+    var INSIGHT_CONFIG = {
+        TRANSLATION: {
+            POSTS: '文章',
+            PAGES: '页面',
+            CATEGORIES: '分类',
+            TAGS: '标签',
+            UNTITLED: '(未命名)',
+        },
+        ROOT_URL: '/',
+        CONTENT_URL: '/content.json',
+    };
+    window.INSIGHT_CONFIG = INSIGHT_CONFIG;
+})(window);
+</script>
+
+<script src="/js/insight.js"></script>
+
+
+</div>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <div class="container">
+            <div class="main-body container-inner">
+                <div class="main-body-inner">
+                    <section id="main">
+                        <div class="main-body-header">
+    <h1 class="header">
+    
+    <a class="page-title-link" href="/categories/LLVM/">LLVM</a>
+    </h1>
+</div>
+
+                        <div class="main-body-content">
+                            <article id="post-LLVM/llvm-floatCmpZero" class="article article-single article-type-post" itemscope itemprop="blogPost">
+    <div class="article-inner">
+        
+            <header class="article-header">
+                
+    
+        <h1 class="article-title" itemprop="name">
+        【Clang Static Analyzer】浮点变量与零比较检查(原创)
+        </h1>
+    
+
+            </header>
+        
+        
+            <div class="article-meta">
+                
+  <div class="article-date">
+    <i class="fa fa-calendar"></i>
+    <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="article-date">
+       <time datetime="2022-07-02T09:19:31.000Z" itemprop="datePublished">2022-07-02</time>
+    </a>
+  </div>
+
+
+<div class="article-date">
+  <i class="fa fa-calendar-plus-o"></i>
+  <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="article-date">
+     <time datetime="2022-07-02T09:19:31.000Z" itemprop="dateModified">2022-07-02</time>
+  </a>
+</div>
+
+
+                
+
+                
+                
+
+                
+
+            </div>
+        
+        
+        <div class="article-entry" itemprop="articleBody">
+            
+
+            
+
+            
+
+            <ul>
+<li><a href="#%E6%B5%AE%E7%82%B9%E5%8F%98%E9%87%8F%E4%B8%8E%E9%9B%B6%E6%AF%94%E8%BE%83%E6%A3%80%E6%9F%A5">浮点变量与零比较检查</a><ul>
+<li><a href="#%E5%88%86%E6%9E%90%E5%8F%AF%E8%A1%8C%E6%80%A7">分析可行性</a><ul>
+<li><a href="#1-%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6">1.测试文件</a></li>
+<li><a href="#2-%E7%A1%AE%E5%AE%9A%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0">2.确定回调函数</a></li>
+</ul>
+</li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0">代码实现</a><ul>
+<li><a href="#1-%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0%E5%AE%9E%E7%8E%B0">1.回调函数实现</a></li>
+<li><a href="#2-%E8%8E%B7%E5%8F%96%E5%B7%A6%E5%80%BC%E5%8F%B3%E5%80%BC%E7%9A%84%E7%AC%A6%E5%8F%B7%E5%80%BC">2.获取左值右值的符号值</a></li>
+<li><a href="#3-%E6%A3%80%E6%9F%A5%E7%AC%A6%E5%8F%B7%E5%80%BC%E6%98%AF%E5%90%A6%E4%B8%BA0">3.检查符号值是否为0</a></li>
+<li><a href="#4-%E6%8F%90%E4%BA%A4%E9%94%99%E8%AF%AF%E6%8A%A5%E5%91%8A">4.提交错误报告</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="浮点变量与零比较检查"><a href="#浮点变量与零比较检查" class="headerlink" title="浮点变量与零比较检查"></a>浮点变量与零比较检查</h1><p>在C/C++中，不可将浮点变量用”==”或”!=”与数字直接比较，而应该转化成”&gt;=”或”&lt;=”此形式进行比较。<br>这条检查在CSA的已有检查规则中并不存在，因此我们自己来实现下。这里我们只给出实现类，但checker的注册、CMakelist的添加等，可以回看<a href="https://liji53.github.io/2022/02/23/LLVM/llvm-environment/">CSA安装和运行</a></p>
+<h3 id="分析可行性"><a href="#分析可行性" class="headerlink" title="分析可行性"></a>分析可行性</h3><p>一般来说，要实现一个CSA checker，我们要分析这么一个过程：</p>
+<ol>
+<li>确定检查的场景，即待check的文件，明确代码可能会以什么样的形式存在</li>
+<li>根据上面的场景，确定checker什么时候进行检查，即checker的回调函数</li>
+<li>确定是否存在上下文依赖，如资源类型的检查，就需要检查上下文状态</li>
+<li>实现代码，在实现过程中，需要结合AST、Exploded graph来不断确认程序状态</li>
+<li>当检查出问题之后，确定是否需要继续检查，还是停止检查，确定错误报告</li>
+</ol>
+<h5 id="1-测试文件"><a href="#1-测试文件" class="headerlink" title="1.测试文件"></a>1.测试文件</h5><p>下面是自测时用的代码，列举了常用的场景，但像”if(浮点变量)”和”if(0.0 == 浮点变量)”这种场景, 这篇文章暂时不考虑在内。</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 为了代码展示的简洁性，尽量把能一行展示的放在一起</span></span><br><span class="line"><span class="function"><span class="keyword">extern</span> <span class="keyword">double</span> <span class="title">fabs</span><span class="params">(<span class="keyword">double</span> x)</span></span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">double</span> CNST_DOUBLE_ZERO = <span class="number">0.00000001</span>;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">compound</span> &#123;</span> <span class="keyword">double</span> a; <span class="keyword">int</span> b; &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">func</span><span class="params">(<span class="keyword">float</span> float_var, struct compound C)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> i = <span class="number">2</span>, j = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">int</span>* x = &amp;j;</span><br><span class="line">	<span class="keyword">int</span>&amp; y = j;</span><br><span class="line">	<span class="keyword">int</span>** z = &amp;x;</span><br><span class="line">	<span class="keyword">double</span> k = <span class="number">0.0</span>;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">compound</span> <span class="title">D</span> =</span> &#123;<span class="number">3.14</span>, <span class="number">0</span>&#125;;</span><br><span class="line">	<span class="comment">// 需要检查出来的场景</span></span><br><span class="line">	<span class="keyword">if</span> (float_var == <span class="number">0</span>) &#123;&#125;      <span class="comment">// == 操作符场景</span></span><br><span class="line">	<span class="keyword">if</span> ((float_var) != (<span class="number">0</span>)) &#123;&#125;  <span class="comment">// != 操作符场景</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="number">0</span> == float_var - <span class="number">1</span>) &#123;&#125;  <span class="comment">// float为BinaryOperator场景</span></span><br><span class="line">	<span class="keyword">if</span> (j == float_var) &#123;&#125;      <span class="comment">// 变量场景</span></span><br><span class="line">	<span class="keyword">if</span> (*x == float_var) &#123;&#125;     <span class="comment">// 指针场景</span></span><br><span class="line">	<span class="keyword">if</span> (**z == float_var) &#123;&#125;    <span class="comment">// 二级指针场景</span></span><br><span class="line">	<span class="keyword">if</span> (y == float_var) &#123;&#125;		<span class="comment">// 引用场景</span></span><br><span class="line">	<span class="keyword">if</span> ((<span class="number">0</span> == k &amp;&amp; i - <span class="number">2</span> == float_var) || <span class="built_in">fabs</span>(float_var - <span class="number">1</span>) == <span class="number">0</span>) &#123;&#125;  <span class="comment">// 多层表达式的场景</span></span><br><span class="line">	<span class="keyword">if</span> (<span class="number">0</span> == C.a || <span class="number">0</span> == C.a - <span class="number">1</span>) &#123;&#125;  <span class="comment">// float是struct成员变量的场景</span></span><br><span class="line">	<span class="keyword">if</span> (D.b == C.a) &#123;&#125;</span><br><span class="line">	<span class="comment">// 不要误报的场景</span></span><br><span class="line">	<span class="keyword">if</span> (i == <span class="number">0</span>) &#123;&#125;</span><br><span class="line">	<span class="keyword">if</span> (CNST_DOUBLE_ZERO == float_var) &#123;&#125;</span><br><span class="line">	<span class="keyword">if</span> (-CNST_DOUBLE_ZERO &lt; float_var &lt; CNST_DOUBLE_ZERO) &#123;&#125;</span><br><span class="line">	<span class="keyword">if</span> (<span class="built_in">fabs</span>(float_var - <span class="number">4</span>) &lt; CNST_DOUBLE_ZERO) &#123;&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-确定回调函数"><a href="#2-确定回调函数" class="headerlink" title="2.确定回调函数"></a>2.确定回调函数</h5><p>本次检查比较简单，我们只需要考虑”==”和”!=”这两种表达式，同时由于我们不关心表达式计算后的结果，而只关心表达式的左值和右值是否为0，因此我们的回调函数可以确定为check::PreStmt&lt;BinaryOperator&gt;</p>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><h5 id="1-回调函数实现"><a href="#1-回调函数实现" class="headerlink" title="1.回调函数实现"></a>1.回调函数实现</h5><p>在回调函数中，我们首先要缩小检查范围，如本例我们只检查：</p>
+<ol>
+<li>“==”和”!=”的操作符</li>
+<li>左值或右值是浮点数的。</li>
+<li>左值或右值等于0的</li>
+</ol>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FloatCmpZeroChecker</span> :</span> <span class="keyword">public</span> Checker&lt;check::PreStmt&lt;BinaryOperator&gt;&gt; &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">// 注册回调BinaryOperator</span></span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">checkPreStmt</span><span class="params">(<span class="keyword">const</span> BinaryOperator *B, CheckerContext &amp;C)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 过滤 非&quot;等于&quot;的操作符</span></span><br><span class="line">    BinaryOperator::Opcode Op = B-&gt;<span class="built_in">getOpcode</span>();</span><br><span class="line">    <span class="keyword">if</span> (Op != BO_EQ &amp;&amp; Op != BO_NE) &#123;<span class="keyword">return</span>;&#125;</span><br><span class="line">    <span class="comment">// 左值或右值必须有一项是float或double类型</span></span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">auto</span> *Rhs = B-&gt;<span class="built_in">getRHS</span>();</span><br><span class="line">    <span class="keyword">const</span> <span class="keyword">auto</span> *Lhs = B-&gt;<span class="built_in">getLHS</span>();</span><br><span class="line">    <span class="keyword">const</span> ASTContext &amp;Ctx = C.<span class="built_in">getASTContext</span>();</span><br><span class="line">    CanQualType CanRhsTy = Ctx.<span class="built_in">getCanonicalType</span>(Rhs-&gt;<span class="built_in">getType</span>()); </span><br><span class="line">    CanQualType CanLhsTy = Ctx.<span class="built_in">getCanonicalType</span>(Lhs-&gt;<span class="built_in">getType</span>());</span><br><span class="line">    <span class="comment">// 其实由于类型转化的存在，只有有一项是浮点类型，2者都将是浮点类型</span></span><br><span class="line">    <span class="keyword">if</span> (!<span class="built_in">isFloatType</span>(CanRhsTy, Ctx) &amp;&amp; !<span class="built_in">isFloatType</span>(CanLhsTy, Ctx)) &#123;</span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 检查左值是否为0</span></span><br><span class="line">    <span class="keyword">if</span> (Optional&lt;DefinedSVal&gt; L_DV = <span class="built_in">get_definedSVal</span>(Lhs, C)) &#123;</span><br><span class="line">      <span class="built_in">checkZero</span>(L_DV, C);</span><br><span class="line">    &#125;    </span><br><span class="line">    <span class="comment">// 检查右值是否为0</span></span><br><span class="line">    <span class="keyword">if</span> (Optional&lt;DefinedSVal&gt; R_DV = <span class="built_in">get_definedSVal</span>(Rhs, C)) &#123;</span><br><span class="line">      <span class="built_in">checkZero</span>(R_DV, C);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">bool</span> <span class="title">isFloatType</span><span class="params">(CanQualType CanTy, <span class="keyword">const</span> ASTContext &amp;Ctx)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> Ctx.FloatTy == CanTy || Ctx.DoubleTy == CanTy ||</span><br><span class="line">           Ctx.LongDoubleTy == CanTy;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="2-获取左值右值的符号值"><a href="#2-获取左值右值的符号值" class="headerlink" title="2.获取左值右值的符号值"></a>2.获取左值右值的符号值</h5><p>先给出代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">checkZero</span><span class="params">(<span class="keyword">const</span> Expr *expr, CheckerContext &amp;C)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">  <span class="comment">// 忽略&#x27;()&#x27; 和 类型转化</span></span><br><span class="line">  <span class="keyword">const</span> Expr *org_expr = expr-&gt;<span class="built_in">IgnoreParenCasts</span>();</span><br><span class="line">  SVal val_org = C.<span class="built_in">getSVal</span>(org_expr);</span><br><span class="line">  <span class="comment">// 本身是float类型(UnKnownVal)，则过滤</span></span><br><span class="line">  Optional&lt;DefinedSVal&gt; DV = val_org.getAs&lt;DefinedSVal&gt;();</span><br><span class="line">  <span class="keyword">if</span> (!DV) &#123; <span class="keyword">return</span>;&#125;</span><br><span class="line">  <span class="comment">// 变量、指针、引用</span></span><br><span class="line">  <span class="keyword">if</span> (Optional&lt;Loc&gt; LocVal = val_org.getAs&lt;Loc&gt;()) &#123;</span><br><span class="line">    <span class="comment">// 从memregion中获取SVal</span></span><br><span class="line">    val_org = C.<span class="built_in">getState</span>()-&gt;<span class="built_in">getSVal</span>(LocVal.<span class="built_in">getValue</span>());</span><br><span class="line">    DV = val_org.getAs&lt;DefinedSVal&gt;();</span><br><span class="line">    <span class="keyword">if</span> (!DV) &#123;<span class="keyword">return</span>;&#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这部分涉及到内存模型的使用，因此我们多啰嗦一点，结合前面的测试文件具体看下对应哪些内容</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// float_var是DeclRefExpr(AST)，它的SVal其实是Loc类型, 同理的还有局部变量j，引用变量y</span></span><br><span class="line"><span class="keyword">if</span> (float_var == <span class="number">0</span>)  </span><br><span class="line"><span class="keyword">if</span> (j == float_var)        <span class="comment">// 局部变量场景</span></span><br><span class="line"><span class="keyword">if</span> (y == float_var) &#123;&#125;		<span class="comment">// 引用场景</span></span><br><span class="line"><span class="comment">// float_var-1是BinaryOperator(AST), 它的SVal是float_var-1这个表达式的返回值，因此为UnKnownVal类型</span></span><br><span class="line"><span class="keyword">if</span> (<span class="number">0</span> == float_var - <span class="number">1</span>)</span><br><span class="line"><span class="comment">// 一级指针和二级指针都是Loc类型，需要从memregion中获取SVal</span></span><br><span class="line"><span class="keyword">if</span> (*x == float_var) &#123;&#125;     <span class="comment">// 指针场景</span></span><br><span class="line"><span class="keyword">if</span> (**z == float_var) &#123;&#125;    <span class="comment">// 二级指针场景</span></span><br></pre></td></tr></table></figure>
+
+<h5 id="3-检查符号值是否为0"><a href="#3-检查符号值是否为0" class="headerlink" title="3.检查符号值是否为0"></a>3.检查符号值是否为0</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">checkZero</span><span class="params">(Optional&lt;DefinedSVal&gt; DV, CheckerContext &amp;C)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">  ConstraintManager &amp;CM = C.<span class="built_in">getConstraintManager</span>();</span><br><span class="line">  <span class="comment">// 假设当前表达式的符号值，返回(可能为真，可能为假)2个状态</span></span><br><span class="line">  ProgramStateRef stateNotZero, stateZero;</span><br><span class="line">  std::<span class="built_in">tie</span>(stateNotZero, stateZero) = CM.<span class="built_in">assumeDual</span>(C.<span class="built_in">getState</span>(), *DV);</span><br><span class="line">  <span class="comment">// 不可能为”非0“，即肯定为0</span></span><br><span class="line">  <span class="keyword">if</span> (!stateNotZero) &#123;</span><br><span class="line">    <span class="built_in">assert</span>(stateZero);</span><br><span class="line">    <span class="built_in">reportBug</span>(<span class="string">&quot;float compared with zero&quot;</span>, stateZero, C);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-提交错误报告"><a href="#4-提交错误报告" class="headerlink" title="4.提交错误报告"></a>4.提交错误报告</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 获取错误内容的表达式</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">const</span> Expr *<span class="title">getDenomExpr</span><span class="params">(<span class="keyword">const</span> ExplodedNode *N)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> Stmt *S = N-&gt;getLocationAs&lt;PreStmt&gt;()-&gt;<span class="built_in">getStmt</span>();</span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> *BE = dyn_cast&lt;BinaryOperator&gt;(S))</span><br><span class="line">    <span class="keyword">return</span> BE-&gt;<span class="built_in">getRHS</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">nullptr</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">FloatCmpZeroChecker</span> :</span> <span class="keyword">public</span> Checker&lt;check::PreStmt&lt;BinaryOperator&gt;&gt; &#123;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="keyword">mutable</span> std::unique_ptr&lt;BuiltinBug&gt; BT;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">reportBug</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span> *Msg, ProgramStateRef StateZero, CheckerContext &amp;C,</span></span></span><br><span class="line"><span class="function"><span class="params">                 std::unique_ptr&lt;BugReporterVisitor&gt; Visitor = <span class="literal">nullptr</span>)</span> <span class="keyword">const</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 生成不sink的节点，程序继续分析</span></span><br><span class="line">    <span class="keyword">if</span> (ExplodedNode *N = C.<span class="built_in">generateNonFatalErrorNode</span>(StateZero)) &#123;</span><br><span class="line">      <span class="keyword">if</span> (!BT)</span><br><span class="line">        BT.<span class="built_in">reset</span>(<span class="keyword">new</span> <span class="built_in">BuiltinBug</span>(<span class="keyword">this</span>, <span class="string">&quot;float compared with zero&quot;</span>));</span><br><span class="line"></span><br><span class="line">      <span class="comment">// 提交错误报告</span></span><br><span class="line">      <span class="keyword">auto</span> R = std::make_unique&lt;PathSensitiveBugReport&gt;(*BT, Msg, N);</span><br><span class="line">      R-&gt;<span class="built_in">addVisitor</span>(std::<span class="built_in">move</span>(Visitor));</span><br><span class="line">      bugreporter::<span class="built_in">trackExpressionValue</span>(N, <span class="built_in">getDenomExpr</span>(N), *R);</span><br><span class="line">      C.<span class="built_in">emitReport</span>(std::<span class="built_in">move</span>(R));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+        </div>
+        <footer class="article-footer">
+            
+
+
+
+    <a data-url="https://liji53.github.io/2022/07/02/LLVM/llvm-floatCmpZero/" data-id="cl602edp900001dn48d454x3i" class="article-share-link"><i class="fa fa-share"></i>分享到</a>
+<script>
+    (function ($) {
+        $('body').on('click', function() {
+            $('.article-share-box.on').removeClass('on');
+        }).on('click', '.article-share-link', function(e) {
+            e.stopPropagation();
+
+            var $this = $(this),
+                url = $this.attr('data-url'),
+                encodedUrl = encodeURIComponent(url),
+                id = 'article-share-box-' + $this.attr('data-id'),
+                offset = $this.offset(),
+                box;
+
+            if ($('#' + id).length) {
+                box = $('#' + id);
+
+                if (box.hasClass('on')){
+                    box.removeClass('on');
+                    return;
+                }
+            } else {
+                var html = [
+                    '<div id="' + id + '" class="article-share-box">',
+                        '<input class="article-share-input" value="' + url + '">',
+                        '<div class="article-share-links">',
+                            '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+                            '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+                            '<a href="http://pinterest.com/pin/create/button/?url=' + encodedUrl + '" class="article-share-pinterest" target="_blank" title="Pinterest"></a>',
+                            '<a href="https://plus.google.com/share?url=' + encodedUrl + '" class="article-share-google" target="_blank" title="Google+"></a>',
+                        '</div>',
+                    '</div>'
+                ].join('');
+
+              box = $(html);
+
+              $('body').append(box);
+            }
+
+            $('.article-share-box.on').hide();
+
+            box.css({
+                top: offset.top + 25,
+                left: offset.left
+            }).addClass('on');
+
+        }).on('click', '.article-share-box', function (e) {
+            e.stopPropagation();
+        }).on('click', '.article-share-box-input', function () {
+            $(this).select();
+        }).on('click', '.article-share-box-link', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.open(this.href, 'article-share-box-window-' + Date.now(), 'width=500,height=450');
+        });
+    })(jQuery);
+</script>
+
+        </footer>
+    </div>
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "author": {
+            "@type": "Person",
+            "name": "Liji"
+        },
+        "headline": "【Clang Static Analyzer】浮点变量与零比较检查(原创)",
+        "image": "https://liji53.github.io",
+        "keywords": "",
+        "genre": "LLVM",
+        "datePublished": "2022-07-02",
+        "dateCreated": "2022-07-02",
+        "dateModified": "2022-07-02",
+        "url": "https://liji53.github.io/2022/07/02/LLVM/llvm-floatCmpZero/",
+        "description": "
+浮点变量与零比较检查
+分析可行性
+1.测试文件
+2.确定回调函数
+
+
+代码实现
+1.回调函数实现
+2.获取左值右值的符号值
+3.检查符号值是否为0
+4.提交错误报告
+
+
+
+
+
+浮点变量与零比较检查在C/C++中，不可将浮点变量用”==”或”!=”与数字直接比较，而应该转化成”&gt;=”或”&lt;=”此形式进行比较。这条检查在CSA的已有检查规则中并不存在，因此我们自己来实现下。这里我们只给出",
+        "wordCount": 1244
+    }
+</script>
+
+</article>
+
+    <section id="comments">
+    
+        
+    <div id="disqus_thread">
+        <noscript>Please enable JavaScript to view the <a target="_blank" rel="noopener" href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    </div>
+
+
+    
+    </section>
+
+
+
+                        </div>
+                    </section>
+                    <aside id="sidebar">
+    <a class="sidebar-toggle" title="Expand Sidebar"><i class="toggle icon"></i></a>
+    <div class="sidebar-top">
+        <p>关注我 :</p>
+        <ul class="social-links">
+            
+                
+                <li>
+                    <a class="social-tooltip" title="twitter" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-twitter"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="facebook" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-facebook"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="stack-overflow" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-stack-overflow"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="github" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-github"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="weibo" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-weibo"></i>
+                    </a>
+                </li>
+                
+            
+                
+                <li>
+                    <a class="social-tooltip" title="rss" href="https://github.com/liji53/liji53.github.io" target="_blank" rel="noopener">
+                        <i class="icon fa fa-rss"></i>
+                    </a>
+                </li>
+                
+            
+        </ul>
+    </div>
+    
+        
+<nav id="article-nav">
+    
+    
+        <a href="/2022/06/11/LLVM/llvm-PathChecker/" id="article-nav-older" class="article-nav-link-wrap">
+        <strong class="article-nav-caption">上一篇</strong>
+        <p class="article-nav-title">【Clang Static Analyzer】基于Exploded Graph的检查</p>
+        <i class="icon fa fa-chevron-left" id="icon-chevron-left"></i>
+        </a>
+    
+</nav>
+
+    
+    <div class="widgets-container">
+        
+            
+                
+
+            
+                
+    <div class="widget-wrap">
+        <h3 class="widget-title">最新文章</h3>
+        <div class="widget">
+            <ul id="recent-post" class="">
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="title">【Clang Static Analyzer】浮点变量与零比较检查(原创)</a></p>
+                            <p class="item-date"><time datetime="2022-07-02T09:19:31.000Z" itemprop="datePublished">2022-07-02</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/06/11/LLVM/llvm-PathChecker/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/06/11/LLVM/llvm-PathChecker/" class="title">【Clang Static Analyzer】基于Exploded Graph的检查</a></p>
+                            <p class="item-date"><time datetime="2022-06-11T20:45:01.000Z" itemprop="datePublished">2022-06-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/25/cryptograghy/cryptography-tls/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/25/cryptograghy/cryptography-tls/" class="title">cryptography-tls</a></p>
+                            <p class="item-date"><time datetime="2022-05-25T08:42:21.000Z" itemprop="datePublished">2022-05-25</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-ip/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-ip/" class="title">net-ip</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:28:48.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/05/23/network/net-tcp/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"></p>
+                            <p class="item-title"><a href="/2022/05/23/network/net-tcp/" class="title">net-tcp</a></p>
+                            <p class="item-date"><time datetime="2022-05-23T06:28:26.000Z" itemprop="datePublished">2022-05-23</time></p>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">分类</h3>
+        <div class="widget">
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">归档</h3>
+        <div class="widget">
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+        </div>
+    </div>
+
+
+            
+                
+
+            
+                
+
+            
+                
+    <div class="widget-wrap widget-list">
+        <h3 class="widget-title">链接</h3>
+        <div class="widget">
+            <ul>
+                
+                    <li>
+                        <a target="_blank" rel="noopener" href="http://hexo.io">Hexo</a>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+
+
+            
+        
+    </div>
+</aside>
+
+                </div>
+            </div>
+        </div>
+        <footer id="footer">
+    <div class="container">
+        <div class="container-inner">
+            <a id="back-to-top" href="javascript:;"><i class="icon fa fa-angle-up"></i></a>
+            <div class="credit">
+                <h1 class="logo-wrap">
+                    <a href="/" class="logo"></a>
+                </h1>
+                <p>&copy; 2022 Liji</p>
+                
+                <p>Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>. Theme by <a href="https://github.com/ppoffice" target="_blank">PPOffice</a></p>
+                
+            </div>
+            <div class="footer-plugins">
+              
+    
+
+
+            </div>
+        </div>
+    </div>
+</footer>
+
+    </div>
+    
+    
+    <script>
+    var disqus_shortname = 'hexo-theme-hueman';
+    
+    
+    var disqus_url = 'https://liji53.github.io/2022/07/02/LLVM/llvm-floatCmpZero/';
+    
+    (function() {
+    var dsq = document.createElement('script');
+    dsq.type = 'text/javascript';
+    dsq.async = true;
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+    </script>
+
+
+
+
+
+    
+        
+<script src="/libs/lightgallery/js/lightgallery.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-thumbnail.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-pager.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-autoplay.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-fullscreen.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-zoom.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-hash.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-share.min.js"></script>
+
+        
+<script src="/libs/lightgallery/js/lg-video.min.js"></script>
+
+    
+    
+        
+<script src="/libs/justified-gallery/jquery.justifiedGallery.min.js"></script>
+
+    
+    
+
+    
+    
+    
+
+
+
+<!-- Custom Scripts -->
+
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>

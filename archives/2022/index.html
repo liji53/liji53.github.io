@@ -169,6 +169,137 @@
         <article class="article article-summary">
     <div class="article-summary-inner">
         
+        <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/07/02/LLVM/llvm-floatCmpZero/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/LLVM/">LLVM</a>
+            </div>
+            <div class="date"><time datetime="2022-07-02T09:19:31.000Z" itemprop="datePublished">2022-07-02</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2022/07/02/LLVM/llvm-floatCmpZero/">【Clang Static Analyzer】浮点变量与零比较检查(原创)</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            
+浮点变量与零比较检查
+分析可行性
+1.测试文件
+2.确定回调函数
+
+
+代码实现
+1.回调函数实现
+2.获取左值右值的符号值
+3.检查符号值是否为0
+4.提交错误报告
+
+
+
+
+
+浮点变量与零比较检查在C/C++中，不可将浮点变量用”==”或”!=”与数字直接比较，而应该转化成”&gt;=”或”&lt;=”此形式进行比较。这条检查在CSA的已有检查规则中并不存在，因此我们自己来实现下。这里我们只给出
+        </p>
+    </div>
+</article>
+    
+
+    
+    
+    
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
+        <a href="/2022/06/11/LLVM/llvm-PathChecker/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+        
+<span class="comment-counter">
+    <i class="fa fa-comments-o"></i>
+    
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/06/11/LLVM/llvm-PathChecker/">0</span>
+    
+</span>
+
+
+    
+</a>
+
+        
+        <div class="article-meta">
+            <div class="category">
+            <a class="article-category-link" href="/categories/LLVM/">LLVM</a>
+            </div>
+            <div class="date"><time datetime="2022-06-11T20:45:01.000Z" itemprop="datePublished">2022-06-11</time></div>
+        </div>
+        
+    
+        <h1 class="article-title" itemprop="name">
+        <a href="/2022/06/11/LLVM/llvm-PathChecker/">【Clang Static Analyzer】基于Exploded Graph的检查</a>
+        </h1>
+    
+
+        <p class="article-excerpt">
+            
+基于Exploded Graph的检查
+对Program state的基本操作
+1.获取SVal
+2.遍历Region Store
+3.假设符号值
+4.生成新的符号值
+
+
+参与Exploded Graph的构建
+1.添加Exploded Node
+2.添加自定义状态
+
+
+遍历Exploded Graph
+
+
+
+基于Exploded Graph的检查对Program state的基本操作在Expl
+        </p>
+    </div>
+</article>
+    
+        </div>
+    
+
+    
+    
+    
+    
+        <div class="article-row">
+    
+        <article class="article article-summary">
+    <div class="article-summary-inner">
+        
         <a href="/2022/05/25/cryptograghy/cryptography-tls/" class="thumbnail">
     
     
@@ -426,57 +557,6 @@ Exploded-Graph和内存模型基于Exploded Graph检查指的是结合代码执�
         <article class="article article-summary">
     <div class="article-summary-inner">
         
-        <a href="/2022/05/21/LLVM/llvm-PathChecker/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/05/21/LLVM/llvm-PathChecker/">0</span>
-    
-</span>
-
-
-    
-</a>
-
-        
-        <div class="article-meta">
-            <div class="category">
-            <a class="article-category-link" href="/categories/LLVM/">LLVM</a>
-            </div>
-            <div class="date"><time datetime="2022-05-21T10:45:01.000Z" itemprop="datePublished">2022-05-21</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2022/05/21/LLVM/llvm-PathChecker/">【Clang Static Analyzer】基于Exploded Graph的检查</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            基于Exploded Graph的检查从Program state中获取信息在Exploded Graph和内存模型中我们介绍了Program state,
-1.获取表达式的值遍历SVal假设SValSVal的比较
-        </p>
-    </div>
-</article>
-    
-        </div>
-    
-
-    
-    
-    
-    
-        <div class="article-row">
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
         <a href="/2022/05/14/LLVM/llvm-CFG/" class="thumbnail">
     
     
@@ -526,10 +606,14 @@ Path-sensitive checker回调函数
     </div>
 </article>
     
+        </div>
+    
 
     
     
     
+    
+        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -598,14 +682,10 @@ AST matchers
     </div>
 </article>
     
-        </div>
-    
 
     
     
     
-    
-        <div class="article-row">
     
         <article class="article article-summary">
     <div class="article-summary-inner">
@@ -664,54 +744,6 @@ VS中构建LLVM
 
 
 CSA安装和运行最近在利用业余时间学习和研究代码检查工具，比对了几种代码检查工具之后，决定把Clang Static Analyzer（开源+可扩
-        </p>
-    </div>
-</article>
-    
-
-    
-    
-    
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
-        <a href="/2022/02/04/C++Basic/atomic/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2022/02/04/C++Basic/atomic/">0</span>
-    
-</span>
-
-
-    
-</a>
-
-        
-        <div class="article-meta">
-            <div class="category">
-            <a class="article-category-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a>
-            </div>
-            <div class="date"><time datetime="2022-02-04T03:24:16.000Z" itemprop="datePublished">2022-02-04</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2022/02/04/C++Basic/atomic/">atomic</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。关于锁的机制与原理，可以参考os-并发
-C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过原子操作来实现的，下面我们结合源码来看看c++11的原子类型是怎么实现的（来自vs的atomic.h）
-1. atomic自定义对象必须是POD我们知道atomic&
         </p>
     </div>
 </article>
@@ -803,6 +835,46 @@ C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过
                     <li>
                         
                         <div class="item-thumbnail">
+                            <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="title">【Clang Static Analyzer】浮点变量与零比较检查(原创)</a></p>
+                            <p class="item-date"><time datetime="2022-07-02T09:19:31.000Z" itemprop="datePublished">2022-07-02</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
+                            <a href="/2022/06/11/LLVM/llvm-PathChecker/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/06/11/LLVM/llvm-PathChecker/" class="title">【Clang Static Analyzer】基于Exploded Graph的检查</a></p>
+                            <p class="item-date"><time datetime="2022-06-11T20:45:01.000Z" itemprop="datePublished">2022-06-11</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
                             <a href="/2022/05/25/cryptograghy/cryptography-tls/" class="thumbnail">
     
     
@@ -860,46 +932,6 @@ C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2022/05/23/network/net-http/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2022/05/23/network/net-http/" class="title">net_http</a></p>
-                            <p class="item-date"><time datetime="2022-05-23T06:27:38.000Z" itemprop="datePublished">2022-05-23</time></p>
-                        </div>
-                    </li>
-                
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2022/05/21/LLVM/llvm-explodedGraph/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2022/05/21/LLVM/llvm-explodedGraph/Images/Exploded_graph_node.png)" alt="【Clang Static Analyzer】Exploded Graph和内存模型" class="thumbnail-image"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
-                            <p class="item-title"><a href="/2022/05/21/LLVM/llvm-explodedGraph/" class="title">【Clang Static Analyzer】Exploded Graph和内存模型</a></p>
-                            <p class="item-date"><time datetime="2022-05-21T10:45:01.000Z" itemprop="datePublished">2022-05-21</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -909,7 +941,7 @@ C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -919,7 +951,7 @@ C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">7</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
