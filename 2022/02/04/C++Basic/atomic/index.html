@@ -6,18 +6,18 @@
     
 
     
-    <title>atomic | 么么博客</title>
+    <title>原子类型 | 么么博客</title>
     
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。关于锁的机制与原理，可以参考os-并发 C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过原子操作来实现的，下面我们结合源码来看看c++11的原子类型是怎么实现的（来自vs的atomic.h） 1. atomic自定义对象必须是POD我们知道atomic&amp;">
+    <meta name="description" content="锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。关于锁的机制与原理，可以参考os-并发 C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过futex机制来实现的，而对futex变量的读写是通过原子操作来实现的，下面我们结合源码(来自vs的atomic.h)来看看c++11的原子类型是如何实现的 1. 原">
 <meta property="og:type" content="article">
-<meta property="og:title" content="atomic">
+<meta property="og:title" content="原子类型">
 <meta property="og:url" content="https://liji53.github.io/2022/02/04/C++Basic/atomic/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。关于锁的机制与原理，可以参考os-并发 C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过原子操作来实现的，下面我们结合源码来看看c++11的原子类型是怎么实现的（来自vs的atomic.h） 1. atomic自定义对象必须是POD我们知道atomic&amp;">
+<meta property="og:description" content="锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。关于锁的机制与原理，可以参考os-并发 C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过futex机制来实现的，而对futex变量的读写是通过原子操作来实现的，下面我们结合源码(来自vs的atomic.h)来看看c++11的原子类型是如何实现的 1. 原">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-02-04T03:24:16.000Z">
 <meta property="article:modified_time" content="2022-02-04T03:24:16.000Z">
@@ -161,7 +161,7 @@
                 
     
         <h1 class="article-title" itemprop="name">
-        atomic
+        原子类型
         </h1>
     
 
@@ -204,17 +204,18 @@
             
 
             <h1 id="锁与原子操作"><a href="#锁与原子操作" class="headerlink" title="锁与原子操作"></a>锁与原子操作</h1><p>在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。<br>关于锁的机制与原理，可以参考<a href="https://liji53.github.io/2021/06/29/operatingSystem/os-concurrency/">os-并发</a></p>
-<h3 id="C-11的atomic原子类型"><a href="#C-11的atomic原子类型" class="headerlink" title="C++11的atomic原子类型"></a>C++11的atomic原子类型</h3><p>pthread库的锁(包括信号量、条件变量)通过原子操作来实现的，下面我们结合源码来看看c++11的原子类型是怎么实现的（来自vs的atomic.h）</p>
-<h5 id="1-atomic自定义对象必须是POD"><a href="#1-atomic自定义对象必须是POD" class="headerlink" title="1. atomic自定义对象必须是POD"></a>1. atomic<T>自定义对象必须是POD</T></h5><p>我们知道atomic&lt;T&gt;的类型可以是自定义对象，但自定义对象是有限制的</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 模板类中，有一个静态检查，表示T的类型必须是POD类型</span></span><br><span class="line"><span class="built_in"><span class="keyword">static_assert</span></span>(is_trivially_copyable_v&lt;_Ty&gt; &amp;&amp; is_copy_constructible_v&lt;_Ty&gt; &amp;&amp; is_move_constructible_v&lt;_Ty&gt;</span><br><span class="line">        &amp;&amp; is_copy_assignable_v&lt;_Ty&gt; &amp;&amp; is_move_assignable_v&lt;_Ty&gt;,<span class="string">&quot;...&quot;</span>)</span><br></pre></td></tr></table></figure>
-
-<h5 id="2-原子变量不能拷贝，赋值"><a href="#2-原子变量不能拷贝，赋值" class="headerlink" title="2. 原子变量不能拷贝，赋值"></a>2. 原子变量不能拷贝，赋值</h5><p>因为两个原子类型之间的操作不能保证原子化</p>
+<h3 id="C-11的atomic原子类型"><a href="#C-11的atomic原子类型" class="headerlink" title="C++11的atomic原子类型"></a>C++11的atomic原子类型</h3><p>pthread库的锁(包括信号量、条件变量)通过futex机制来实现的，而对futex变量的读写是通过原子操作来实现的，下面我们结合源码(来自vs的atomic.h)来看看c++11的原子类型是如何实现的</p>
+<h5 id="1-原子变量不能拷贝，赋值"><a href="#1-原子变量不能拷贝，赋值" class="headerlink" title="1. 原子变量不能拷贝，赋值"></a>1. 原子变量不能拷贝，赋值</h5><p>这是因为两个原子类型之间的操作不能保证原子化</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">atomic</span>(<span class="keyword">const</span> atomic&amp;) = <span class="keyword">delete</span>;</span><br><span class="line">atomic&amp; <span class="keyword">operator</span>=(<span class="keyword">const</span> atomic&amp;) = <span class="keyword">delete</span>;</span><br></pre></td></tr></table></figure>
 
-<h5 id="3-非atomic-flag不一定无锁"><a href="#3-非atomic-flag不一定无锁" class="headerlink" title="3. 非atomic_flag不一定无锁"></a>3. 非atomic_flag不一定无锁</h5><p>除了atomic_flag,其他任何原子类型不一定是无锁的,具体跟平台相关。在本例中，只要是1,2,4,8大小的数据类型，就是无锁</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_NODISCARD <span class="keyword">bool</span> <span class="title">is_lock_free</span><span class="params">()</span> <span class="keyword">const</span> <span class="keyword">volatile</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">        <span class="keyword">constexpr</span> <span class="keyword">bool</span> _Result = <span class="built_in"><span class="keyword">sizeof</span></span>(_Ty) &lt;= <span class="number">8</span> &amp;&amp; (<span class="built_in"><span class="keyword">sizeof</span></span>(_Ty) &amp; <span class="built_in"><span class="keyword">sizeof</span></span>(_Ty) - <span class="number">1</span>) == <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">return</span> _Result;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h5 id="2-atomic自定义对象必须是POD"><a href="#2-atomic自定义对象必须是POD" class="headerlink" title="2. atomic自定义对象必须是POD"></a>2. atomic<T>自定义对象必须是POD</T></h5><p>我们知道atomic&lt;T&gt;的类型可以是自定义对象，但自定义对象是有限制的</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/// 模板类中，有一个静态检查，表示T的类型必须是POD类型</span></span><br><span class="line"><span class="built_in"><span class="keyword">static_assert</span></span>(is_trivially_copyable_v&lt;_Ty&gt; &amp;&amp; is_copy_constructible_v&lt;_Ty&gt; &amp;&amp; is_move_constructible_v&lt;_Ty&gt;</span><br><span class="line">        &amp;&amp; is_copy_assignable_v&lt;_Ty&gt; &amp;&amp; is_move_assignable_v&lt;_Ty&gt;,<span class="string">&quot;...&quot;</span>)</span><br></pre></td></tr></table></figure>
 
-<h5 id="4-如果不是无锁的原子类型，其实底层实现就是mutex"><a href="#4-如果不是无锁的原子类型，其实底层实现就是mutex" class="headerlink" title="4. 如果不是无锁的原子类型，其实底层实现就是mutex"></a>4. 如果不是无锁的原子类型，其实底层实现就是mutex</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">Atomic_storage</span> &#123;</span></span><br><span class="line">        <span class="function"><span class="keyword">void</span> <span class="title">store</span><span class="params">(<span class="keyword">const</span> _TVal _Value, <span class="keyword">const</span> memory_order _Order = memory_order_seq_cst)</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">        _Check_store_memory_order(_Order);</span><br><span class="line">        _Guard _Lock&#123;_Spinlock&#125;;</span><br><span class="line">        _Storage = _Value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;；</span><br></pre></td></tr></table></figure>
+<h5 id="3-非atomic-flag不一定无锁"><a href="#3-非atomic-flag不一定无锁" class="headerlink" title="3. 非atomic_flag不一定无锁"></a>3. 非atomic_flag不一定无锁</h5><p>除了atomic_flag,其他任何原子类型不一定是无锁的,具体跟平台相关。但在这个版本的VS中，只要是1,2,4,8大小的数据类型，就是无锁</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">_NODISCARD <span class="keyword">bool</span> <span class="title">is_lock_free</span><span class="params">()</span> <span class="keyword">const</span> <span class="keyword">volatile</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constexpr</span> <span class="keyword">bool</span> _Result = <span class="built_in"><span class="keyword">sizeof</span></span>(_Ty) &lt;= <span class="number">8</span> &amp;&amp; (<span class="built_in"><span class="keyword">sizeof</span></span>(_Ty) &amp; <span class="built_in"><span class="keyword">sizeof</span></span>(_Ty) - <span class="number">1</span>) == <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> _Result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="4-如果不是无锁的原子类型，其实底层实现就是mutex"><a href="#4-如果不是无锁的原子类型，其实底层实现就是mutex" class="headerlink" title="4. 如果不是无锁的原子类型，其实底层实现就是mutex"></a>4. 如果不是无锁的原子类型，其实底层实现就是mutex</h5><p>这个机制保证了一定的平台兼容性</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">Atomic_storage</span> &#123;</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">store</span><span class="params">(<span class="keyword">const</span> _TVal _Value, <span class="keyword">const</span> memory_order _Order = memory_order_seq_cst)</span> <span class="keyword">noexcept</span> </span>&#123;</span><br><span class="line">        _Check_store_memory_order(_Order);</span><br><span class="line">        _Guard _Lock&#123;_Spinlock&#125;;</span><br><span class="line">        _Storage = _Value;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;；</span><br></pre></td></tr></table></figure>
 
 <h5 id="5-原子操作"><a href="#5-原子操作" class="headerlink" title="5. 原子操作"></a>5. 原子操作</h5><p>_Atomic_storage&lt;_Ty, 8&gt; 指的是数据结构大小为8 的原子类型，由于平台不一样，这里用的是windows接口：_InterlockedExchange64</p>
 <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> _<span class="title">Atomic_storage</span>&lt;</span>_Ty, <span class="number">8</span>&gt;&#123;</span><br><span class="line">     <span class="function"><span class="keyword">void</span> <span class="title">store</span><span class="params">(<span class="keyword">const</span> _TVal _Value)</span> <span class="keyword">noexcept</span> </span>&#123; <span class="comment">// store with sequential consistency</span></span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">auto</span> _Mem           = _Atomic_address_as&lt;<span class="keyword">long</span> <span class="keyword">long</span>&gt;(_Storage);</span><br><span class="line">        <span class="keyword">const</span> <span class="keyword">long</span> <span class="keyword">long</span> _As_bytes = _Atomic_reinterpret_as&lt;<span class="keyword">long</span> <span class="keyword">long</span>&gt;(_Value);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> defined(_M_IX86)</span></span><br><span class="line">        _Compiler_barrier();</span><br><span class="line">        __iso_volatile_store64(_Mem, _As_bytes);</span><br><span class="line">        <span class="function">_STD <span class="title">atomic_thread_fence</span><span class="params">(memory_order_seq_cst)</span></span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">elif</span> defined(_M_ARM64)</span></span><br><span class="line">        _Memory_barrier();</span><br><span class="line">        __iso_volatile_store64(_Mem, _As_bytes);</span><br><span class="line">        _Memory_barrier();</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span> <span class="comment">// ^^^ _M_ARM64 / ARM32, x64 vvv</span></span></span><br><span class="line">        (<span class="keyword">void</span>) _InterlockedExchange64(_Mem, _As_bytes);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span> <span class="comment">// _M_ARM64</span></span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;；</span><br></pre></td></tr></table></figure>
@@ -347,7 +348,7 @@
             "@type": "Person",
             "name": "Liji"
         },
-        "headline": "atomic",
+        "headline": "原子类型",
         "image": "https://liji53.github.io",
         "keywords": "",
         "genre": "C++基础",
@@ -356,9 +357,9 @@
         "dateModified": "2022-02-04",
         "url": "https://liji53.github.io/2022/02/04/C++Basic/atomic/",
         "description": "锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。关于锁的机制与原理，可以参考os-并发
-C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过原子操作来实现的，下面我们结合源码来看看c++11的原子类型是怎么实现的（来自vs的atomic.h）
-1. atomic自定义对象必须是POD我们知道atomic&",
-        "wordCount": 1009
+C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过futex机制来实现的，而对futex变量的读写是通过原子操作来实现的，下面我们结合源码(来自vs的atomic.h)来看看c++11的原子类型是如何实现的
+1. 原",
+        "wordCount": 993
     }
 </script>
 

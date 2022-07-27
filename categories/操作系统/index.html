@@ -252,8 +252,36 @@ HDD的硬件特性如上图，你需要清楚的是
     
 
         <p class="article-excerpt">
-            并发并发、互斥、同步在实际开发过程中经常会用到，本文将聚焦于互斥与同步，除了了解底层的互斥原理，还将重点学习glic提供的几种互斥机制。
-底层原子操作原子操作：将多个步骤合成一个操作，这个操作要么成功，要么失败。底层原子操作由硬件提供，在阅读同步相关的源码时，会经常看到类似atomic_compare_exchange，atomic_fetch_add等类似的函数，其实这些函数就是封装了这些底层的
+            
+并发
+底层原子操作
+test-and-set
+compare-and-swap
+fetch-and-add
+load 和 store
+
+
+互斥锁
+1.自旋锁
+2.nptl互斥锁的实现
+3.futex机制
+4.nptl读写锁的实现
+5.提高并发性能
+
+
+条件变量
+1.用法
+2.生产者-消费者模型
+3.nptl的实现
+
+
+信号量
+nptl中的实现
+
+
+并发问题
+Non-Deadlock
+DeadLo
         </p>
     </div>
 </article>
