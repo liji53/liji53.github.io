@@ -172,7 +172,7 @@
         <a href="/2022/02/04/C++Basic/atomic/" class="thumbnail">
     
     
-        <span class="thumbnail-image thumbnail-none"></span>
+        <span style="background-image:url(/2022/02/04/C++Basic/atomic/Images/class.png)" alt="原子类型" class="thumbnail-image"></span>
     
     
         
@@ -202,9 +202,19 @@
     
 
         <p class="article-excerpt">
-            锁与原子操作在c++11中，其中最大的一个变化就是对多线程的支持，而其中最重要的部分就是引入了原子操作和原子类型。关于锁的机制与原理，可以参考os-并发
-C++11的atomic原子类型pthread库的锁(包括信号量、条件变量)通过futex机制来实现的，而对futex变量的读写是通过原子操作来实现的，下面我们结合源码(来自vs的atomic.h)来看看c++11的原子类型是如何实现的
-1. 原
+            
+原子类型
+原子类型的实现
+1.基本类型
+2.内部类的关系与功能
+3.基本操作
+4.原子变量不能拷贝，赋值
+5.atomic&lt;T&gt;自定义对象必须是POD
+6.非atomic_flag不一定无锁
+7.如果不是无锁的原子类型，其实底层实现就是mutex
+8.原子读写的内部实现
+9.默认内存顺序std::memory_order_seq_cst
+10.compare_exchange_wea
         </p>
     </div>
 </article>
