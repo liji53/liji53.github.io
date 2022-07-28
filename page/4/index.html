@@ -224,7 +224,7 @@
         <a href="/2021/06/15/operatingSystem/os-virtualization/" class="thumbnail">
     
     
-        <span style="background-image:url(/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png)" alt="OS-虚拟CPU" class="thumbnail-image"></span>
+        <span style="background-image:url(/2021/06/15/operatingSystem/os-virtualization/Images/proc_statue.png)" alt="OS-进程与虚拟CPU" class="thumbnail-image"></span>
     
     
         
@@ -249,12 +249,32 @@
         
     
         <h1 class="article-title" itemprop="name">
-        <a href="/2021/06/15/operatingSystem/os-virtualization/">OS-虚拟CPU</a>
+        <a href="/2021/06/15/operatingSystem/os-virtualization/">OS-进程与虚拟CPU</a>
         </h1>
     
 
         <p class="article-excerpt">
-            虚拟CPU面试的时候，我们经常会被问道线程与进程的区别(进程是操作系统进行资源分配(除了cpu)的基本单位，线程是进行cpu调度的基本单位)。但这次我不是唠嗑线程与进程的区别，而是聚焦到进程能够实现并发（迷惑我们以为拥有完整cpu）的相关技术-即虚拟CPU。实现虚拟CPU的技术，主要靠几种底层机制(时钟中断、软中断、上下文切换)以及一种上层策略(进程调度策略)来实现。首先我们看下进程的状态转化图(
+            
+进程与虚拟CPU
+进程切换
+1.中断
+2.内中断-系统调用
+3.外中断-时钟中断
+4.上下文切换
+
+
+进程调度策略(MLFQ)
+1.两种基本算法
+2.多级反馈队列(主流)
+3.优化下MLFQ
+4.MLFQ的进阶
+
+
+参考资料
+
+
+
+进程与虚拟CPU操作系统中最重要的一个概念就是进程，最重要的特性就是并发性。进程是对正在运行中的程序的一个抽象，也可理解为PCB+程序代码+运行时数据并发性是将一个c
         </p>
     </div>
 </article>
