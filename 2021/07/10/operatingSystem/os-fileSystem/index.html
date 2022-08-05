@@ -12,12 +12,12 @@
     
     <meta name="keywords" content="" />
     
-    <meta name="description" content="文件系统文件系统是OS用来组织和分配存储设备的方法，现在linux系统用的基本都是Ext4文件系统，在window上则基本都是NTFS文件系统，接下来我们将学习它们的数据结构与实现原理。 HDD和SSD基础在了解文件系统的实现之前，需要先知道存储介质的特性，因为文件系统(包括很多应用程序，像数据库)正是基于这些特征才设计的。 HDD的硬件特性如上图，你需要清楚的是  扇区：即图中的编号，操作硬盘的">
+    <meta name="description" content="文件系统 HDD和SSD基础 HDD的硬件特性 SSD的硬件特性   文件系统的实现 1.Ext2的布局(物理结构) 2.Ext2目录结构 3.Fat的布局 4.Ext4的数据管理方式   文件读写的过程 1.读IO时序 2.写IO时序 3.性能优化   异常恢复-文件系统一致性 1.fsck 2.通过日志恢复   命令与资料    文件系统文件系统是OS用来组织和分配存储设备的方法，现在lin">
 <meta property="og:type" content="article">
 <meta property="og:title" content="os-文件系统">
 <meta property="og:url" content="https://liji53.github.io/2021/07/10/operatingSystem/os-fileSystem/index.html">
 <meta property="og:site_name" content="么么博客">
-<meta property="og:description" content="文件系统文件系统是OS用来组织和分配存储设备的方法，现在linux系统用的基本都是Ext4文件系统，在window上则基本都是NTFS文件系统，接下来我们将学习它们的数据结构与实现原理。 HDD和SSD基础在了解文件系统的实现之前，需要先知道存储介质的特性，因为文件系统(包括很多应用程序，像数据库)正是基于这些特征才设计的。 HDD的硬件特性如上图，你需要清楚的是  扇区：即图中的编号，操作硬盘的">
+<meta property="og:description" content="文件系统 HDD和SSD基础 HDD的硬件特性 SSD的硬件特性   文件系统的实现 1.Ext2的布局(物理结构) 2.Ext2目录结构 3.Fat的布局 4.Ext4的数据管理方式   文件读写的过程 1.读IO时序 2.写IO时序 3.性能优化   异常恢复-文件系统一致性 1.fsck 2.通过日志恢复   命令与资料    文件系统文件系统是OS用来组织和分配存储设备的方法，现在lin">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://liji53.github.io/2021/07/10/operatingSystem/os-fileSystem/Images/HDD.png">
 <meta property="article:published_time" content="2021-07-10T20:11:07.000Z">
@@ -205,19 +205,48 @@
 
             
 
-            <h1 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h1><p>文件系统是OS用来组织和分配存储设备的方法，现在linux系统用的基本都是Ext4文件系统，在window上则基本都是NTFS文件系统，接下来我们将学习它们的数据结构与实现原理。</p>
+            <ul>
+<li><a href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F">文件系统</a><ul>
+<li><a href="#HDD%E5%92%8CSSD%E5%9F%BA%E7%A1%80">HDD和SSD基础</a><ul>
+<li><a href="#HDD%E7%9A%84%E7%A1%AC%E4%BB%B6%E7%89%B9%E6%80%A7">HDD的硬件特性</a></li>
+<li><a href="#SSD%E7%9A%84%E7%A1%AC%E4%BB%B6%E7%89%B9%E6%80%A7">SSD的硬件特性</a></li>
+</ul>
+</li>
+<li><a href="#%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84%E5%AE%9E%E7%8E%B0">文件系统的实现</a><ul>
+<li><a href="#1-Ext2%E7%9A%84%E5%B8%83%E5%B1%80-%E7%89%A9%E7%90%86%E7%BB%93%E6%9E%84">1.Ext2的布局(物理结构)</a></li>
+<li><a href="#2-Ext2%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84">2.Ext2目录结构</a></li>
+<li><a href="#3-Fat%E7%9A%84%E5%B8%83%E5%B1%80">3.Fat的布局</a></li>
+<li><a href="#4-Ext4%E7%9A%84%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86%E6%96%B9%E5%BC%8F">4.Ext4的数据管理方式</a></li>
+</ul>
+</li>
+<li><a href="#%E6%96%87%E4%BB%B6%E8%AF%BB%E5%86%99%E7%9A%84%E8%BF%87%E7%A8%8B">文件读写的过程</a><ul>
+<li><a href="#1-%E8%AF%BBIO%E6%97%B6%E5%BA%8F">1.读IO时序</a></li>
+<li><a href="#2-%E5%86%99IO%E6%97%B6%E5%BA%8F">2.写IO时序</a></li>
+<li><a href="#3-%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96">3.性能优化</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BC%82%E5%B8%B8%E6%81%A2%E5%A4%8D-%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E4%B8%80%E8%87%B4%E6%80%A7">异常恢复-文件系统一致性</a><ul>
+<li><a href="#1-fsck">1.fsck</a></li>
+<li><a href="#2-%E9%80%9A%E8%BF%87%E6%97%A5%E5%BF%97%E6%81%A2%E5%A4%8D">2.通过日志恢复</a></li>
+</ul>
+</li>
+<li><a href="#%E5%91%BD%E4%BB%A4%E4%B8%8E%E8%B5%84%E6%96%99">命令与资料</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="文件系统"><a href="#文件系统" class="headerlink" title="文件系统"></a>文件系统</h1><p>文件系统是OS用来组织和分配存储设备的方法，现在linux系统用的基本都是Ext4文件系统，在window上则基本都是NTFS文件系统，接下来我们将学习它们的物理结构以及实现原理。</p>
 <h3 id="HDD和SSD基础"><a href="#HDD和SSD基础" class="headerlink" title="HDD和SSD基础"></a>HDD和SSD基础</h3><p>在了解文件系统的实现之前，需要先知道存储介质的特性，因为文件系统(包括很多应用程序，像数据库)正是基于这些特征才设计的。</p>
 <h5 id="HDD的硬件特性"><a href="#HDD的硬件特性" class="headerlink" title="HDD的硬件特性"></a>HDD的硬件特性</h5><p><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/HDD.png"><br>如上图，你需要清楚的是</p>
 <ol>
-<li>扇区：即图中的编号，操作硬盘的基本存储单元，对扇区的读写是原子的，</li>
-<li>寻道：图中seek的动作，寻道时间一般在几毫秒到十几毫秒</li>
-<li>旋转：图中Rotates的动作，旋转一圈的时间一般也要几毫秒(如10000RPM = 6 ms/R)</li>
+<li>扇区：即图中的编号，操作硬盘的基本存储单元，<strong>对扇区的读写是原子的</strong></li>
+<li>寻道：图中seek的动作，寻道时间一般在<strong>几毫秒到十几毫秒</strong></li>
+<li>旋转：图中Rotates的动作，旋转一圈的时间一般也要<strong>几毫秒</strong>(如10000RPM = 6 ms/R)</li>
 <li>以现有的技术发展，寻道、旋转时间的进步比内存、cpu的发展慢的多，甚至是停滞的</li>
 </ol>
 <p>一次读写实际花费的时间应该是：<br>T(I/O) = Tseek + Trotation + Ttransfer<br>其中Ttransfer一般是100M/s到几百M/s之间<br>有了这个公式之后，在对文件系统的设计(包括应用程序的设计)，要尽可能的利用这个公式，提高传输效率。<br>在涉及读写的时候，主要考虑二种读写模式：</p>
 <ol>
-<li>随机读写：在随机读写中，每次磁头都需要重新定位，它的IO时间为Tseek + Trotation + Ttransfer</li>
-<li>顺序读写：在顺序读写中，如果一次性写入一大块的数据，则只需要一次的Tseek和Trotation 即可。但如果是分批次的顺序写入，除了第一次的Tseek和Trotation时间，后面每次读写还需要Trotation时间(因为磁盘是一直在转的，分批次写入会有时间差，导致磁盘转过头)</li>
+<li>随机读写：<strong>在随机读写中，每次磁头都需要重新定位</strong>，它的IO时间为Tseek + Trotation + Ttransfer</li>
+<li>顺序读写：<strong>在顺序读写中</strong>，如果一次性写入一大块的数据，<strong>则只需要一次的Tseek和Trotation 即可</strong>。但如果是分批次的顺序写入，除了第一次的Tseek和Trotation时间，后面每次读写还需要Trotation时间(因为磁盘是一直在转的，分批次写入会有时间差，导致磁盘转过头)</li>
 </ol>
 <h5 id="SSD的硬件特性"><a href="#SSD的硬件特性" class="headerlink" title="SSD的硬件特性"></a>SSD的硬件特性</h5><p>关于SSD，你需要清楚的是：</p>
 <ol>
@@ -229,30 +258,30 @@
 </ol>
 <p>基于这些硬件特性，SSD在随机读写上的性能要远好于HDD，而在顺序读写上一般也比HDD快1倍。（SSD内部的机制如垃圾回收机制，损耗均衡等不再介绍）</p>
 <h3 id="文件系统的实现"><a href="#文件系统的实现" class="headerlink" title="文件系统的实现"></a>文件系统的实现</h3><p>文件系统会把硬盘分割成一个个块，以块为单位进行读写，一般一个块4K大小。每个块只属于一个文件(目录)，如果文件不足block大小，则剩余的容量不再使用</p>
-<h5 id="Ext2的布局"><a href="#Ext2的布局" class="headerlink" title="Ext2的布局"></a>Ext2的布局</h5><p>Ext2文件系统的布局(图片来源：<a target="_blank" rel="noopener" href="https://blog.csdn.net/gongjiwei/article/details/82025142">https://blog.csdn.net/gongjiwei/article/details/82025142</a>):<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/Ext2_layout.png"><br>MBR: 引导块，常用于启动电脑<br>block group：由诺干个块组成的，为了提高访问同一目录下文件的效率(减少Tseek)，文件系统会把同一个目录下的文件尽量放在一个group中。<br>superblock：记录此文件系统的整体信息，如块大小，容量等，每个block group都有，用于备份。<br>group description table: 块组描述符表，记录了每个块组的块位图、inode位图、inode table等的位置，同样每个block group都有，用于备份。<br>block bitmap：块位图中的每一位表示当前块组中对应的那个块是否被使用。自身占一个块<br>inode bitmap：i节点位图中的每一位表示inode是否可用。自身占一个块<br>data blocks：数据块，用于存放文件、目录的数据<br>inode table:ext2中一个inode占用128byte（记录文件的属性，不包括文件名）,它的属性如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/Ext2_inode.png"><br>这里可以看到inode中存储了数据块的地址(block字段)，再结合文件系统布局图，可以看到一共有15个地址。<br>但为什么要设计成12个direct block以及3个一级、二级、三级间接block呢？（细品这些数据结构）</p>
+<h5 id="1-Ext2的布局-物理结构"><a href="#1-Ext2的布局-物理结构" class="headerlink" title="1.Ext2的布局(物理结构)"></a>1.Ext2的布局(物理结构)</h5><p>Ext2文件系统的布局(图片来源：<a target="_blank" rel="noopener" href="https://blog.csdn.net/gongjiwei/article/details/82025142">https://blog.csdn.net/gongjiwei/article/details/82025142</a>):<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/Ext2_layout.png"><br>下面对上图中的术语进行解释：<br>MBR: 引导块，常用于启动电脑<br>block group：由诺干个块组成的，为了提高访问同一目录下文件的效率(减少Tseek)，文件系统会把同一个目录下的文件尽量放在一个group中。<br>superblock：记录此文件系统的整体信息，如块大小，容量等，每个block group都有，用于备份。<br>group description table: 块组描述符表，记录了每个块组的块位图、inode位图、inode table等的位置，同样每个block group都有，用于备份。<br>block bitmap：块位图中的每一位表示当前块组中对应的那个块是否被使用。自身占一个块<br>inode bitmap：i节点位图中的每一位表示inode是否可用。自身占一个块<br>data blocks：数据块，用于存放文件、目录的数据<br>inode table:ext2中一个inode占用128byte（记录文件的属性，不包括文件名）,它的属性如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/Ext2_inode.png"><br>这里可以看到inode中存储了数据块的地址(block字段)，再结合文件系统布局图，可以看到一共有15个地址。<br>但为什么要设计成12个direct block以及3个一级、二级、三级间接block呢？（这么设计对寻址有什么好处？）</p>
 <ol>
-<li>设计成多级间接block是为了支持大容量的文件：(12 + 1024 + 1024^2 + 1024^3) × 4 KB</li>
-<li>设计成12个direct block，是因为大多数文件的大小只有2k，这样就可以直接定位到block，而不用去data block间接查找，提高效率</li>
+<li>设计成<strong>多级间接block是为了支持大容量的文件</strong>：(12 + 1024 + 1024^2 + 1024^3) × 4 KB</li>
+<li>设计成<strong>12个direct block，是因为大多数文件的大小都小于2k，这样就可以直接定位到block</strong>，而不用去data block间接查找，提高效率</li>
 </ol>
-<h5 id="Ext2目录结构"><a href="#Ext2目录结构" class="headerlink" title="Ext2目录结构"></a>Ext2目录结构</h5><p>data blocks既可以用于存放文件的数据，也可以用于存放目录的数据.<br>其中目录的数据结构如下：</p>
+<h5 id="2-Ext2目录结构"><a href="#2-Ext2目录结构" class="headerlink" title="2.Ext2目录结构"></a>2.Ext2目录结构</h5><p>data blocks既可以用于存放文件的数据，也可以用于存放目录的数据.<br>每一个目录项的数据结构如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">　<span class="class"><span class="keyword">struct</span> <span class="title">ext2_dir_entry_2</span> &#123;</span></span><br><span class="line">　　__le32 inode; <span class="comment">// 文件入口的inode号，0表示该项未使用</span></span><br><span class="line">　　__le16 rec_len; <span class="comment">// 目录项长度</span></span><br><span class="line">　　__u8 name_len; <span class="comment">// 文件名包含的字符数</span></span><br><span class="line">　　__u8 file_type; <span class="comment">// 文件类型</span></span><br><span class="line">　　<span class="keyword">char</span> name[<span class="number">255</span>]; <span class="comment">// 文件名</span></span><br><span class="line">　　&#125;;</span><br></pre></td></tr></table></figure>
-<p>目录数据会保存此目录下的所有文件名和目录名，以及文件的入口地址。至于其他的信息则存放在inode节点中</p>
-<h5 id="Fat的布局"><a href="#Fat的布局" class="headerlink" title="Fat的布局"></a>Fat的布局</h5><p>了解完基于inode组织的文件系统之后，我们再来了解下基于链表组织的Fat文件系统。像SD卡的文件系统一般就是Fat32，在Fat文件系统中对应Ext2 Block的描述是簇。<br>它的磁盘布局如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/fat_layout.png"><br>其中Fat表的位置由DBR来定位，Fat2是Fat1的备份，而Fat表的数据会读到内存中，它的布局如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/fat_table.png"><br>它描述了：</p>
+<p>目录会保存此目录下的所有文件名和目录名，以及文件的入口地址。至于<strong>其他的信息则存放在inode节点中(注意：fat文件系统放在目录项中)</strong></p>
+<h5 id="3-Fat的布局"><a href="#3-Fat的布局" class="headerlink" title="3.Fat的布局"></a>3.Fat的布局</h5><p>了解完基于inode组织的文件系统之后，我们再来了解下基于链表组织的Fat文件系统。像SD卡的文件系统一般就是Fat32，在Fat文件系统中对应Ext2 Block的描述是簇。<br>它的磁盘布局如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/fat_layout.png"><br>其中Fat表的位置由DBR来定位，Fat2是Fat1的备份，而Fat表的数据会读到内存中，它的布局如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/fat_table.png"><br>它描述了：</p>
 <ol>
 <li>簇的分配情况(0表示没有分配)，因此不存在像bitmap这样的数据结构</li>
-<li>文件下一个数据块的簇号，因此不需要类似inode的block字段</li>
+<li>文件下一个数据块的簇号(-1表示结束)，因此不需要类似inode的block字段</li>
 </ol>
-<p>但从上面的布局中，我们没有找到用于描述文件信息的元数据，其实这些元信息都存放在目录项中，而目录项的数据又存放在数据块中，因此这里看不到。<br>如果想要实际看看文件系统的结构，可以用WinHex可查看存储介质的二进制数据</p>
-<h5 id="Ext4的数据管理方式"><a href="#Ext4的数据管理方式" class="headerlink" title="Ext4的数据管理方式"></a>Ext4的数据管理方式</h5><p>Ext2、Ext3基于表的方式查找数据块;Fat基于链表的方式查找数据块;而Ext4基于extent tree的方式查找数据块。<br>Ext4的数据布局可以直接参考Ext2的布局，下面我们主要看Ext4是如何查找数据块的。<br>Ext4的inode 同样存在i_block[15] 结构，除了可以用于新的Extent tree结构，还可以兼容老的Ext系统。<br>先看Ext2采用表来查找数据块的问题：如果一个文件分配了连续的1000个块，却需要映射这1000个块的地址。<br>而采用extent的方案，连续地址的映射只需要一个起始地址+长度（ee_len）即可<br>extent tree的访问过程：（图片来源：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/52052278%EF%BC%89">https://zhuanlan.zhihu.com/p/52052278）</a><br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/Ext4_extent.jpg"><br>从数据结构来看，虽然它的名字叫extent tree，但其实与B-树类似。<br>关于Ext4的详细数据结构信息，可以看最后一节给出的链接地址，这里不再详细介绍。</p>
+<p>但从上面的布局中，我们没有找到用于描述文件信息的元数据，其实这些<strong>元信息都存放在目录项中</strong>，而目录项的数据又存放在数据块中，因此这里看不到。<br>如果想要实际看看文件系统的结构，可以用WinHex可查看存储介质的二进制数据</p>
+<h5 id="4-Ext4的数据管理方式"><a href="#4-Ext4的数据管理方式" class="headerlink" title="4.Ext4的数据管理方式"></a>4.Ext4的数据管理方式</h5><p>Ext2、Ext3基于表的方式查找数据块;Fat基于链表的方式查找数据块;而Ext4基于extent tree的方式查找数据块。<br>Ext4的数据布局可以直接参考Ext2的布局，下面我们主要看Ext4是如何查找数据块的。<br>Ext4的inode 同样存在i_block[15] 结构，除了可以用于新的Extent tree结构，还可以兼容老的Ext系统。<br>先看Ext2采用表来查找数据块的问题：如果一个文件分配了连续的1000个块，却需要映射这1000个块的地址。<br>而采用extent的方案，<strong>连续地址的映射只需要一个起始地址+长度</strong>（ee_len）即可。<br>extent tree的访问过程：（图片来源：<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/52052278%EF%BC%89">https://zhuanlan.zhihu.com/p/52052278）</a><br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/Ext4_extent.jpg"><br>从数据结构来看，虽然它的名字叫extent tree，但其实与B-树类似。<br>关于Ext4的详细数据结构信息，可以看最后一节给出的链接地址，这里不再详细介绍。</p>
 <h3 id="文件读写的过程"><a href="#文件读写的过程" class="headerlink" title="文件读写的过程"></a>文件读写的过程</h3><p>看完上面常见文件系统的布局之后，我们还需要清楚open、read等函数背后的IO动作</p>
 <h5 id="1-读IO时序"><a href="#1-读IO时序" class="headerlink" title="1.读IO时序"></a>1.读IO时序</h5><p>假设我们的代码如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> fd = open(<span class="string">&quot;/foo/bar&quot;</span>, O_RDONLY);</span><br><span class="line">size = read(fd, buffer, <span class="keyword">sizeof</span>(buffer));</span><br></pre></td></tr></table></figure>
 <p>它的IO过程如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/read_access.png"><br>假如没有采用任何手段，一句open就要产生5次IO访问，在结合HDD的硬件特性，由于这些block是分散的，因此5次IO意味着5*(Tseek+Trotation),基本上需要50ms以上。</p>
 <h5 id="2-写IO时序"><a href="#2-写IO时序" class="headerlink" title="2.写IO时序"></a>2.写IO时序</h5><p>类似的，写的过程如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/write_access.png"></p>
 <h5 id="3-性能优化"><a href="#3-性能优化" class="headerlink" title="3.性能优化"></a>3.性能优化</h5><p>对于读的性能优化，最常用的方案自然是缓存，通过把常用的inode节点缓存起来，就可以大大的减少访问次数。<br>如前面读IO时序中的图，如果把bar inode节点缓存起来，就可以减少后面3次的读写，而常见的缓存策略自然是LRU。<br>写的性能优化，可以通过缓冲buffer来实现，一般的缓冲的设计从时间与空间角度出发，比方每5s写入磁盘一次，或者buffer满了就写一次磁盘。<br>但buffer应该设计成多大呢？<br>这里我们假设一次Tseek+Trotation的时间是10ms，传输速率为40MB/s<br>如果我们想要达到50%的传输宽带，buffer的大小应该是 40*1024*10/1000 = 409 KB<br>虽然使用缓冲虽然能提高传输效率，但如果突然宕机了，就存在数据丢失的风险。</p>
-<h3 id="异常恢复-文件系统一致性"><a href="#异常恢复-文件系统一致性" class="headerlink" title="异常恢复-文件系统一致性"></a>异常恢复-文件系统一致性</h3><p>文件系统在写入数据时，需要修改多个块数据(bitmap、inode、数据块等)，但这个过程并不是原子的。因此如果在写入的过程中突然宕机，就会产生文件系统不一致的情况，这时候就需要进行修复。<br>这里我们仅讨论对元数据的修复，因此像数据块丢失、不一致的问题可以在数据库事务中再讨论。</p>
+<h3 id="异常恢复-文件系统一致性"><a href="#异常恢复-文件系统一致性" class="headerlink" title="异常恢复-文件系统一致性"></a>异常恢复-文件系统一致性</h3><p>文件系统在写入数据时，需要修改多个块数据(bitmap、inode、数据块等)，但这个过程并不是原子的。因此如果在写入的过程中突然宕机，就会产生文件系统不一致的情况，这时候就需要进行修复。<br>这里我们仅讨论对元数据的修复，而像数据块的丢失、不一致的问题可以在数据库事务中再讨论。</p>
 <h5 id="1-fsck"><a href="#1-fsck" class="headerlink" title="1.fsck"></a>1.fsck</h5><p>这是在linux系统中自带的工具，它的原理就是扫描bitmap表和inode table，把它们分别记录在2张表中，如下图A:<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/fsck.png"><br>图A表示数据一致，不需要修复。<br>图B表示实际数据块已经分配，但bitmap表无记录，因此只需要把bitmap表的对应位置0(已用)即可。<br>图D的情况比较复杂，可能是某一个文件X刚删除了一个数据块，同时把bitmap表置1(空闲)，但紧接着另一个文件Y申请到了相同的块，于是又把bitmap置0，但还没来的及修改A的inode就宕机了。这种情况fsck也无法修复，因为不知道这个数据块到底属于谁（这时候可以咨询用户，由用户自己决定）。<br>也有一些问题无法修复，比如inode指向错误的数据块，fsck仅能确保元数据的一致性</p>
-<h5 id="2-通过日志恢复"><a href="#2-通过日志恢复" class="headerlink" title="2.通过日志恢复"></a>2.通过日志恢复</h5><p>通过fsck修复文件系统存在一个问题：太慢了。（之前我做的一个项目就是在SD卡挂载之前调用fsck来恢复文件系统的，导致用户插入SD卡的体验非常差，可能需要等20s才能看到SD卡挂载成功）<br>下面我们介绍ext3、ext4(ext2不支持)文件系统所使用的方法，Write Ahead Log策略：每次更新将数据记录到日志文件中，然后在修改实际数据，如果宕机了，通过日志文件对数据进行恢复。<br>日志的数据格式如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/ext3_journal.png"><br>TxB和TxE表示这条日志的开始和结束，它记录了这条日志的ID。<br>按照上图的格式，如果是先一次性写日志，在写实际数据，这样存在3个问题：</p>
+<h5 id="2-通过日志恢复"><a href="#2-通过日志恢复" class="headerlink" title="2.通过日志恢复"></a>2.通过日志恢复</h5><p>通过fsck修复文件系统存在一个问题：太慢了。（之前我做的一个项目就是在SD卡挂载之前调用fsck来恢复文件系统的，导致用户插入SD卡的体验非常差，可能需要等20s才能看到SD卡挂载成功）<br>下面我们介绍ext3、ext4(ext2不支持)文件系统所使用的方法，<strong>Write Ahead Log策略：每次更新将数据记录到日志文件中，然后在修改实际数据，如果宕机了，通过日志文件对数据进行恢复。</strong><br>日志的数据格式如下：<br><img src="/2021/07/10/operatingSystem/os-fileSystem/Images/ext3_journal.png"><br>TxB和TxE表示这条日志的开始和结束，它记录了这条日志的ID。<br>按照上图的格式，如果是先一次性写日志，在写实际数据，这样存在3个问题：</p>
 <ol>
 <li>写日志的操作不是原子的，一次性写这条数据，可能出现头和尾都写了，但中间数据缺失，但恢复的时候由于头尾已经存在就认为数据完整，但其实是不完整的。</li>
 <li>不停的写日志，日志满了怎么办。</li>
@@ -270,7 +299,7 @@
 <ol>
 <li>先写实际的数据，即文件内容</li>
 <li>写日志中的TxB + 元数据</li>
-<li>必须等到步骤2完成，在写入TxE</li>
+<li><strong>必须等到步骤2完成，再写入TxE</strong></li>
 <li>更新元数据（实际数据的写入已经在第一步完成）</li>
 <li>等步骤4完成之后，更新日志超级块的2个指针（最新和最旧）</li>
 </ol>
@@ -362,12 +391,37 @@
         "dateCreated": "2021-07-10",
         "dateModified": "2021-07-10",
         "url": "https://liji53.github.io/2021/07/10/operatingSystem/os-fileSystem/",
-        "description": "文件系统文件系统是OS用来组织和分配存储设备的方法，现在linux系统用的基本都是Ext4文件系统，在window上则基本都是NTFS文件系统，接下来我们将学习它们的数据结构与实现原理。
-HDD和SSD基础在了解文件系统的实现之前，需要先知道存储介质的特性，因为文件系统(包括很多应用程序，像数据库)正是基于这些特征才设计的。
-HDD的硬件特性如上图，你需要清楚的是
+        "description": "
+文件系统
+HDD和SSD基础
+HDD的硬件特性
+SSD的硬件特性
 
-扇区：即图中的编号，操作硬盘的",
-        "wordCount": 239
+
+文件系统的实现
+1.Ext2的布局(物理结构)
+2.Ext2目录结构
+3.Fat的布局
+4.Ext4的数据管理方式
+
+
+文件读写的过程
+1.读IO时序
+2.写IO时序
+3.性能优化
+
+
+异常恢复-文件系统一致性
+1.fsck
+2.通过日志恢复
+
+
+命令与资料
+
+
+
+文件系统文件系统是OS用来组织和分配存储设备的方法，现在lin",
+        "wordCount": 256
     }
 </script>
 
@@ -483,6 +537,26 @@ HDD的硬件特性如上图，你需要清楚的是
                     <li>
                         
                         <div class="item-thumbnail">
+                            <a href="/2022/07/27/LLVM/llvm-arrayParamAssign/" class="thumbnail">
+    
+    
+        <span class="thumbnail-image thumbnail-none"></span>
+    
+    
+</a>
+
+                        </div>
+                        
+                        <div class="item-inner">
+                            <p class="item-category"><a class="article-category-link" href="/categories/LLVM/">LLVM</a></p>
+                            <p class="item-title"><a href="/2022/07/27/LLVM/llvm-arrayParamAssign/" class="title">【Clang Static Analyzer】数组参数赋值(原创)</a></p>
+                            <p class="item-date"><time datetime="2022-07-27T19:20:31.000Z" itemprop="datePublished">2022-07-27</time></p>
+                        </div>
+                    </li>
+                
+                    <li>
+                        
+                        <div class="item-thumbnail">
                             <a href="/2022/07/02/LLVM/llvm-floatCmpZero/" class="thumbnail">
     
     
@@ -560,26 +634,6 @@ HDD的硬件特性如上图，你需要清楚的是
                         </div>
                     </li>
                 
-                    <li>
-                        
-                        <div class="item-thumbnail">
-                            <a href="/2022/05/23/network/net-tcp/" class="thumbnail">
-    
-    
-        <span class="thumbnail-image thumbnail-none"></span>
-    
-    
-</a>
-
-                        </div>
-                        
-                        <div class="item-inner">
-                            <p class="item-category"></p>
-                            <p class="item-title"><a href="/2022/05/23/network/net-tcp/" class="title">net-tcp</a></p>
-                            <p class="item-date"><time datetime="2022-05-23T06:28:26.000Z" itemprop="datePublished">2022-05-23</time></p>
-                        </div>
-                    </li>
-                
             </ul>
         </div>
     </div>
@@ -589,7 +643,7 @@ HDD的硬件特性如上图，你需要清楚的是
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">分类</h3>
         <div class="widget">
-            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
+            <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/C-%E5%9F%BA%E7%A1%80/">C++基础</a><span class="category-list-count">3</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/LLVM/">LLVM</a><span class="category-list-count">7</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/python%E6%9D%82%E9%A1%B9/">python杂项</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%AF%86%E7%A0%81%E5%AD%A6/">密码学</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/">操作系统</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a><span class="category-list-count">5</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E7%BC%96%E8%AF%91%E3%80%81%E6%B1%87%E7%BC%96%E3%80%81%E9%93%BE%E6%8E%A5/">编译、汇编、链接</a><span class="category-list-count">3</span></li></ul>
         </div>
     </div>
 
@@ -599,7 +653,7 @@ HDD的硬件特性如上图，你需要清楚的是
     <div class="widget-wrap widget-list">
         <h3 class="widget-title">归档</h3>
         <div class="widget">
-            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
+            <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/07/">七月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/06/">六月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/05/">五月 2022</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/04/">四月 2022</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/02/">二月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">一月 2022</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/12/">十二月 2021</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/10/">十月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/09/">九月 2021</a><span class="archive-list-count">6</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/08/">八月 2021</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/07/">七月 2021</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/06/">六月 2021</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/05/">五月 2021</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2021/04/">四月 2021</a><span class="archive-list-count">1</span></li></ul>
         </div>
     </div>
 
