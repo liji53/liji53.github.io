@@ -6,14 +6,14 @@
     
 
     
-    <title>归档: 2021/8 | 么么博客</title>
+    <title>分类: 工具人 | 么么博客</title>
     
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     
     <meta name="description" content="程序猿个人随记">
 <meta property="og:type" content="website">
 <meta property="og:title" content="么么博客">
-<meta property="og:url" content="https://liji53.github.io/archives/2021/08/index.html">
+<meta property="og:url" content="https://liji53.github.io/categories/%E5%B7%A5%E5%85%B7%E4%BA%BA/index.html">
 <meta property="og:site_name" content="么么博客">
 <meta property="og:description" content="程序猿个人随记">
 <meta property="og:locale" content="zh_CN">
@@ -145,7 +145,7 @@
                         <div class="main-body-header">
     <h1 class="header">
     
-    <i class="icon fa fa-archive"></i>归档: 2021/8
+    <i class="icon fa fa-folder-open"></i>分类: <em class="page-title-link">工具人</em>
     </h1>
 </div>
 
@@ -169,17 +169,17 @@
         <article class="article article-summary">
     <div class="article-summary-inner">
         
-        <a href="/2021/08/29/database/mysql-transaction/" class="thumbnail">
+        <a href="/2021/07/05/pythonOther/deployWeb/" class="thumbnail">
     
     
-        <span style="background-image:url(/2021/08/29/database/mysql-transaction/Images/redo_log.png)" alt="mysql-事务" class="thumbnail-image"></span>
+        <span style="background-image:url(/2021/07/05/pythonOther/deployWeb/Images/vcc3_web.png)" alt="花最小的学习成本实现web UI" class="thumbnail-image"></span>
     
     
         
 <span class="comment-counter">
     <i class="fa fa-comments-o"></i>
     
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/08/29/database/mysql-transaction/">0</span>
+        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/07/05/pythonOther/deployWeb/">0</span>
     
 </span>
 
@@ -190,166 +190,40 @@
         
         <div class="article-meta">
             <div class="category">
-            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
+            <a class="article-category-link" href="/categories/%E5%B7%A5%E5%85%B7%E4%BA%BA/">工具人</a>
             </div>
-            <div class="date"><time datetime="2021-08-29T18:42:00.000Z" itemprop="datePublished">2021-08-29</time></div>
+            <div class="date"><time datetime="2021-07-05T11:51:02.000Z" itemprop="datePublished">2021-07-05</time></div>
         </div>
         
     
         <h1 class="article-title" itemprop="name">
-        <a href="/2021/08/29/database/mysql-transaction/">mysql-事务</a>
+        <a href="/2021/07/05/pythonOther/deployWeb/">花最小的学习成本实现web UI</a>
         </h1>
     
 
         <p class="article-excerpt">
-            mysql-事务先看下事务的概念：需要保证原子性、隔离性、一致性和持久性（AICD）的一个或多个数据库操作。
-redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是把对数据的修改记录下来，如果出现宕机，在重启的时候对数据进行恢复(与double write的区别mysql-存储布局)。它的机制可以与日志文件系统如ext3、ext4 对比学习，参考操作系统-文件系统
-1.
-        </p>
-    </div>
-</article>
-    
-
-    
-    
-    
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
-        <a href="/2021/08/21/database/mysql-index/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2021/08/21/database/mysql-index/Images/index_directory.png)" alt="mysql-索引" class="thumbnail-image"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/08/21/database/mysql-index/">0</span>
-    
-</span>
+            
+给程序搭个web界面
+预备知识
+总体思路
+1.整体思路
+2.面临的困难
+3.前端框架的选择
 
 
-    
-</a>
-
-        
-        <div class="article-meta">
-            <div class="category">
-            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
-            </div>
-            <div class="date"><time datetime="2021-08-21T13:21:02.000Z" itemprop="datePublished">2021-08-21</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2021/08/21/database/mysql-index/">mysql-索引</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            mysql-索引在使用数据库时，表索引的设计，以及使用sql语句时如何使用索引，是DBA、开发非常关心的事情。如果连索引的实现原理都不清楚，根本就无法写出高效的查询语句，也无法对表结构进行优化。
-聚簇索引1.索引的结构我们已经知道了在一个页中如何通过页目录对页内数据进行查找（回顾mysql-存储布局数据页格式）。而如何快速找到数据在哪个页中，则通过索引实现，索引页和数据页的页类型是相同的，因为In
-        </p>
-    </div>
-</article>
-    
-        </div>
-    
-
-    
-    
-    
-    
-        <div class="article-row">
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
-        <a href="/2021/08/14/database/mysql-layout/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2021/08/14/database/mysql-layout/Images/double_write_arch.png)" alt="mysql-存储布局" class="thumbnail-image"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/08/14/database/mysql-layout/">0</span>
-    
-</span>
+实现过程
+1.快速搞定布局问题
+2.数据与组件绑定
+3.动态页面渲染
+4.协议交互
+5.事件响应
 
 
-    
-</a>
-
-        
-        <div class="article-meta">
-            <div class="category">
-            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
-            </div>
-            <div class="date"><time datetime="2021-08-14T22:20:07.000Z" itemprop="datePublished">2021-08-14</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2021/08/14/database/mysql-layout/">mysql-存储布局</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            mysql-存储布局我们平常在软件设计时，大部分打交道的都是内存中的数据结构。这次我们来看看InnoDB在文件中是如何设计数据结构的(回顾mysql-整体架构InnoDB架构的On-Disk Structures)。
-磁盘架构从前面一节的架构图中，我们可以看到有多种表空间文件，如系统表空间(ibdata1)、独立表空间(表名.ibd)等。除了表空间，还存在doublewrite 文件，重做日志文件
-        </p>
-    </div>
-</article>
-    
-
-    
-    
-    
-    
-        <article class="article article-summary">
-    <div class="article-summary-inner">
-        
-        <a href="/2021/08/11/database/mysql-arch/" class="thumbnail">
-    
-    
-        <span style="background-image:url(/2021/08/11/database/mysql-arch/Images/arch_mysql.png)" alt="mysql-整体架构" class="thumbnail-image"></span>
-    
-    
-        
-<span class="comment-counter">
-    <i class="fa fa-comments-o"></i>
-    
-        <span class="disqus-comment-count" data-disqus-identifier="" data-disqus-url="https://liji53.github.io/2021/08/11/database/mysql-arch/">0</span>
-    
-</span>
+总结
 
 
-    
-</a>
 
-        
-        <div class="article-meta">
-            <div class="category">
-            <a class="article-category-link" href="/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/">数据库</a>
-            </div>
-            <div class="date"><time datetime="2021-08-11T19:20:30.000Z" itemprop="datePublished">2021-08-11</time></div>
-        </div>
-        
-    
-        <h1 class="article-title" itemprop="name">
-        <a href="/2021/08/11/database/mysql-arch/">mysql-整体架构</a>
-        </h1>
-    
-
-        <p class="article-excerpt">
-            mysql-整体架构现在的软件开发基本上都离不开数据库的支持，而最常用的关系型数据库有oracle、SQL Server、mysql等，但如果考虑到开源，mysql应该是最受欢迎的。在《Mysql技术内幕 InnoDB存储引擎》中作者认为一个新的OLTP项目不使用mysql InnoDB存储引擎是非常愚蠢的（非常的自信）。
-数据库的分类关系型数据库(sql)：适合存储结构化数据(抽象成二维表格模型
+给程序搭个web界面作为一名合格的工具人，通过web界面/客户端来组织管理你写的工具是必不可少的技能，否则你的工具是不可能得到其他同事的认同的。但我们毕竟不是专门搞前端的，因此有了这篇学习
         </p>
     </div>
 </article>
@@ -359,6 +233,7 @@ redo logInnoDB的事务持久性，通过redo log来保证，简单来说就是�
 
 
     </div></section>
+
 
 
 
